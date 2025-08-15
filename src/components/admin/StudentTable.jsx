@@ -1,0 +1,422 @@
+"use client"
+
+import { useState, useEffect } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
+import { Eye, Search, Filter, Download, ChevronLeft, ChevronRight } from 'lucide-react'
+import { toast } from "sonner"
+
+const StudentTable = () => {
+  const [students, setStudents] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    totalStudents: 0
+  })
+  const [filters, setFilters] = useState({
+    search: '',
+    status: ''
+  })
+  const [selectedStudent, setSelectedStudent] = useState(null)
+
+  useEffect(() => {
+    fetchStudents()
+  }, [pagination.currentPage, filters])
+
+  const fetchStudents = async () => {
+    setLoading(true)
+    try {
+      const params = new URLSearchParams({
+        page: pagination.currentPage.toString(),
+        limit: '10'
+      })
+      
+      if (filters.search) params.append('search', filters.search)
+      if (filters.status) params.append('status', filters.status)
+      
+      const response = await fetch(`/api/students?${params}`)
+      const data = await response.json()
+      
+      setStudents(data.students)
+      setPagination(data.pagination)
+    } catch (error) {
+      console.error('Error fetching students:', error)
+      toast.error('Error fetching students')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const updateStudentStatus = async (studentId, newStatus) => {
+    try {
+      const response = await fetch(`/api/students/${studentId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: newStatus })
+      })
+
+      if (response.ok) {
+        toast.success('Student status updated successfully')
+        fetchStudents()
+      } else {
+        toast.error('Error updating student status')
+      }
+    } catch (error) {
+      console.error('Error updating student:', error)
+      toast.error('Error updating student')
+    }
+  }
+
+  const exportToCSV = () => {
+    const headers = [
+      'Name', 'Email', 'Phone', 'High School', 'GPA', 'Class Rigor', 
+      'University Preference', 'Graduation Year', 'Status', 'Submitted At'
+    ]
+    
+    const csvData = students.map(student => [
+      `${student.firstName} ${student.lastName}`,
+      student.email,
+      student.phoneNumber,
+      student.highSchoolName,
+      student.currentGPA,
+      student.classRigor,
+      student.universitiesWant,
+      new Date(student.graduationYear).getFullYear(),
+      student.status,
+      new Date(student.submittedAt).toLocaleDateString()
+    ])
+
+    const csvContent = [
+      headers.join(','),
+      ...csvData.map(row => row.map(field => `"${field}"`).join(','))
+    ].join('\n')
+
+    const blob = new Blob([csvContent], { type: 'text/csv' })
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.setAttribute('hidden', '')
+    a.setAttribute('href', url)
+    a.setAttribute('download', `students_${new Date().toISOString().split('T')[0]}.csv`)
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+  }
+
+  const getStatusBadge = (status) => {
+    const variants = {
+      pending: 'default',
+      reviewed: 'secondary',
+      contacted: 'destructive'
+    }
+    
+    const colors = {
+      pending: 'bg-yellow-100 text-yellow-800',
+      reviewed: 'bg-blue-100 text-blue-800', 
+      contacted: 'bg-green-100 text-green-800'
+    }
+
+    return (
+      <Badge className={colors[status]}>
+        {status.charAt(0).toUpperCase() + status.slice(1)}
+      </Badge>
+    )
+  }
+
+  const StudentDetailModal = ({ student, onClose, onStatusUpdate }) => {
+    if (!student) return null
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="p-6 border-b">
+            <div className="flex justify-between items-start">
+              <div>
+                <h2 className="text-2xl font-bold">{student.firstName} {student.lastName}</h2>
+                <p className="text-gray-600">{student.email}</p>
+              </div>
+              <div className="flex items-center space-x-2">
+                {getStatusBadge(student.status)}
+                <Button variant="outline" size="sm" onClick={onClose}>
+                  ✕
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-6 space-y-8">
+            {/* Student Information */}
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Student Information</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Name</label>
+                  <p>{student.firstName} {student.lastName}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Email</label>
+                  <p>{student.email}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Phone</label>
+                  <p>{student.phoneNumber}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Gender</label>
+                  <p>{student.gender}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-500">High School</label>
+                  <p>{student.highSchoolName}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Graduation Year</label>
+                  <p>{new Date(student.graduationYear).getFullYear()}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Parent Information */}
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Parent Information</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Parent Name</label>
+                  <p>{student.parentFirstName} {student.parentLastName}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Parent Email</label>
+                  <p>{student.parentEmail}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Parent Phone</label>
+                  <p>{student.parentPhoneNumber}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Address</label>
+                  <p>{student.address}, {student.city}, {student.state} {student.zipCode}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Academic Information */}
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Academic Information</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Current GPA</label>
+                  <p>{student.currentGPA}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Class Rigor</label>
+                  <p>{student.classRigor}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-500">University Preference</label>
+                  <p>{student.universitiesWant}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Registration Code</label>
+                  <p>{student.registrationCode}</p>
+                </div>
+              </div>
+              
+              {student.satActScores && (
+                <div className="mt-4">
+                  <label className="text-sm font-medium text-gray-500">SAT/ACT Scores</label>
+                  <p className="mt-1">{student.satActScores}</p>
+                </div>
+              )}
+              
+              <div className="mt-4">
+                <label className="text-sm font-medium text-gray-500">Biggest Stressor</label>
+                <p className="mt-1">{student.biggestStressor}</p>
+              </div>
+              
+              <div className="mt-4">
+                <label className="text-sm font-medium text-gray-500">Parent's Biggest Worry</label>
+                <p className="mt-1">{student.parentWorry}</p>
+              </div>
+            </div>
+
+            {/* Status Update */}
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Update Status</h3>
+              <div className="flex space-x-2">
+                {['pending', 'reviewed', 'contacted'].map((status) => (
+                  <Button
+                    key={status}
+                    variant={student.status === status ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => onStatusUpdate(student._id, status)}
+                  >
+                    {status.charAt(0).toUpperCase() + status.slice(1)}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <div className="flex justify-between items-center">
+            <CardTitle>Student Registrations</CardTitle>
+            <Button onClick={exportToCSV} size="sm">
+              <Download className="w-4 h-4 mr-2" />
+              Export CSV
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {/* Filters */}
+          <div className="flex space-x-4 mb-6">
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                  placeholder="Search students..."
+                  value={filters.search}
+                  onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
+                  className="pl-10 border-[#457BF5]"
+                />
+              </div>
+            </div>
+            <select
+              value={filters.status}
+              onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
+              className="border border-[#457BF5] rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#457BF5] focus:border-[#457BF5]"
+            >
+              <option value="">All Status</option>
+              <option value="pending">Pending</option>
+              <option value="reviewed">Reviewed</option>
+              <option value="contacted">Contacted</option>
+            </select>
+          </div>
+
+          {/* Table */}
+          {loading ? (
+            <div className="space-y-4">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="animate-pulse flex space-x-4 p-4 border rounded">
+                  <div className="rounded-full bg-gray-200 h-10 w-10"></div>
+                  <div className="flex-1 space-y-2 py-1">
+                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                    <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left p-4">Student</th>
+                    <th className="text-left p-4">Contact</th>
+                    <th className="text-left p-4">Academic</th>
+                    <th className="text-left p-4">Status</th>
+                    <th className="text-left p-4">Submitted</th>
+                    <th className="text-left p-4">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {students.map((student) => (
+                    <tr key={student._id} className="border-b hover:bg-gray-50">
+                      <td className="p-4">
+                        <div>
+                          <div className="font-medium">{student.firstName} {student.lastName}</div>
+                          <div className="text-sm text-gray-500">{student.highSchoolName}</div>
+                        </div>
+                      </td>
+                      <td className="p-4">
+                        <div>
+                          <div className="text-sm">{student.email}</div>
+                          <div className="text-sm text-gray-500">{student.phoneNumber}</div>
+                        </div>
+                      </td>
+                      <td className="p-4">
+                        <div>
+                          <div className="text-sm">GPA: {student.currentGPA}</div>
+                          <div className="text-sm text-gray-500">{student.universitiesWant}</div>
+                        </div>
+                      </td>
+                      <td className="p-4">
+                        {getStatusBadge(student.status)}
+                      </td>
+                      <td className="p-4">
+                        <div className="text-sm">
+                          {new Date(student.submittedAt).toLocaleDateString()}
+                        </div>
+                      </td>
+                      <td className="p-4">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => setSelectedStudent(student)}
+                        >
+                          <Eye className="w-4 h-4 mr-1" />
+                          View
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* Pagination */}
+          <div className="flex justify-between items-center mt-6">
+            <div className="text-sm text-gray-500">
+              Showing {((pagination.currentPage - 1) * 10) + 1} to {Math.min(pagination.currentPage * 10, pagination.totalStudents)} of {pagination.totalStudents} students
+            </div>
+            <div className="flex space-x-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPagination(prev => ({ ...prev, currentPage: prev.currentPage - 1 }))}
+                disabled={!pagination.hasPrev}
+              >
+                <ChevronLeft className="w-4 h-4 mr-1" />
+                Previous
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPagination(prev => ({ ...prev, currentPage: prev.currentPage + 1 }))}
+                disabled={!pagination.hasNext}
+              >
+                Next
+                <ChevronRight className="w-4 h-4 ml-1" />
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Student Detail Modal */}
+      {selectedStudent && (
+        <StudentDetailModal
+          student={selectedStudent}
+          onClose={() => setSelectedStudent(null)}
+          onStatusUpdate={(id, status) => {
+            updateStudentStatus(id, status)
+            setSelectedStudent(null)
+          }}
+        />
+      )}
+    </div>
+  )
+}
+
+export default StudentTable
