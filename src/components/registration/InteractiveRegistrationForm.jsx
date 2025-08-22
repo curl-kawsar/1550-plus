@@ -12,6 +12,17 @@ import { useSubmitRegistration, validateStep, getStepProgress } from "@/hooks/us
 import { toast } from "sonner"
 
 const InteractiveRegistrationForm = () => {
+  // Add Bebas Neue font (similar to Norwester)
+  useEffect(() => {
+    const link = document.createElement('link');
+    link.href = 'https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap';
+    link.rel = 'stylesheet';
+    document.head.appendChild(link);
+    
+    return () => {
+      document.head.removeChild(link);
+    };
+  }, []);
   const [currentStep, setCurrentStep] = useState(1)
   const [fieldErrors, setFieldErrors] = useState({})
   const [touchedFields, setTouchedFields] = useState({})
@@ -497,15 +508,15 @@ const InteractiveRegistrationForm = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="h-screen bg-gray-50 flex">
       {/* Left Side - Form */}
-      <div className="w-1/2 p-8">
+      <div className="w-1/2 p-8 overflow-y-auto">
         <div className="max-w-md mx-auto">
           {/* Header */}
           <div className="flex items-center mb-8">
             <div className="flex items-center">
               <img 
-                src="/navbar-logo.png" 
+                src="/logo.png" 
                 alt="College Mastermind Logo" 
                 className="w-22 h-16"
               />
@@ -560,16 +571,32 @@ const InteractiveRegistrationForm = () => {
         </div>
       </div>
 
-      {/* Right Side - Image */}
-      <div className="w-1/2 bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
-        <div className="text-center">
-          <img 
-            src="/std_reg.png" 
-            alt="Student Registration" 
-            className="max-w-full max-h-full object-contain"
-          />
-        </div>
-      </div>
+             {/* Right Side - Custom Design */}
+       <div 
+         className="w-1/2 h-screen flex items-center justify-center relative overflow-hidden"
+         style={{
+           background: 'linear-gradient(to bottom right, #113076 0%, #020610 100%)'
+         }}
+       >
+         {/* Dotted Background Pattern */}
+         <div 
+           className="absolute inset-0 opacity-30"
+           style={{
+             backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)',
+             backgroundSize: '20px 20px'
+           }}
+         />
+         
+         {/* Main Content */}
+         <div className="text-center z-10 px-8">
+           <div className="text-white font-black leading-tight tracking-wide" style={{ fontFamily: 'Bebas Neue, sans-serif' }}>
+             <div className="text-8xl sm:text-9xl lg:text-[8rem] xl:text-[8rem] mb-4 sm:mb-6">6 WEEKS</div>
+             <div className="text-7xl sm:text-8xl lg:text-[9rem] xl:text-[8rem] mb-4 sm:mb-6">12 LESSONS</div>
+             <div className="text-6xl sm:text-7xl lg:text-[8rem] xl:text-[8rem] mb-4 sm:mb-6">NO COST</div>
+             <div className="text-6xl sm:text-7xl lg:text-[8rem] xl:text-[8rem]">NO EXCUSES</div>
+           </div>
+         </div>
+       </div>
     </div>
   )
 }

@@ -51,7 +51,7 @@ const AdminLogin = ({ onLoginSuccess }) => {
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
             <img 
-              src="/navbar-logo.png" 
+              src="/logo.png" 
               alt="College Mastermind Logo" 
               className="w-22 h-16"
             />

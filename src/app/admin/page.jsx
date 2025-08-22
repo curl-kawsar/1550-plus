@@ -5,6 +5,8 @@ import AdminLogin from '@/components/admin/AdminLogin'
 import AdminNavbar from '@/components/admin/AdminNavbar'
 import DashboardStats from '@/components/admin/DashboardStats'
 import StudentTable from '@/components/admin/StudentTable'
+import ContactMessages from '@/components/admin/ContactMessages'
+import MaintenanceToggle from '@/components/admin/MaintenanceToggle'
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('overview')
@@ -84,6 +86,30 @@ export default function AdminDashboard() {
               </p>
             </div>
             <StudentTable />
+          </div>
+        )}
+
+        {activeTab === 'contacts' && (
+          <div>
+            <div className="mb-8">
+              <h2 className="text-3xl font-bold text-gray-900">Contact Messages</h2>
+              <p className="mt-2 text-gray-600">
+                View and manage contact form submissions.
+              </p>
+            </div>
+            <ContactMessages />
+          </div>
+        )}
+
+        {activeTab === 'maintenance' && (
+          <div>
+            <div className="mb-8">
+              <h2 className="text-3xl font-bold text-gray-900">Maintenance Mode</h2>
+              <p className="mt-2 text-gray-600">
+                Control site maintenance mode and display custom messages to users.
+              </p>
+            </div>
+            <MaintenanceToggle adminEmail={admin?.email} />
           </div>
         )}
       </div>

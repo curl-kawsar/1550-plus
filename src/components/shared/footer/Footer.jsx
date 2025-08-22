@@ -1,122 +1,225 @@
-import { Github, Twitter, Linkedin } from "lucide-react"
+"use client"
+
+import { Facebook, Instagram, Youtube } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { useState } from "react"
+import { useSubmitContact } from "@/hooks/useContact"
 
 const Footer = () => {
+  const [contactForm, setContactForm] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    message: ''
+  })
+
+  const submitContactMutation = useSubmitContact()
+
+  const handleInputChange = (field, value) => {
+    setContactForm(prev => ({ ...prev, [field]: value }))
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    
+    // Basic validation
+    if (!contactForm.firstName || !contactForm.lastName || !contactForm.email || !contactForm.message) {
+      return
+    }
+
+    submitContactMutation.mutate(contactForm, {
+      onSuccess: () => {
+        // Reset form on success
+        setContactForm({
+          firstName: '',
+          lastName: '',
+          email: '',
+          message: ''
+        })
+      }
+    })
+  }
+
   return (
-    <footer className="border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="max-w-7xl mx-auto px-4 py-12">
-        {/* Main Footer Content */}
-        <div className="grid grid-cols-4 gap-16">
-          {/* Brand Section */}
-          <div className="space-y-4">
-            <div className="flex items-center space-x-3">
-              <div className="h-9 w-9 rounded-lg bg-primary flex items-center justify-center">
-                <span className="text-lg font-bold text-primary-foreground">N</span>
-              </div>
-              <span className="text-xl font-semibold">NextBoiler</span>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Modern Next.js boilerplate with a focus on developer experience and best practices.
-            </p>
-          </div>
-
-          {/* Quick Links */}
-          <div>
-            <h3 className="text-sm font-semibold mb-4">Quick Links</h3>
-            <ul className="space-y-3">
-              <li>
-                <Link href="/about" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  About Us
-                </Link>
-              </li>
-              <li>
-                <Link href="/features" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Features
-                </Link>
-              </li>
-              <li>
-                <Link href="/pricing" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Pricing
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Resources */}
-          <div>
-            <h3 className="text-sm font-semibold mb-4">Resources</h3>
-            <ul className="space-y-3">
-              <li>
-                <Link href="/docs" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Documentation
-                </Link>
-              </li>
-              <li>
-                <Link href="/blog" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Blog
-                </Link>
-              </li>
-              <li>
-                <Link href="/support" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Support
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Newsletter */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-semibold">Stay Updated</h3>
-            <p className="text-sm text-muted-foreground">
-              Subscribe to our newsletter for updates and news.
-            </p>
-            <div className="flex space-x-2">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="flex-1 px-3 py-2 text-sm border border-[#457BF5] rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-[#457BF5] focus:border-[#457BF5]"
-              />
-              <Button>Subscribe</Button>
-            </div>
-          </div>
+    <footer className="bg-black text-white relative overflow-hidden">
+      {/* Background Pattern */}
+      <div 
+        className="absolute inset-0 opacity-10"
+        style={{
+          backgroundImage: 'radial-gradient(circle at 1px 1px, white 2px, transparent 0)',
+          backgroundSize: '20px 20px'
+        }}
+      />
+      
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 relative z-10">
+        {/* Logo Section */}
+        <div className="flex justify-left mb-16">
+          <Link href="/" className="flex items-center">
+            <img 
+              src="/logo.png" 
+              alt="1550+ Logo" 
+              className="h-12 w-auto"
+            />
+          </Link>
         </div>
 
-        {/* Bottom Section */}
-        <div className="border-t mt-12 pt-8">
-          <div className="flex justify-between items-center">
-            <p className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} NextBoiler. All rights reserved.
+        {/* Main Content - All in One Line */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-16">
+          
+          {/* Quick Links */}
+          <div>
+            <h3 className="text-lg font-semibold mb-6 text-white">Quick Link</h3>
+            <ul className="space-y-4">
+              <li>
+                <Link href="/" className="text-gray-300 hover:text-white transition-colors">
+                  Home
+                </Link>
+              </li>
+              <li>
+                <Link href="/about" className="text-gray-300 hover:text-white transition-colors">
+                  About
+                </Link>
+              </li>
+              <li>
+                <Link href="/services" className="text-gray-300 hover:text-white transition-colors">
+                  Services
+                </Link>
+              </li>
+              <li>
+                <Link href="/team" className="text-gray-300 hover:text-white transition-colors">
+                  Meet Your Team
+                </Link>
+              </li>
+              <li>
+                <Link href="/contact" className="text-gray-300 hover:text-white transition-colors">
+                  Contact Us
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Services */}
+          <div>
+            <h3 className="text-lg font-semibold mb-6 text-white">Services</h3>
+            <ul className="space-y-4">
+              <li>
+                <Link href="/services/test-prep" className="text-gray-300 hover:text-white transition-colors">
+                  Test Prep
+                </Link>
+              </li>
+              <li>
+                <Link href="/services/admissions" className="text-gray-300 hover:text-white transition-colors">
+                  Admissions Service
+                </Link>
+              </li>
+              <li>
+                <Link href="/services/internship" className="text-gray-300 hover:text-white transition-colors">
+                  Internship
+                </Link>
+              </li>
+              <li>
+                <Link href="/events" className="text-gray-300 hover:text-white transition-colors">
+                  Events
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Socials */}
+          <div>
+            <h3 className="text-lg font-semibold mb-6 text-white">Socials</h3>
+            <div className="space-y-4">
+              <a 
+                href="https://facebook.com" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors"
+              >
+                <Facebook className="h-5 w-5" />
+                <span>Facebook</span>
+              </a>
+              <a 
+                href="https://instagram.com" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors"
+              >
+                <Instagram className="h-5 w-5" />
+                <span>Instagram</span>
+              </a>
+              <a 
+                href="https://youtube.com" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors"
+              >
+                <Youtube className="h-5 w-5" />
+                <span>Youtube</span>
+              </a>
+              <a 
+                href="https://tiktok.com" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors"
+              >
+                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-.88-.05A6.33 6.33 0 005 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1-.1z"/>
+                </svg>
+                <span>TikTok</span>
+              </a>
+            </div>
+          </div>
+
+          {/* Get in Touch */}
+          <div>
+            <h3 className="text-lg font-semibold mb-2 text-white">Get in touch</h3>
+            <p className="text-gray-300 mb-6 text-sm">
+              You can reach us anytime
             </p>
-
-            {/* Social Links */}
-            <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="icon" asChild>
-                <a href="https://github.com" target="_blank" rel="noopener noreferrer">
-                  <Github className="h-4 w-4" />
-                </a>
+            
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <Input
+                  type="text"
+                  placeholder="First name"
+                  value={contactForm.firstName}
+                  onChange={(e) => handleInputChange('firstName', e.target.value)}
+                  className="bg-transparent border-gray-600 text-white placeholder:text-gray-400 focus:border-white"
+                />
+                <Input
+                  type="text"
+                  placeholder="Last name"
+                  value={contactForm.lastName}
+                  onChange={(e) => handleInputChange('lastName', e.target.value)}
+                  className="bg-transparent border-gray-600 text-white placeholder:text-gray-400 focus:border-white"
+                />
+              </div>
+              
+              <Input
+                type="email"
+                placeholder="Your mail"
+                value={contactForm.email}
+                onChange={(e) => handleInputChange('email', e.target.value)}
+                className="bg-transparent border-gray-600 text-white placeholder:text-gray-400 focus:border-white"
+              />
+              
+              <textarea
+                placeholder="Tell us what can we help you"
+                value={contactForm.message}
+                onChange={(e) => handleInputChange('message', e.target.value)}
+                className="w-full px-3 py-2 bg-transparent border border-gray-600 rounded-md text-white placeholder:text-gray-400 focus:outline-none focus:border-white resize-none h-24"
+              />
+              
+              <Button 
+                type="submit"
+                disabled={submitContactMutation.isPending}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-md py-2 disabled:opacity-50"
+              >
+                {submitContactMutation.isPending ? "Sending..." : "Submit"}
               </Button>
-              <Button variant="ghost" size="icon" asChild>
-                <a href="https://twitter.com" target="_blank" rel="noopener noreferrer">
-                  <Twitter className="h-4 w-4" />
-                </a>
-              </Button>
-              <Button variant="ghost" size="icon" asChild>
-                <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer">
-                  <Linkedin className="h-4 w-4" />
-                </a>
-              </Button>
-            </div>
-
-            {/* Legal Links */}
-            <div className="flex space-x-6">
-              <Link href="/privacy" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                Privacy
-              </Link>
-              <Link href="/terms" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                Terms
-              </Link>
-            </div>
+            </form>
           </div>
         </div>
       </div>

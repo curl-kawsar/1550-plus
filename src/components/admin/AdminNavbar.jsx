@@ -1,13 +1,15 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { BarChart3, Users, Settings, LogOut, Shield } from "lucide-react"
+import { BarChart3, Users, Settings, LogOut, Shield, MessageCircle, Wrench } from "lucide-react"
 import { toast } from "sonner"
 
 const AdminNavbar = ({ activeTab, setActiveTab, admin, onLogout }) => {
   const navigation = [
     { id: 'overview', label: 'Overview', icon: BarChart3 },
     { id: 'students', label: 'Students', icon: Users },
+    { id: 'contacts', label: 'Contact Messages', icon: MessageCircle },
+    { id: 'maintenance', label: 'Maintenance', icon: Wrench },
   ]
 
   const handleLogout = async () => {
@@ -37,7 +39,7 @@ const AdminNavbar = ({ activeTab, setActiveTab, admin, onLogout }) => {
             <div className="flex items-center">
               <div className="flex items-center">
                 <img 
-                  src="/navbar-logo.png" 
+                  src="/logo.png" 
                   alt="College Mastermind Logo" 
                   className="w-22 h-12"
                 />

@@ -79,16 +79,16 @@ const StudentTable = () => {
     ]
     
     const csvData = students.map(student => [
-      `${student.firstName} ${student.lastName}`,
-      student.email,
-      student.phoneNumber,
-      student.highSchoolName,
-      student.currentGPA,
-      student.classRigor,
-      student.universitiesWant,
-      new Date(student.graduationYear).getFullYear(),
-      student.status,
-      new Date(student.submittedAt).toLocaleDateString()
+      `${student.firstName || 'N/A'} ${student.lastName || 'N/A'}`,
+      student.email || 'N/A',
+      student.phoneNumber || 'N/A',
+      student.highSchoolName || 'N/A',
+      student.currentGPA || 'N/A',
+      student.classRigor || 'N/A',
+      student.universitiesWant || 'N/A',
+      student.graduationYear ? new Date(student.graduationYear).getFullYear() : 'N/A',
+      student.status || 'N/A',
+      student.submittedAt ? new Date(student.submittedAt).toLocaleDateString() : 'N/A'
     ])
 
     const csvContent = [
@@ -136,8 +136,8 @@ const StudentTable = () => {
           <div className="p-6 border-b">
             <div className="flex justify-between items-start">
               <div>
-                <h2 className="text-2xl font-bold">{student.firstName} {student.lastName}</h2>
-                <p className="text-gray-600">{student.email}</p>
+                <h2 className="text-2xl font-bold">{student.firstName || 'N/A'} {student.lastName || 'N/A'}</h2>
+                <p className="text-gray-600">{student.email || 'N/A'}</p>
               </div>
               <div className="flex items-center space-x-2">
                 {getStatusBadge(student.status)}
@@ -155,27 +155,27 @@ const StudentTable = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium text-gray-500">Name</label>
-                  <p>{student.firstName} {student.lastName}</p>
+                  <p>{student.firstName || 'N/A'} {student.lastName || 'N/A'}</p>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-500">Email</label>
-                  <p>{student.email}</p>
+                  <p>{student.email || 'N/A'}</p>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-500">Phone</label>
-                  <p>{student.phoneNumber}</p>
+                  <p>{student.phoneNumber || 'N/A'}</p>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-500">Gender</label>
-                  <p>{student.gender}</p>
+                  <p>{student.gender || 'N/A'}</p>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-500">High School</label>
-                  <p>{student.highSchoolName}</p>
+                  <p>{student.highSchoolName || 'N/A'}</p>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-500">Graduation Year</label>
-                  <p>{new Date(student.graduationYear).getFullYear()}</p>
+                  <p>{student.graduationYear ? new Date(student.graduationYear).getFullYear() : 'N/A'}</p>
                 </div>
               </div>
             </div>
@@ -186,19 +186,19 @@ const StudentTable = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium text-gray-500">Parent Name</label>
-                  <p>{student.parentFirstName} {student.parentLastName}</p>
+                  <p>{student.parentFirstName || 'N/A'} {student.parentLastName || 'N/A'}</p>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-500">Parent Email</label>
-                  <p>{student.parentEmail}</p>
+                  <p>{student.parentEmail || 'N/A'}</p>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-500">Parent Phone</label>
-                  <p>{student.parentPhoneNumber}</p>
+                  <p>{student.parentPhoneNumber || 'N/A'}</p>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-500">Address</label>
-                  <p>{student.address}, {student.city}, {student.state} {student.zipCode}</p>
+                  <p>{[student.address, student.city, student.state, student.zipCode].filter(Boolean).join(', ') || 'N/A'}</p>
                 </div>
               </div>
             </div>
@@ -209,19 +209,19 @@ const StudentTable = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium text-gray-500">Current GPA</label>
-                  <p>{student.currentGPA}</p>
+                  <p>{student.currentGPA || 'N/A'}</p>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-500">Class Rigor</label>
-                  <p>{student.classRigor}</p>
+                  <p>{student.classRigor || 'N/A'}</p>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-500">University Preference</label>
-                  <p>{student.universitiesWant}</p>
+                  <p>{student.universitiesWant || 'N/A'}</p>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-500">Registration Code</label>
-                  <p>{student.registrationCode}</p>
+                  <p>{student.registrationCode || 'N/A'}</p>
                 </div>
               </div>
               
@@ -234,12 +234,12 @@ const StudentTable = () => {
               
               <div className="mt-4">
                 <label className="text-sm font-medium text-gray-500">Biggest Stressor</label>
-                <p className="mt-1">{student.biggestStressor}</p>
+                <p className="mt-1">{student.biggestStressor || 'N/A'}</p>
               </div>
               
               <div className="mt-4">
                 <label className="text-sm font-medium text-gray-500">Parent's Biggest Worry</label>
-                <p className="mt-1">{student.parentWorry}</p>
+                <p className="mt-1">{student.parentWorry || 'N/A'}</p>
               </div>
             </div>
 
@@ -334,20 +334,20 @@ const StudentTable = () => {
                     <tr key={student._id} className="border-b hover:bg-gray-50">
                       <td className="p-4">
                         <div>
-                          <div className="font-medium">{student.firstName} {student.lastName}</div>
-                          <div className="text-sm text-gray-500">{student.highSchoolName}</div>
+                          <div className="font-medium">{student.firstName || 'N/A'} {student.lastName || 'N/A'}</div>
+                          <div className="text-sm text-gray-500">{student.highSchoolName || 'N/A'}</div>
                         </div>
                       </td>
                       <td className="p-4">
                         <div>
-                          <div className="text-sm">{student.email}</div>
-                          <div className="text-sm text-gray-500">{student.phoneNumber}</div>
+                          <div className="text-sm">{student.email || 'N/A'}</div>
+                          <div className="text-sm text-gray-500">{student.phoneNumber || 'N/A'}</div>
                         </div>
                       </td>
                       <td className="p-4">
                         <div>
-                          <div className="text-sm">GPA: {student.currentGPA}</div>
-                          <div className="text-sm text-gray-500">{student.universitiesWant}</div>
+                          <div className="text-sm">GPA: {student.currentGPA || 'N/A'}</div>
+                          <div className="text-sm text-gray-500">{student.universitiesWant || 'N/A'}</div>
                         </div>
                       </td>
                       <td className="p-4">
@@ -355,7 +355,7 @@ const StudentTable = () => {
                       </td>
                       <td className="p-4">
                         <div className="text-sm">
-                          {new Date(student.submittedAt).toLocaleDateString()}
+                          {student.submittedAt ? new Date(student.submittedAt).toLocaleDateString() : 'N/A'}
                         </div>
                       </td>
                       <td className="p-4">
@@ -378,7 +378,7 @@ const StudentTable = () => {
           {/* Pagination */}
           <div className="flex justify-between items-center mt-6">
             <div className="text-sm text-gray-500">
-              Showing {((pagination.currentPage - 1) * 10) + 1} to {Math.min(pagination.currentPage * 10, pagination.totalStudents)} of {pagination.totalStudents} students
+              Showing {((pagination.currentPage - 1) * 10) + 1} to {Math.min(pagination.currentPage * 10, pagination.totalStudents || 0)} of {pagination.totalStudents || 0} students
             </div>
             <div className="flex space-x-2">
               <Button
