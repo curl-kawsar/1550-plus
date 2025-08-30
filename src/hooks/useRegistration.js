@@ -56,6 +56,12 @@ export const validateStep = (step, formData) => {
       if (formData.currentGPA && (parseFloat(formData.currentGPA) < 0 || parseFloat(formData.currentGPA) > 4)) {
         errors.push("GPA must be between 0.0 and 4.0")
       }
+      if (!formData.password?.trim()) errors.push("Password is required")
+      if (formData.password && formData.password.length < 6) errors.push("Password must be at least 6 characters")
+      if (!formData.confirmPassword?.trim()) errors.push("Confirm password is required")
+      if (formData.password && formData.confirmPassword && formData.password !== formData.confirmPassword) {
+        errors.push("Passwords do not match")
+      }
       break
       
     case 2: // Parent Information
@@ -91,7 +97,7 @@ export const validateStep = (step, formData) => {
 
 export const getStepProgress = (step, formData) => {
   const totalFields = {
-    1: 8, // firstName, lastName, email, gender, phoneNumber, graduationYear, highSchoolName, currentGPA (topCollegeChoices is optional)
+    1: 10, // firstName, lastName, email, gender, phoneNumber, graduationYear, highSchoolName, currentGPA, password, confirmPassword (topCollegeChoices is optional)
     2: 5, // parentFirstName, parentLastName, state, parentEmail, parentPhoneNumber  
     3: 3, // classRigor, universitiesWant, satActScores (optional)
     4: 2, // typeOfStudent, registrationCode (biggestStressor & parentWorry are optional)
@@ -102,7 +108,8 @@ export const getStepProgress = (step, formData) => {
   const filledFields = {
     1: [
       formData.firstName, formData.lastName, formData.email, formData.gender,
-      formData.phoneNumber, formData.graduationYear, formData.highSchoolName, formData.currentGPA
+      formData.phoneNumber, formData.graduationYear, formData.highSchoolName, formData.currentGPA,
+      formData.password, formData.confirmPassword
     ].filter(Boolean).length,
     2: [
       formData.parentFirstName, formData.parentLastName, formData.state,

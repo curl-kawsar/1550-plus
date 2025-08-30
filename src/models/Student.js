@@ -19,6 +19,11 @@ const StudentSchema = new mongoose.Schema({
     lowercase: true,
     trim: true
   },
+  password: {
+    type: String,
+    required: true,
+    minlength: 6
+  },
   graduationYear: {
     type: Date,
     required: true

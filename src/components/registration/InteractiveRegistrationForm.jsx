@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -11,9 +12,11 @@ import { CheckCircle2, AlertCircle, Zap, Star } from "lucide-react"
 import { useSubmitRegistration, validateStep, getStepProgress } from "@/hooks/useRegistration"
 import { useEnrollmentCounts } from "@/hooks/useEnrollment"
 import { toast } from "sonner"
-import ThankYouModal from "./ThankYouModal"
+
 
 const InteractiveRegistrationForm = () => {
+  const router = useRouter()
+  
   // Add Bebas Neue font (similar to Norwester)
   useEffect(() => {
     const link = document.createElement('link');
@@ -28,12 +31,11 @@ const InteractiveRegistrationForm = () => {
   const [currentStep, setCurrentStep] = useState(1)
   const [fieldErrors, setFieldErrors] = useState({})
   const [touchedFields, setTouchedFields] = useState({})
-  const [showThankYou, setShowThankYou] = useState(false)
   const [formData, setFormData] = useState({
     // Student Information
     firstName: "", lastName: "", email: "", graduationYear: "",
     highSchoolName: "", phoneNumber: "", gender: "Male", currentGPA: "", 
-    topCollegeChoices: "",
+    topCollegeChoices: "", password: "", confirmPassword: "",
     
     // Parent Information
     parentFirstName: "", parentLastName: "", parentEmail: "",
@@ -75,7 +77,9 @@ const InteractiveRegistrationForm = () => {
                    error.toLowerCase().includes('address') ? 'address' :
                    error.toLowerCase().includes('zip') ? 'zipCode' :
                    error.toLowerCase().includes('city') ? 'city' :
-                   error.toLowerCase().includes('state') ? 'state' : null
+                   error.toLowerCase().includes('state') ? 'state' :
+                   error.toLowerCase().includes('confirm password') ? 'confirmPassword' :
+                   error.toLowerCase().includes('password') ? 'password' : null
       
       if (field) stepErrors[field] = error
     })
@@ -125,14 +129,14 @@ const InteractiveRegistrationForm = () => {
 
     submitMutation.mutate(formData, {
       onSuccess: () => {
-        // Show thank you modal
-        setShowThankYou(true)
+        // Show success message and redirect to login
+        toast.success("Registration completed successfully! Please log in to access your dashboard.")
         
         // Reset form
         setFormData({
           firstName: "", lastName: "", email: "", graduationYear: "",
           highSchoolName: "", phoneNumber: "", gender: "Male", currentGPA: "", 
-          topCollegeChoices: "", parentFirstName: "", parentLastName: "", 
+          topCollegeChoices: "", password: "", confirmPassword: "", parentFirstName: "", parentLastName: "", 
           parentEmail: "", parentPhoneNumber: "", state: "",
           classRigor: "Mostly Honors and AP", universitiesWant: "Ivy League/Top 20",
           satActScores: "", typeOfStudent: "", biggestStressor: "", 
@@ -141,6 +145,11 @@ const InteractiveRegistrationForm = () => {
         setCurrentStep(1)
         setTouchedFields({})
         setFieldErrors({})
+        
+        // Redirect to login page after a short delay
+        setTimeout(() => {
+          router.push('/student-login')
+        }, 2000)
       }
     })
   }
@@ -288,6 +297,21 @@ const InteractiveRegistrationForm = () => {
                     onChange={(e) => handleInputChange('topCollegeChoices', e.target.value)}
                     className="w-full p-3 border border-[#457BF5] rounded-md resize-none h-20 focus:outline-none focus:ring-2 focus:ring-[#457BF5] focus:border-[#457BF5]"
                   />
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-sm font-medium text-gray-700">Create Password *</Label>
+                <div className="mt-2">
+                  {renderInputField('password', 'Enter a secure password', 'password')}
+                </div>
+                <p className="text-xs text-gray-500 mt-1">Use this password to log into your student dashboard later</p>
+              </div>
+
+              <div>
+                <Label className="text-sm font-medium text-gray-700">Confirm Password *</Label>
+                <div className="mt-2">
+                  {renderInputField('confirmPassword', 'Re-enter your password', 'password')}
                 </div>
               </div>
             </div>
@@ -748,12 +772,6 @@ const InteractiveRegistrationForm = () => {
          </div>
        </div>
 
-      {/* Thank You Modal */}
-      <ThankYouModal 
-        isOpen={showThankYou}
-        onClose={() => setShowThankYou(false)}
-        studentData={formData}
-      />
     </div>
   )
 }

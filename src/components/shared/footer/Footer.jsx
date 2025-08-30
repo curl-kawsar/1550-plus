@@ -206,7 +206,7 @@ const Footer = () => {
               />
               
               <textarea
-                placeholder="Tell us what can we help you"
+                placeholder="Tell us"
                 value={contactForm.message}
                 onChange={(e) => handleInputChange('message', e.target.value)}
                 className="w-full px-3 py-2 bg-transparent border border-gray-600 rounded-md text-white placeholder:text-gray-400 focus:outline-none focus:border-white resize-none h-24"

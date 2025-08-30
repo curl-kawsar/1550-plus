@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/mongodb';
 import Student from '@/models/Student';
+import bcrypt from 'bcryptjs';
 
 export async function POST(request) {
   try {
@@ -10,7 +11,7 @@ export async function POST(request) {
     
     // Validate required fields
     const requiredFields = [
-      'firstName', 'lastName', 'email', 'graduationYear', 'highSchoolName', 
+      'firstName', 'lastName', 'email', 'password', 'graduationYear', 'highSchoolName', 
       'phoneNumber', 'gender', 'currentGPA', 'parentFirstName', 'parentLastName', 
       'parentEmail', 'parentPhoneNumber', 'state', 'classRigor', 'universitiesWant', 
       'typeOfStudent', 'registrationCode', 'classTime', 'diagnosticTestDate'
@@ -34,9 +35,31 @@ export async function POST(request) {
       );
     }
     
-    // Create new student
-    const student = new Student(body);
+    // Hash password
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(body.password, saltRounds);
+    
+    // Create new student with hashed password
+    const studentData = {
+      ...body,
+      password: hashedPassword
+    };
+    
+    console.log('Creating student with data:', {
+      email: studentData.email,
+      hasPassword: !!studentData.password,
+      passwordLength: studentData.password ? studentData.password.length : 0
+    });
+    
+    const student = new Student(studentData);
     await student.save();
+    
+    console.log('Student saved successfully:', {
+      id: student._id,
+      email: student.email,
+      hasPassword: !!student.password,
+      passwordLength: student.password ? student.password.length : 0
+    });
     
     return NextResponse.json(
       { 

@@ -3,12 +3,20 @@
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Menu, X } from "lucide-react"
+import { Menu, X, LogOut, LayoutDashboard } from "lucide-react"
 import { useState } from "react"
+import { useCurrentStudent, useStudentLogout } from "@/hooks/useStudentAuth"
 
 const Navbar = () => {
   const pathname = usePathname()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const { data: currentStudent, isLoading: isStudentLoading } = useCurrentStudent()
+  const logoutMutation = useStudentLogout()
+
+  const handleLogout = () => {
+    logoutMutation.mutate()
+    setIsMobileMenuOpen(false)
+  }
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-gray-700/20" style={{ backgroundColor: '#141C42' }}>
@@ -44,41 +52,63 @@ const Navbar = () => {
               About
             </Link>
             <Link 
-              href="/services" 
+              href="/contact" 
               className={`text-sm font-medium transition-colors hover:text-blue-400 ${
-                pathname === "/services" ? "text-white" : "text-gray-300"
+                pathname === "/contact" ? "text-white" : "text-gray-300"
               }`}
             >
-              Services
-            </Link>
-            <Link 
-              href="/events" 
-              className={`text-sm font-medium transition-colors hover:text-blue-400 ${
-                pathname === "/events" ? "text-white" : "text-gray-300"
-              }`}
-            >
-              Events
+              Contact Us
             </Link>
           </div>
         </div>
 
         {/* Desktop Action Buttons */}
         <div className="hidden lg:flex items-center space-x-4">
-          <Link href="/register">
-            <Button 
-              variant="ghost" 
-              className="text-gray-300 hover:text-white hover:bg-white/10"
-            >
-              Sign up
-            </Button>
-          </Link>
-          <Link href="/admin">
-            <Button 
-              className="login-gradient-btn text-white px-6 hover:scale-105 transition-all duration-200"
-            >
-              Login
-            </Button>
-          </Link>
+          {currentStudent ? (
+            // Authenticated Student Menu
+            <>
+              <span className="text-gray-300 text-sm">
+                Welcome, {currentStudent.firstName}
+              </span>
+              <Link href="/student-dashboard">
+                <Button 
+                  variant="ghost"
+                  className="text-blue-400 hover:text-white hover:bg-blue-400/20 transition-all duration-200"
+                >
+                  <LayoutDashboard className="w-4 h-4 mr-2" />
+                  Dashboard
+                </Button>
+              </Link>
+              <Button 
+                onClick={handleLogout}
+                variant="ghost"
+                className="text-red-400 hover:text-white hover:bg-red-400/20 transition-all duration-200"
+                disabled={logoutMutation.isPending}
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                {logoutMutation.isPending ? 'Logging out...' : 'Logout'}
+              </Button>
+            </>
+          ) : (
+            // Unauthenticated Menu
+            <>
+              <Link href="/register">
+                <Button 
+                  variant="ghost" 
+                  className="text-gray-300 hover:text-white hover:bg-white/10"
+                >
+                  Sign up
+                </Button>
+              </Link>
+              <Link href="/student-login">
+                <Button 
+                  className="login-gradient-btn text-white px-6 hover:scale-105 transition-all duration-200"
+                >
+                  Student Login
+                </Button>
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Mobile Menu Button */}
@@ -121,39 +151,60 @@ const Navbar = () => {
               About
             </Link>
             <Link 
-              href="/services" 
+              href="/contact" 
               className={`block text-sm font-medium transition-colors hover:text-blue-400 ${
-                pathname === "/services" ? "text-white" : "text-gray-300"
+                pathname === "/contact" ? "text-white" : "text-gray-300"
               }`}
               onClick={() => setIsMobileMenuOpen(false)}
             >
-              Services
-            </Link>
-            <Link 
-              href="/events" 
-              className={`block text-sm font-medium transition-colors hover:text-blue-400 ${
-                pathname === "/events" ? "text-white" : "text-gray-300"
-              }`}
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Events
+              Contact Us
             </Link>
             <div className="pt-4 border-t border-gray-700/20 space-y-3">
-              <Link href="/register" onClick={() => setIsMobileMenuOpen(false)}>
-                <Button 
-                  variant="ghost" 
-                  className="w-full text-gray-300 hover:text-white hover:bg-white/10 justify-start"
-                >
-                  Sign up
-                </Button>
-              </Link>
-              <Link href="/admin" onClick={() => setIsMobileMenuOpen(false)}>
-                <Button 
-                  className="login-gradient-btn w-full text-white hover:scale-105 transition-all duration-200"
-                >
-                  Login
-                </Button>
-              </Link>
+              {currentStudent ? (
+                // Authenticated Student Mobile Menu
+                <>
+                  <div className="text-gray-300 text-sm px-3 py-2">
+                    Welcome, {currentStudent.firstName}
+                  </div>
+                  <Link href="/student-dashboard" onClick={() => setIsMobileMenuOpen(false)}>
+                    <Button 
+                      variant="ghost"
+                      className="w-full text-blue-400 hover:text-white hover:bg-blue-400/20 transition-all duration-200 justify-start"
+                    >
+                      <LayoutDashboard className="w-4 h-4 mr-2" />
+                      Dashboard
+                    </Button>
+                  </Link>
+                  <Button 
+                    onClick={handleLogout}
+                    variant="ghost"
+                    className="w-full text-red-400 hover:text-white hover:bg-red-400/20 transition-all duration-200 justify-start"
+                    disabled={logoutMutation.isPending}
+                  >
+                    <LogOut className="w-4 h-4 mr-2" />
+                    {logoutMutation.isPending ? 'Logging out...' : 'Logout'}
+                  </Button>
+                </>
+              ) : (
+                // Unauthenticated Mobile Menu
+                <>
+                  <Link href="/register" onClick={() => setIsMobileMenuOpen(false)}>
+                    <Button 
+                      variant="ghost" 
+                      className="w-full text-gray-300 hover:text-white hover:bg-white/10 justify-start"
+                    >
+                      Sign up
+                    </Button>
+                  </Link>
+                  <Link href="/student-login" onClick={() => setIsMobileMenuOpen(false)}>
+                    <Button 
+                      className="login-gradient-btn w-full text-white hover:scale-105 transition-all duration-200"
+                    >
+                      Student Login
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
