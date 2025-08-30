@@ -10,7 +10,7 @@ A complete student authentication and dashboard system has been implemented for 
 - **Password Fields**: Added secure password and confirm password fields
 - **Validation**: Comprehensive password validation (minimum 6 characters, matching passwords)
 - **Security**: Passwords are hashed using bcryptjs before storage
-
+ 
 **Files Modified:**
 - `src/components/registration/InteractiveRegistrationForm.jsx`
 - `src/hooks/useRegistration.js`
