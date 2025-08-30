@@ -11,10 +11,9 @@ export async function POST(request) {
     // Validate required fields
     const requiredFields = [
       'firstName', 'lastName', 'email', 'graduationYear', 'highSchoolName', 
-      'phoneNumber', 'gender', 'parentFirstName', 'parentLastName', 
-      'parentEmail', 'parentPhoneNumber', 'address', 'zipCode', 'city', 
-      'state', 'currentGPA', 'classRigor', 'universitiesWant', 
-      'biggestStressor', 'parentWorry', 'registrationCode'
+      'phoneNumber', 'gender', 'currentGPA', 'parentFirstName', 'parentLastName', 
+      'parentEmail', 'parentPhoneNumber', 'state', 'classRigor', 'universitiesWant', 
+      'typeOfStudent', 'registrationCode', 'classTime', 'diagnosticTestDate'
     ];
     
     for (const field of requiredFields) {
@@ -73,6 +72,8 @@ export async function GET(request) {
     const limit = parseInt(searchParams.get('limit')) || 10;
     const status = searchParams.get('status');
     const search = searchParams.get('search');
+    const diagnosticTest = searchParams.get('diagnosticTest');
+    const classTime = searchParams.get('classTime');
     
     const skip = (page - 1) * limit;
     
@@ -88,6 +89,18 @@ export async function GET(request) {
         { email: { $regex: search, $options: 'i' } },
         { highSchoolName: { $regex: search, $options: 'i' } }
       ];
+    }
+    if (diagnosticTest) {
+      if (diagnosticTest === 'saturday') {
+        query.diagnosticTestDate = { $regex: 'Saturday', $options: 'i' };
+      } else if (diagnosticTest === 'sunday') {
+        query.diagnosticTestDate = { $regex: 'Sunday', $options: 'i' };
+      } else if (diagnosticTest === 'cannot') {
+        query.diagnosticTestDate = { $regex: 'can\'t make either', $options: 'i' };
+      }
+    }
+    if (classTime) {
+      query.classTime = classTime;
     }
     
     // Get students with pagination

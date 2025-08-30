@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from 'react'
 import AdminLogin from '@/components/admin/AdminLogin'
-import AdminNavbar from '@/components/admin/AdminNavbar'
+import AdminSidebar from '@/components/admin/AdminSidebar'
 import DashboardStats from '@/components/admin/DashboardStats'
 import StudentTable from '@/components/admin/StudentTable'
 import ContactMessages from '@/components/admin/ContactMessages'
+import EnrollmentTracking from '@/components/admin/EnrollmentTracking'
+import DiagnosticTracking from '@/components/admin/DiagnosticTracking'
 import MaintenanceToggle from '@/components/admin/MaintenanceToggle'
 
 export default function AdminDashboard() {
@@ -55,8 +57,9 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <AdminNavbar 
+    <div className="min-h-screen bg-gray-50 flex">
+      {/* Sidebar */}
+      <AdminSidebar 
         activeTab={activeTab} 
         setActiveTab={setActiveTab} 
         admin={admin}
@@ -64,7 +67,8 @@ export default function AdminDashboard() {
       />
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="flex-1 lg:ml-0 min-h-screen">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-16 lg:pt-8">
         {activeTab === 'overview' && (
           <div>
             <div className="mb-8">
@@ -101,6 +105,30 @@ export default function AdminDashboard() {
           </div>
         )}
 
+        {activeTab === 'enrollment' && (
+          <div>
+            <div className="mb-8">
+              <h2 className="text-3xl font-bold text-gray-900">Class Enrollment Tracking</h2>
+              <p className="mt-2 text-gray-600">
+                Monitor real-time class enrollments and track minimum requirements.
+              </p>
+            </div>
+            <EnrollmentTracking />
+          </div>
+        )}
+
+        {activeTab === 'diagnostic' && (
+          <div>
+            <div className="mb-8">
+              <h2 className="text-3xl font-bold text-gray-900">Diagnostic Test Tracking</h2>
+              <p className="mt-2 text-gray-600">
+                Monitor diagnostic test date selections and attendance planning.
+              </p>
+            </div>
+            <DiagnosticTracking />
+          </div>
+        )}
+
         {activeTab === 'maintenance' && (
           <div>
             <div className="mb-8">
@@ -112,6 +140,7 @@ export default function AdminDashboard() {
             <MaintenanceToggle adminEmail={admin?.email} />
           </div>
         )}
+        </div>
       </div>
     </div>
   )

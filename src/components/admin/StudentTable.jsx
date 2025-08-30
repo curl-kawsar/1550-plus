@@ -18,7 +18,8 @@ const StudentTable = () => {
   })
   const [filters, setFilters] = useState({
     search: '',
-    status: ''
+    status: '',
+    diagnosticTest: ''
   })
   const [selectedStudent, setSelectedStudent] = useState(null)
 
@@ -36,6 +37,7 @@ const StudentTable = () => {
       
       if (filters.search) params.append('search', filters.search)
       if (filters.status) params.append('status', filters.status)
+      if (filters.diagnosticTest) params.append('diagnosticTest', filters.diagnosticTest)
       
       const response = await fetch(`/api/students?${params}`)
       const data = await response.json()
@@ -75,7 +77,7 @@ const StudentTable = () => {
   const exportToCSV = () => {
     const headers = [
       'Name', 'Email', 'Phone', 'High School', 'GPA', 'Class Rigor', 
-      'University Preference', 'Graduation Year', 'Status', 'Submitted At'
+      'University Preference', 'Class Time', 'Diagnostic Test Date', 'Graduation Year', 'Status', 'Submitted At'
     ]
     
     const csvData = students.map(student => [
@@ -86,6 +88,8 @@ const StudentTable = () => {
       student.currentGPA || 'N/A',
       student.classRigor || 'N/A',
       student.universitiesWant || 'N/A',
+      student.classTime || 'N/A',
+      student.diagnosticTestDate || 'N/A',
       student.graduationYear ? new Date(student.graduationYear).getFullYear() : 'N/A',
       student.status || 'N/A',
       student.submittedAt ? new Date(student.submittedAt).toLocaleDateString() : 'N/A'
@@ -197,8 +201,8 @@ const StudentTable = () => {
                   <p>{student.parentPhoneNumber || 'N/A'}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-500">Address</label>
-                  <p>{[student.address, student.city, student.state, student.zipCode].filter(Boolean).join(', ') || 'N/A'}</p>
+                  <label className="text-sm font-medium text-gray-500">State</label>
+                  <p>{student.state || 'N/A'}</p>
                 </div>
               </div>
             </div>
@@ -225,6 +229,13 @@ const StudentTable = () => {
                 </div>
               </div>
               
+              {student.topCollegeChoices && (
+                <div className="mt-4">
+                  <label className="text-sm font-medium text-gray-500">Top 3 College Choices</label>
+                  <p className="mt-1">{student.topCollegeChoices}</p>
+                </div>
+              )}
+              
               {student.satActScores && (
                 <div className="mt-4">
                   <label className="text-sm font-medium text-gray-500">SAT/ACT Scores</label>
@@ -232,14 +243,40 @@ const StudentTable = () => {
                 </div>
               )}
               
-              <div className="mt-4">
-                <label className="text-sm font-medium text-gray-500">Biggest Stressor</label>
-                <p className="mt-1">{student.biggestStressor || 'N/A'}</p>
-              </div>
+              {student.typeOfStudent && (
+                <div className="mt-4">
+                  <label className="text-sm font-medium text-gray-500">Type of Student</label>
+                  <p className="mt-1">{student.typeOfStudent}</p>
+                </div>
+              )}
               
-              <div className="mt-4">
-                <label className="text-sm font-medium text-gray-500">Parent's Biggest Worry</label>
-                <p className="mt-1">{student.parentWorry || 'N/A'}</p>
+              {student.biggestStressor && (
+                <div className="mt-4">
+                  <label className="text-sm font-medium text-gray-500">Biggest Stressor</label>
+                  <p className="mt-1">{student.biggestStressor}</p>
+                </div>
+              )}
+              
+              {student.parentWorry && (
+                <div className="mt-4">
+                  <label className="text-sm font-medium text-gray-500">Parent's Biggest Worry</label>
+                  <p className="mt-1">{student.parentWorry}</p>
+                </div>
+              )}
+            </div>
+
+            {/* Class Schedule Information */}
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Class Schedule Information</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Selected Class Time</label>
+                  <p>{student.classTime || 'N/A'}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Diagnostic Test Date</label>
+                  <p>{student.diagnosticTestDate || 'N/A'}</p>
+                </div>
               </div>
             </div>
 
@@ -301,6 +338,16 @@ const StudentTable = () => {
               <option value="reviewed">Reviewed</option>
               <option value="contacted">Contacted</option>
             </select>
+            <select
+              value={filters.diagnosticTest}
+              onChange={(e) => setFilters(prev => ({ ...prev, diagnosticTest: e.target.value }))}
+              className="border border-[#457BF5] rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#457BF5] focus:border-[#457BF5]"
+            >
+              <option value="">All Diagnostic Tests</option>
+              <option value="saturday">Saturday Sept 27</option>
+              <option value="sunday">Sunday Sept 28</option>
+              <option value="cannot">Cannot Attend</option>
+            </select>
           </div>
 
           {/* Table */}
@@ -324,6 +371,8 @@ const StudentTable = () => {
                     <th className="text-left p-4">Student</th>
                     <th className="text-left p-4">Contact</th>
                     <th className="text-left p-4">Academic</th>
+                    <th className="text-left p-4">Class Time</th>
+                    <th className="text-left p-4">Diagnostic Test</th>
                     <th className="text-left p-4">Status</th>
                     <th className="text-left p-4">Submitted</th>
                     <th className="text-left p-4">Actions</th>
@@ -348,6 +397,52 @@ const StudentTable = () => {
                         <div>
                           <div className="text-sm">GPA: {student.currentGPA || 'N/A'}</div>
                           <div className="text-sm text-gray-500">{student.universitiesWant || 'N/A'}</div>
+                        </div>
+                      </td>
+                      <td className="p-4">
+                        <div>
+                          <div className="text-sm font-medium">{student.classTime || 'N/A'}</div>
+                        </div>
+                      </td>
+                      <td className="p-4">
+                        <div>
+                          {student.diagnosticTestDate ? (
+                            student.diagnosticTestDate.includes('Saturday') ? (
+                              <div className="flex items-center space-x-2">
+                                <Badge className="bg-green-100 text-green-800 border-green-200">
+                                  Saturday
+                                </Badge>
+                                <div>
+                                  <div className="text-xs text-gray-500">Sept 27</div>
+                                  <div className="text-xs text-gray-500">8:30am</div>
+                                </div>
+                              </div>
+                            ) : student.diagnosticTestDate.includes('Sunday') ? (
+                              <div className="flex items-center space-x-2">
+                                <Badge className="bg-blue-100 text-blue-800 border-blue-200">
+                                  Sunday
+                                </Badge>
+                                <div>
+                                  <div className="text-xs text-gray-500">Sept 28</div>
+                                  <div className="text-xs text-gray-500">8:30am</div>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="flex items-center space-x-2">
+                                <Badge className="bg-orange-100 text-orange-800 border-orange-200">
+                                  Cannot Attend
+                                </Badge>
+                                <div>
+                                  <div className="text-xs text-orange-600">Follow-up</div>
+                                  <div className="text-xs text-orange-600">needed</div>
+                                </div>
+                              </div>
+                            )
+                          ) : (
+                            <Badge className="bg-gray-100 text-gray-600 border-gray-200">
+                              Not Set
+                            </Badge>
+                          )}
                         </div>
                       </td>
                       <td className="p-4">

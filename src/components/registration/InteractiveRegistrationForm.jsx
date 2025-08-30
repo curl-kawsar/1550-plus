@@ -9,7 +9,9 @@ import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { CheckCircle2, AlertCircle, Zap, Star } from "lucide-react"
 import { useSubmitRegistration, validateStep, getStepProgress } from "@/hooks/useRegistration"
+import { useEnrollmentCounts } from "@/hooks/useEnrollment"
 import { toast } from "sonner"
+import ThankYouModal from "./ThankYouModal"
 
 const InteractiveRegistrationForm = () => {
   // Add Bebas Neue font (similar to Norwester)
@@ -26,24 +28,33 @@ const InteractiveRegistrationForm = () => {
   const [currentStep, setCurrentStep] = useState(1)
   const [fieldErrors, setFieldErrors] = useState({})
   const [touchedFields, setTouchedFields] = useState({})
+  const [showThankYou, setShowThankYou] = useState(false)
   const [formData, setFormData] = useState({
     // Student Information
     firstName: "", lastName: "", email: "", graduationYear: "",
-    highSchoolName: "", phoneNumber: "", gender: "Male",
+    highSchoolName: "", phoneNumber: "", gender: "Male", currentGPA: "", 
+    topCollegeChoices: "",
     
     // Parent Information
     parentFirstName: "", parentLastName: "", parentEmail: "",
-    parentPhoneNumber: "", address: "", zipCode: "", city: "", state: "",
+    parentPhoneNumber: "", state: "",
     
     // Academic Information
-    currentGPA: "", classRigor: "Mostly Honors and AP", universitiesWant: "Ivy League/Top 20",
+    classRigor: "Mostly Honors and AP", universitiesWant: "Ivy League/Top 20",
+    satActScores: "",
     
-    // Academic Information Part 2
-    satActScores: "", biggestStressor: "", parentWorry: "", registrationCode: ""
+    // Additional Information
+    typeOfStudent: "", biggestStressor: "", parentWorry: "", registrationCode: "",
+    
+    // Class Time & Diagnostic
+    classTime: "", diagnosticTestDate: ""
   })
 
   const submitMutation = useSubmitRegistration()
-  const totalSteps = 4
+  const totalSteps = 6
+
+  // Get real-time enrollment data
+  const { data: enrollmentData, isLoading: isLoadingEnrollment, error: enrollmentError } = useEnrollmentCounts()
 
   // Real-time validation
   useEffect(() => {
@@ -114,15 +125,18 @@ const InteractiveRegistrationForm = () => {
 
     submitMutation.mutate(formData, {
       onSuccess: () => {
+        // Show thank you modal
+        setShowThankYou(true)
+        
         // Reset form
         setFormData({
           firstName: "", lastName: "", email: "", graduationYear: "",
-          highSchoolName: "", phoneNumber: "", gender: "Male",
-          parentFirstName: "", parentLastName: "", parentEmail: "",
-          parentPhoneNumber: "", address: "", zipCode: "", city: "", state: "",
-          currentGPA: "", classRigor: "Mostly Honors and AP", 
-          universitiesWant: "Ivy League/Top 20", satActScores: "",
-          biggestStressor: "", parentWorry: "", registrationCode: ""
+          highSchoolName: "", phoneNumber: "", gender: "Male", currentGPA: "", 
+          topCollegeChoices: "", parentFirstName: "", parentLastName: "", 
+          parentEmail: "", parentPhoneNumber: "", state: "",
+          classRigor: "Mostly Honors and AP", universitiesWant: "Ivy League/Top 20",
+          satActScores: "", typeOfStudent: "", biggestStressor: "", 
+          parentWorry: "", registrationCode: "", classTime: "", diagnosticTestDate: ""
         })
         setCurrentStep(1)
         setTouchedFields({})
@@ -207,16 +221,23 @@ const InteractiveRegistrationForm = () => {
               </div>
 
               <div>
-                <Label className="text-sm font-medium text-gray-700">Graduation Year *</Label>
-                <div className="mt-2">
-                  {renderInputField('graduationYear', '', 'date')}
-                </div>
-              </div>
-
-              <div>
-                <Label className="text-sm font-medium text-gray-700">High School Name *</Label>
-                <div className="mt-2">
-                  {renderInputField('highSchoolName', 'XYZ High School')}
+                <Label className="text-sm font-medium text-gray-700">Gender *</Label>
+                <div className="flex space-x-6 mt-2">
+                  {['Male', 'Female'].map(option => (
+                    <label key={option} className="flex items-center cursor-pointer">
+                      <input
+                        type="radio"
+                        name="gender"
+                        value={option}
+                        checked={formData.gender === option}
+                        onChange={(e) => handleInputChange('gender', e.target.value)}
+                        className="mr-2 text-blue-600"
+                      />
+                      <span className={formData.gender === option ? 'text-blue-600 font-medium' : ''}>
+                        {option}
+                      </span>
+                    </label>
+                  ))}
                 </div>
               </div>
 
@@ -238,23 +259,35 @@ const InteractiveRegistrationForm = () => {
               </div>
 
               <div>
-                <Label className="text-sm font-medium text-gray-700">Gender *</Label>
-                <div className="flex space-x-6 mt-2">
-                  {['Male', 'Female'].map(option => (
-                    <label key={option} className="flex items-center cursor-pointer">
-                      <input
-                        type="radio"
-                        name="gender"
-                        value={option}
-                        checked={formData.gender === option}
-                        onChange={(e) => handleInputChange('gender', e.target.value)}
-                        className="mr-2 text-blue-600"
-                      />
-                      <span className={formData.gender === option ? 'text-blue-600 font-medium' : ''}>
-                        {option}
-                      </span>
-                    </label>
-                  ))}
+                <Label className="text-sm font-medium text-gray-700">Graduation Year *</Label>
+                <div className="mt-2">
+                  {renderInputField('graduationYear', '01/01/2000', 'date')}
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-sm font-medium text-gray-700">High School Name *</Label>
+                <div className="mt-2">
+                  {renderInputField('highSchoolName', 'XYZ High School')}
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-sm font-medium text-gray-700">Current Unweighted GPA *</Label>
+                <div className="mt-2">
+                  {renderInputField('currentGPA', '4.00', 'number')}
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-sm font-medium text-gray-700">What Are Your Top 3 Choices For College (Optional)</Label>
+                <div className="mt-2">
+                  <textarea
+                    placeholder="Your answer here"
+                    value={formData.topCollegeChoices}
+                    onChange={(e) => handleInputChange('topCollegeChoices', e.target.value)}
+                    className="w-full p-3 border border-[#457BF5] rounded-md resize-none h-20 focus:outline-none focus:ring-2 focus:ring-[#457BF5] focus:border-[#457BF5]"
+                  />
                 </div>
               </div>
             </div>
@@ -282,7 +315,7 @@ const InteractiveRegistrationForm = () => {
             
             <div className="space-y-4">
               <div>
-                <Label className="text-sm font-medium text-gray-700">Parent Full Name *</Label>
+                <Label className="text-sm font-medium text-gray-700">Full Name *</Label>
                 <div className="grid grid-cols-2 gap-4 mt-2">
                   {renderInputField('parentFirstName', 'First Name')}
                   {renderInputField('parentLastName', 'Last Name')}
@@ -290,50 +323,27 @@ const InteractiveRegistrationForm = () => {
               </div>
 
               <div>
-                <Label className="text-sm font-medium text-gray-700">Parent Email *</Label>
+                <Label className="text-sm font-medium text-gray-700">State *</Label>
                 <div className="mt-2">
-                  {renderInputField('parentEmail', 'parent@email.com', 'email')}
+                  {renderInputField('state', 'Newyork')}
                 </div>
               </div>
 
               <div>
-                <Label className="text-sm font-medium text-gray-700">Parent Phone Number *</Label>
+                <Label className="text-sm font-medium text-gray-700">Email *</Label>
+                <div className="mt-2">
+                  {renderInputField('parentEmail', 'collegemastermind@gmail.com', 'email')}
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-sm font-medium text-gray-700">Phone Number *</Label>
                 <div className="relative mt-2">
                   <div className="relative">
                     {renderInputField('parentPhoneNumber', 'XXXXXXXXXXXX', 'tel')}
                     <div className="absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
                       <span className="text-gray-500">🇺🇸</span>
                     </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-sm font-medium text-gray-700">Address *</Label>
-                  <div className="mt-2">
-                    {renderInputField('address', '10 street')}
-                  </div>
-                </div>
-                <div>
-                  <Label className="text-sm font-medium text-gray-700">Zip Code *</Label>
-                  <div className="mt-2">
-                    {renderInputField('zipCode', '2505')}
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-sm font-medium text-gray-700">City *</Label>
-                  <div className="mt-2">
-                    {renderInputField('city', 'New York')}
-                  </div>
-                </div>
-                <div>
-                  <Label className="text-sm font-medium text-gray-700">State *</Label>
-                  <div className="mt-2">
-                    {renderInputField('state', 'New York')}
                   </div>
                 </div>
               </div>
@@ -361,14 +371,6 @@ const InteractiveRegistrationForm = () => {
             </div>
             
             <div className="space-y-6">
-              <div>
-                <Label className="text-sm font-medium text-gray-700">Current Unweighted GPA *</Label>
-                <div className="mt-2">
-                  {renderInputField('currentGPA', '3.84', 'number')}
-                  <p className="text-xs text-gray-500 mt-1">Enter your GPA on a 4.0 scale</p>
-                </div>
-              </div>
-
               <div>
                 <Label className="text-sm font-medium text-gray-700">Class Rigor *</Label>
                 <div className="space-y-3 mt-2">
@@ -416,6 +418,18 @@ const InteractiveRegistrationForm = () => {
                   ))}
                 </div>
               </div>
+
+              <div>
+                <Label className="text-sm font-medium text-gray-700">SAT/ACT Previous Scores (Optional)</Label>
+                <div className="mt-2">
+                  <textarea
+                    placeholder="Include sub-scores if you know them"
+                    value={formData.satActScores}
+                    onChange={(e) => handleInputChange('satActScores', e.target.value)}
+                    className="w-full p-3 border border-[#457BF5] rounded-md resize-none h-20 focus:outline-none focus:ring-2 focus:ring-[#457BF5] focus:border-[#457BF5]"
+                  />
+                </div>
+              </div>
             </div>
           </div>
         )
@@ -441,61 +455,197 @@ const InteractiveRegistrationForm = () => {
             
             <div className="space-y-4">
               <div>
-                <Label className="text-sm font-medium text-gray-700">
-                  SAT/ACT Scores (Optional)
-                </Label>
-                <textarea
-                  placeholder="If you have taken the SAT or ACT, please list your scores..."
-                  value={formData.satActScores}
-                  onChange={(e) => handleInputChange('satActScores', e.target.value)}
-                  className="mt-2 w-full p-3 border border-[#457BF5] rounded-md resize-none h-20 focus:outline-none focus:ring-2 focus:ring-[#457BF5] focus:border-[#457BF5]"
-                />
-              </div>
-
-              <div>
-                <Label className="text-sm font-medium text-gray-700">
-                  Biggest Stressor About College Admissions *
-                </Label>
-                <div className="relative">
-                  <textarea
-                    placeholder="What worries you most about the college application process?"
-                    value={formData.biggestStressor}
-                    onChange={(e) => handleInputChange('biggestStressor', e.target.value)}
-                    className={`mt-2 w-full p-3 border rounded-md resize-none h-20 focus:outline-none focus:ring-2 focus:ring-[#457BF5] focus:border-[#457BF5] ${
-                      getFieldStatus('biggestStressor') === 'error' ? 'border-red-500 bg-red-50' :
-                      getFieldStatus('biggestStressor') === 'success' ? 'border-green-500 bg-green-50' : 'border-[#457BF5]'
-                    }`}
-                  />
-                  {fieldErrors.biggestStressor && touchedFields.biggestStressor && (
-                    <p className="text-xs text-red-500 mt-1">{fieldErrors.biggestStressor}</p>
-                  )}
+                <Label className="text-sm font-medium text-gray-700">Type Of Student *</Label>
+                <p className="text-sm text-gray-500 mb-3">Which Option Describes You The Most? There Is No Wrong Answer.</p>
+                <div className="space-y-3">
+                  {[
+                    "I usually wait until the last minute to get things done. Motivated sometimes, but inconsistent.",
+                    "I generally bring my stuff and finish on time, but I don't always get top results.",
+                    "I am usually very slow to work and achieve awesome results. I get stressed if I don't succeed!"
+                  ].map((option) => (
+                    <label key={option} className="flex items-start cursor-pointer">
+                      <input
+                        type="radio"
+                        name="typeOfStudent"
+                        value={option}
+                        checked={formData.typeOfStudent === option}
+                        onChange={(e) => handleInputChange('typeOfStudent', e.target.value)}
+                        className="mr-3 mt-1 text-blue-600"
+                      />
+                      <span className={formData.typeOfStudent === option ? 'text-blue-600 font-medium' : ''}>
+                        {option}
+                      </span>
+                    </label>
+                  ))}
                 </div>
               </div>
 
               <div>
                 <Label className="text-sm font-medium text-gray-700">
-                  Parent's Biggest Worry *
+                  Biggest Stressor About College Admissions (Optional)
                 </Label>
-                <div className="relative">
+                <div className="mt-2">
                   <textarea
-                    placeholder="What does your parent worry about most regarding college?"
+                    placeholder="Your answer here"
+                    value={formData.biggestStressor}
+                    onChange={(e) => handleInputChange('biggestStressor', e.target.value)}
+                    className="w-full p-3 border border-[#457BF5] rounded-md resize-none h-20 focus:outline-none focus:ring-2 focus:ring-[#457BF5] focus:border-[#457BF5]"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-sm font-medium text-gray-700">
+                  Parent(s) Biggest Worries Or Concerns (Optional)
+                </Label>
+                <div className="mt-2">
+                  <textarea
+                    placeholder="Your answer here"
                     value={formData.parentWorry}
                     onChange={(e) => handleInputChange('parentWorry', e.target.value)}
-                    className={`mt-2 w-full p-3 border rounded-md resize-none h-20 focus:outline-none focus:ring-2 focus:ring-[#457BF5] focus:border-[#457BF5] ${
-                      getFieldStatus('parentWorry') === 'error' ? 'border-red-500 bg-red-50' :
-                      getFieldStatus('parentWorry') === 'success' ? 'border-green-500 bg-green-50' : 'border-[#457BF5]'
-                    }`}
+                    className="w-full p-3 border border-[#457BF5] rounded-md resize-none h-20 focus:outline-none focus:ring-2 focus:ring-[#457BF5] focus:border-[#457BF5]"
                   />
-                  {fieldErrors.parentWorry && touchedFields.parentWorry && (
-                    <p className="text-xs text-red-500 mt-1">{fieldErrors.parentWorry}</p>
-                  )}
                 </div>
               </div>
 
               <div>
                 <Label className="text-sm font-medium text-gray-700">Registration Code *</Label>
                 <div className="mt-2">
-                  {renderInputField('registrationCode', 'Enter your registration code')}
+                  {renderInputField('registrationCode', '11550.07')}
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+
+      case 5:
+        return (
+          <div className="space-y-6">
+            <div className="flex items-center gap-2 mb-4">
+              <CheckCircle2 className="w-5 h-5 text-blue-600" />
+              <h2 className="text-2xl font-bold text-gray-900">Class Time</h2>
+              <Badge variant="outline" className="ml-auto">
+                Step {currentStep} of {totalSteps}
+              </Badge>
+            </div>
+            
+            <div className="mb-4">
+              <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
+                <span>Step Progress</span>
+                <span>{stepProgress}% Complete</span>
+              </div>
+              <Progress value={stepProgress} className="h-2" />
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <Label className="text-sm font-medium text-gray-700">Class Timings *</Label>
+                <p className="text-sm text-gray-500 mb-3">Select Your Preferred Time Slot.</p>
+                <div className="space-y-3">
+                  {[
+                    "Mon & Wed - 4:00 PM Pacific",
+                    "Mon & Wed - 7:00 PM Pacific", 
+                    "Tue & Thu - 4:00 PM Pacific",
+                    "Tue & Thu - 7:00 PM Pacific"
+                  ].map((option) => {
+                    const enrollmentCount = enrollmentData?.enrollments?.[option] || 0;
+                    const hasMinimumEnrollment = enrollmentCount >= (enrollmentData?.minimumRequired || 40);
+                    const isLoading = isLoadingEnrollment;
+                    
+                    return (
+                      <div key={option} className="relative">
+                        <label className="flex items-center justify-between p-4 border border-[#457BF5] rounded-lg cursor-pointer hover:bg-blue-50 transition-colors">
+                          <div className="flex items-center">
+                            <input
+                              type="radio"
+                              name="classTime"
+                              value={option}
+                              checked={formData.classTime === option}
+                              onChange={(e) => handleInputChange('classTime', e.target.value)}
+                              className="mr-3 text-blue-600"
+                            />
+                            <span className={formData.classTime === option ? 'text-blue-600 font-medium' : ''}>
+                              {option}
+                            </span>
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {isLoading ? (
+                              <span className="animate-pulse">Loading...</span>
+                            ) : (
+                              `${enrollmentCount} students enrolled`
+                            )}
+                          </div>
+                        </label>
+                        {!isLoading && !hasMinimumEnrollment && (
+                          <div className="mt-2 p-3 bg-orange-50 border border-orange-200 rounded-lg flex items-center">
+                            <AlertCircle className="w-4 h-4 text-orange-500 mr-2 flex-shrink-0" />
+                            <div className="text-sm text-orange-700">
+                              <strong>Minimum Enrollment Not Met</strong>
+                              <p className="mt-1">This class will not run unless it reaches the required minimum number of students. If it doesn't reach enrollment, you will be placed in another class time or you can choose other options again.</p>
+                            </div>
+                          </div>
+                        )}
+                        {enrollmentError && (
+                          <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center">
+                            <AlertCircle className="w-4 h-4 text-red-500 mr-2 flex-shrink-0" />
+                            <div className="text-sm text-red-700">
+                              <strong>Unable to Load Enrollment Data</strong>
+                              <p className="mt-1">Please try refreshing the page. You can still select a class time.</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+
+      case 6:
+        return (
+          <div className="space-y-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Star className="w-5 h-5 text-blue-600" />
+              <h2 className="text-2xl font-bold text-gray-900">Diagnostic Test</h2>
+              <Badge variant="outline" className="ml-auto">
+                Step {currentStep} of {totalSteps}
+              </Badge>
+            </div>
+            
+            <div className="mb-4">
+              <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
+                <span>Step Progress</span>
+                <span>{stepProgress}% Complete</span>
+              </div>
+              <Progress value={stepProgress} className="h-2" />
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <Label className="text-sm font-medium text-gray-700">Diagnostic Test Date *</Label>
+                <p className="text-sm text-gray-500 mb-3">Please Choose One</p>
+                <div className="space-y-3">
+                  {[
+                    "Saturday September 27th 8:30am - noon PST",
+                    "Sunday September 28th 8:30am - noon PST",
+                    "I can't make either of these dates (reply below with if neither option works for you)"
+                  ].map((option) => (
+                    <label key={option} className="flex items-start p-4 border border-[#457BF5] rounded-lg cursor-pointer hover:bg-blue-50 transition-colors">
+                      <input
+                        type="radio"
+                        name="diagnosticTestDate"
+                        value={option}
+                        checked={formData.diagnosticTestDate === option}
+                        onChange={(e) => handleInputChange('diagnosticTestDate', e.target.value)}
+                        className="mr-3 mt-1 text-blue-600"
+                      />
+                      <span className={formData.diagnosticTestDate === option ? 'text-blue-600 font-medium' : ''}>
+                        {option}
+                      </span>
+                    </label>
+                  ))}
                 </div>
               </div>
             </div>
@@ -597,6 +747,13 @@ const InteractiveRegistrationForm = () => {
            </div>
          </div>
        </div>
+
+      {/* Thank You Modal */}
+      <ThankYouModal 
+        isOpen={showThankYou}
+        onClose={() => setShowThankYou(false)}
+        studentData={formData}
+      />
     </div>
   )
 }

@@ -1,3 +1,5 @@
+/* Import Norwester font */
+@import url('https://fonts.cdnfonts.com/css/norwester');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

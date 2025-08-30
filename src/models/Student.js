@@ -38,6 +38,11 @@ const StudentSchema = new mongoose.Schema({
     required: true,
     enum: ['Male', 'Female']
   },
+  topCollegeChoices: {
+    type: String,
+    required: false,
+    trim: true
+  },
 
   // Parent Information
   parentFirstName: {
@@ -57,21 +62,6 @@ const StudentSchema = new mongoose.Schema({
     trim: true
   },
   parentPhoneNumber: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  address: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  zipCode: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  city: {
     type: String,
     required: true,
     trim: true
@@ -106,19 +96,52 @@ const StudentSchema = new mongoose.Schema({
     required: false,
     trim: true
   },
-  biggestStressor: {
+  typeOfStudent: {
     type: String,
     required: true,
+    enum: [
+      'I usually wait until the last minute to get things done. Motivated sometimes, but inconsistent.',
+      'I generally bring my stuff and finish on time, but I don\'t always get top results.',
+      'I am usually very slow to work and achieve awesome results. I get stressed if I don\'t succeed!'
+    ],
+    trim: true
+  },
+  biggestStressor: {
+    type: String,
+    required: false,
     trim: true
   },
   parentWorry: {
     type: String,
-    required: true,
+    required: false,
     trim: true
   },
   registrationCode: {
     type: String,
     required: true,
+    trim: true
+  },
+  
+  // Class Schedule Information
+  classTime: {
+    type: String,
+    required: true,
+    enum: [
+      'Mon & Wed - 4:00 PM Pacific',
+      'Mon & Wed - 7:00 PM Pacific',
+      'Tue & Thu - 4:00 PM Pacific',
+      'Tue & Thu - 7:00 PM Pacific'
+    ],
+    trim: true
+  },
+  diagnosticTestDate: {
+    type: String,
+    required: true,
+    enum: [
+      'Saturday September 27th 8:30am - noon PST',
+      'Sunday September 28th 8:30am - noon PST',
+      'I can\'t make either of these dates (reply below with if neither option works for you)'
+    ],
     trim: true
   },
 
@@ -140,5 +163,6 @@ const StudentSchema = new mongoose.Schema({
 StudentSchema.index({ email: 1 });
 StudentSchema.index({ submittedAt: -1 });
 StudentSchema.index({ status: 1 });
+StudentSchema.index({ classTime: 1 }); // For enrollment counting
 
 export default mongoose.models.Student || mongoose.model('Student', StudentSchema);
