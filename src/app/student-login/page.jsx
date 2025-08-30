@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from 'react'
+import { useEffect, Suspense } from 'react'
 import { useRouter } from 'next/navigation'
 import StudentLoginForm from '@/components/auth/StudentLoginForm'
 import { useStudentAuth } from '@/hooks/useStudentAuth'
@@ -44,7 +44,13 @@ export default function StudentLoginPage() {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          <StudentLoginForm />
+          <Suspense fallback={
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+            </div>
+          }>
+            <StudentLoginForm />
+          </Suspense>
         </div>
       </div>
     </div>

@@ -165,7 +165,7 @@ const StudentSchema = new mongoose.Schema({
 });
 
 // Create indexes for better query performance
-StudentSchema.index({ email: 1 });
+// Note: email index is automatically created by unique: true
 StudentSchema.index({ submittedAt: -1 });
 StudentSchema.index({ status: 1 });
 StudentSchema.index({ classTime: 1 }); // For enrollment counting
