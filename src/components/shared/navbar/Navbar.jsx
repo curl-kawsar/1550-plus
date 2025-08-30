@@ -1,32 +1,49 @@
-"use client"
+'use client';
 
-import { Button } from "@/components/ui/button"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { Menu, X, LogOut, LayoutDashboard } from "lucide-react"
-import { useState } from "react"
-import { useCurrentStudent, useStudentLogout } from "@/hooks/useStudentAuth"
+import {Button} from '@/components/ui/button';
+import Link from 'next/link';
+import {usePathname} from 'next/navigation';
+import {Menu, X, LogOut, LayoutDashboard} from 'lucide-react';
+import {useState, useEffect} from 'react';
+import {useCurrentStudent, useStudentLogout} from '@/hooks/useStudentAuth';
 
 const Navbar = () => {
-  const pathname = usePathname()
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const { data: currentStudent, isLoading: isStudentLoading } = useCurrentStudent()
-  const logoutMutation = useStudentLogout()
+  useEffect(() => {
+    // Load Norwester font dynamically
+    const link = document.createElement('link');
+    link.href =
+      'https://fonts.googleapis.com/css2?family=Norwester&display=swap';
+    link.rel = 'stylesheet';
+    document.head.appendChild(link);
+
+    return () => {
+      document.head.removeChild(link);
+    };
+  }, []);
+
+  const pathname = usePathname();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const {data: currentStudent, isLoading: isStudentLoading} =
+    useCurrentStudent();
+  const logoutMutation = useStudentLogout();
 
   const handleLogout = () => {
-    logoutMutation.mutate()
-    setIsMobileMenuOpen(false)
-  }
+    logoutMutation.mutate();
+    setIsMobileMenuOpen(false);
+  };
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-gray-700/20" style={{ backgroundColor: '#141C42' }}>
+    <nav
+      className="sticky top-0 z-50 w-full border-b border-gray-700/20"
+      style={{backgroundColor: '#141C42'}}
+    >
       <div className="max-w-7xl mx-auto flex h-16 items-center px-4 lg:px-6">
         {/* Logo */}
         <div className="flex items-center">
           <Link href="/" className="flex items-center">
-            <img 
-              src="/logo.png" 
-              alt="1550+ Logo" 
+            <img
+              src="/1550+logo.png"
+              alt="1550+ Logo"
               className="h-12 w-auto"
             />
           </Link>
@@ -35,26 +52,26 @@ const Navbar = () => {
         {/* Desktop Navigation */}
         <div className="hidden lg:flex items-center justify-center flex-1 px-8">
           <div className="flex items-center space-x-8">
-            <Link 
-              href="/" 
+            <Link
+              href="/"
               className={`text-sm font-medium transition-colors hover:text-blue-400 ${
-                pathname === "/" ? "text-white" : "text-gray-300"
+                pathname === '/' ? 'text-white' : 'text-gray-300'
               }`}
             >
               Home
             </Link>
-            <Link 
-              href="/about" 
+            <Link
+              href="/about"
               className={`text-sm font-medium transition-colors hover:text-blue-400 ${
-                pathname === "/about" ? "text-white" : "text-gray-300"
+                pathname === '/about' ? 'text-white' : 'text-gray-300'
               }`}
             >
               About
             </Link>
-            <Link 
-              href="/contact" 
+            <Link
+              href="/contact"
               className={`text-sm font-medium transition-colors hover:text-blue-400 ${
-                pathname === "/contact" ? "text-white" : "text-gray-300"
+                pathname === '/contact' ? 'text-white' : 'text-gray-300'
               }`}
             >
               Contact Us
@@ -71,7 +88,7 @@ const Navbar = () => {
                 Welcome, {currentStudent.firstName}
               </span>
               <Link href="/student-dashboard">
-                <Button 
+                <Button
                   variant="ghost"
                   className="text-blue-400 hover:text-white hover:bg-blue-400/20 transition-all duration-200"
                 >
@@ -79,7 +96,7 @@ const Navbar = () => {
                   Dashboard
                 </Button>
               </Link>
-              <Button 
+              <Button
                 onClick={handleLogout}
                 variant="ghost"
                 className="text-red-400 hover:text-white hover:bg-red-400/20 transition-all duration-200"
@@ -93,17 +110,15 @@ const Navbar = () => {
             // Unauthenticated Menu
             <>
               <Link href="/register">
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   className="text-gray-300 hover:text-white hover:bg-white/10"
                 >
                   Sign up
                 </Button>
               </Link>
               <Link href="/student-login">
-                <Button 
-                  className="login-gradient-btn text-white px-6 hover:scale-105 transition-all duration-200"
-                >
+                <Button className="login-gradient-btn text-white px-6 hover:scale-105 transition-all duration-200">
                   Student Login
                 </Button>
               </Link>
@@ -130,30 +145,33 @@ const Navbar = () => {
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden border-t border-gray-700/20" style={{ backgroundColor: '#141C42' }}>
+        <div
+          className="lg:hidden border-t border-gray-700/20"
+          style={{backgroundColor: '#141C42'}}
+        >
           <div className="px-4 py-4 space-y-4">
-            <Link 
-              href="/" 
+            <Link
+              href="/"
               className={`block text-sm font-medium transition-colors hover:text-blue-400 ${
-                pathname === "/" ? "text-white" : "text-gray-300"
+                pathname === '/' ? 'text-white' : 'text-gray-300'
               }`}
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Home
             </Link>
-            <Link 
-              href="/about" 
+            <Link
+              href="/about"
               className={`block text-sm font-medium transition-colors hover:text-blue-400 ${
-                pathname === "/about" ? "text-white" : "text-gray-300"
+                pathname === '/about' ? 'text-white' : 'text-gray-300'
               }`}
               onClick={() => setIsMobileMenuOpen(false)}
             >
               About
             </Link>
-            <Link 
-              href="/contact" 
+            <Link
+              href="/contact"
               className={`block text-sm font-medium transition-colors hover:text-blue-400 ${
-                pathname === "/contact" ? "text-white" : "text-gray-300"
+                pathname === '/contact' ? 'text-white' : 'text-gray-300'
               }`}
               onClick={() => setIsMobileMenuOpen(false)}
             >
@@ -166,8 +184,11 @@ const Navbar = () => {
                   <div className="text-gray-300 text-sm px-3 py-2">
                     Welcome, {currentStudent.firstName}
                   </div>
-                  <Link href="/student-dashboard" onClick={() => setIsMobileMenuOpen(false)}>
-                    <Button 
+                  <Link
+                    href="/student-dashboard"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Button
                       variant="ghost"
                       className="w-full text-blue-400 hover:text-white hover:bg-blue-400/20 transition-all duration-200 justify-start"
                     >
@@ -175,7 +196,7 @@ const Navbar = () => {
                       Dashboard
                     </Button>
                   </Link>
-                  <Button 
+                  <Button
                     onClick={handleLogout}
                     variant="ghost"
                     className="w-full text-red-400 hover:text-white hover:bg-red-400/20 transition-all duration-200 justify-start"
@@ -188,18 +209,22 @@ const Navbar = () => {
               ) : (
                 // Unauthenticated Mobile Menu
                 <>
-                  <Link href="/register" onClick={() => setIsMobileMenuOpen(false)}>
-                    <Button 
-                      variant="ghost" 
+                  <Link
+                    href="/register"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Button
+                      variant="ghost"
                       className="w-full text-gray-300 hover:text-white hover:bg-white/10 justify-start"
                     >
                       Sign up
                     </Button>
                   </Link>
-                  <Link href="/student-login" onClick={() => setIsMobileMenuOpen(false)}>
-                    <Button 
-                      className="login-gradient-btn w-full text-white hover:scale-105 transition-all duration-200"
-                    >
+                  <Link
+                    href="/student-login"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Button className="login-gradient-btn w-full text-white hover:scale-105 transition-all duration-200">
                       Student Login
                     </Button>
                   </Link>
@@ -210,7 +235,7 @@ const Navbar = () => {
         </div>
       )}
     </nav>
-  )
-}
+  );
+};
 
-export default Navbar
+export default Navbar;

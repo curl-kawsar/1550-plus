@@ -1,0 +1,29 @@
+.hero-image {
+  background-image: url('/heroimage.png');
+  background-size: cover; /* makes it fill */
+  background-position: top right; /* keeps it centered */
+  background-repeat: no-repeat; /* no tiling */
+  height: 90vh; /* full screen height */
+  width: 100%;
+}
+
+h2,
+ul,
+li {
+  font-family: 'Norwester', sans-serif;
+}
+
+/* For phones (max width 600px) */
+@media only screen and (max-width: 600px) {
+  .hero-image {
+    position: relative;
+    z-index: 5;
+  }
+  .hero-image::after {
+    position: absolute;
+    content: '';
+    inset: 0;
+    background-color: rgba(20, 28, 66, 0.8);
+    z-index: -10;
+  }
+}
