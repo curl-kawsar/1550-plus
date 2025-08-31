@@ -14,7 +14,7 @@ A full-stack Next.js application for student registration and admin management, 
 ### Admin Dashboard
 - Interactive analytics dashboard
 - Student data management
-- Registration status tracking
+- Registration status tracking 
 - Data export functionality
 - Real-time statistics and charts
 
