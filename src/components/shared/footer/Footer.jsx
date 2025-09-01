@@ -64,7 +64,7 @@ const Footer = () => {
         <div className="flex justify-left mb-16">
           <Link href="/" className="flex items-center">
             <img
-              src="/1550+logo.png"
+              src="/logo.png"
               alt="1550+ Logo"
               className="h-12 w-auto"
             />

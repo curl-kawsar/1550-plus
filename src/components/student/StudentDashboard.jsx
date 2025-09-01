@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import StudentChatTab from '@/components/student/StudentChatTab'
+import { useChatMessages } from '@/hooks/useChat'
 import { 
   User, 
   Mail, 
@@ -17,11 +19,46 @@ import {
   BookOpen,
   Target,
   LogOut,
-  Settings
+  Settings,
+  MessageSquare
 } from 'lucide-react'
 
 export default function StudentDashboard({ student, onLogout }) {
   const [activeTab, setActiveTab] = useState('overview')
+
+  // Chat Tab Button with notification badge
+  const ChatTabButton = ({ student, isActive, onClick, icon: Icon, label }) => {
+    const studentEmail = student?.email;
+    
+    const { data: chatData } = useChatMessages(studentEmail, {
+      enabled: !!studentEmail,
+      refetchInterval: 10000 // Check for new messages every 10 seconds
+    });
+
+    const messages = chatData?.messages || [];
+    const unreadAdminMessages = messages.filter(
+      msg => msg.sender === 'admin' && msg.status !== 'read'
+    ).length;
+
+    return (
+      <button
+        onClick={onClick}
+        className={`py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2 relative ${
+          isActive
+            ? 'border-[#457BF5] text-[#457BF5]'
+            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+        }`}
+      >
+        <Icon className="h-4 w-4" />
+        {label}
+        {unreadAdminMessages > 0 && (
+          <Badge variant="destructive" className="ml-1 text-xs h-5 w-5 rounded-full p-0 flex items-center justify-center">
+            {unreadAdminMessages}
+          </Badge>
+        )}
+      </button>
+    )
+  }
 
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A'
@@ -49,7 +86,8 @@ export default function StudentDashboard({ student, onLogout }) {
     { id: 'overview', label: 'Overview', icon: User },
     { id: 'schedule', label: 'Schedule', icon: Calendar },
     { id: 'academic', label: 'Academic Info', icon: BookOpen },
-    { id: 'contact', label: 'Contact Info', icon: Mail }
+    { id: 'contact', label: 'Contact Info', icon: Mail },
+    { id: 'chat', label: 'Chat', icon: MessageSquare }
   ]
 
   return (
@@ -96,6 +134,21 @@ export default function StudentDashboard({ student, onLogout }) {
           <nav className="flex space-x-8">
             {tabs.map((tab) => {
               const Icon = tab.icon
+              
+              // Special handling for chat tab with notifications
+              if (tab.id === 'chat') {
+                return (
+                  <ChatTabButton
+                    key={tab.id}
+                    student={student}
+                    isActive={activeTab === tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    icon={Icon}
+                    label={tab.label}
+                  />
+                )
+              }
+              
               return (
                 <button
                   key={tab.id}
@@ -376,6 +429,12 @@ export default function StudentDashboard({ student, onLogout }) {
                 </div>
               </CardContent>
             </Card>
+          </div>
+        )}
+
+        {activeTab === 'chat' && (
+          <div className="max-w-4xl mx-auto">
+            <StudentChatTab student={student} />
           </div>
         )}
       </div>

@@ -67,6 +67,12 @@ export const useStudentLogin = () => {
     mutationFn: loginStudent,
     onSuccess: (data) => {
       toast.success('Login successful! Welcome to your dashboard.')
+      
+      // Store JWT token in localStorage for chat authentication
+      if (data.token) {
+        localStorage.setItem('studentToken', data.token)
+      }
+      
       // Update the student query cache
       queryClient.setQueryData(['current-student'], data.student)
       queryClient.invalidateQueries({ queryKey: ['current-student'] })
@@ -88,6 +94,10 @@ export const useStudentLogout = () => {
     mutationFn: logoutStudent,
     onSuccess: () => {
       toast.success('Logged out successfully')
+      
+      // Clear JWT token from localStorage
+      localStorage.removeItem('studentToken')
+      
       // Clear the student query cache
       queryClient.setQueryData(['current-student'], null)
       queryClient.invalidateQueries({ queryKey: ['current-student'] })

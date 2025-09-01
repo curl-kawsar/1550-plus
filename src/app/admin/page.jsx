@@ -9,6 +9,7 @@ import ContactMessages from '@/components/admin/ContactMessages'
 import EnrollmentTracking from '@/components/admin/EnrollmentTracking'
 import DiagnosticTracking from '@/components/admin/DiagnosticTracking'
 import MaintenanceToggle from '@/components/admin/MaintenanceToggle'
+import AdminChat from '@/components/admin/AdminChat'
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('overview')
@@ -90,6 +91,18 @@ export default function AdminDashboard() {
               </p>
             </div>
             <StudentTable />
+          </div>
+        )}
+
+        {activeTab === 'chat' && (
+          <div>
+            <div className="mb-8">
+              <h2 className="text-3xl font-bold text-gray-900">Student Messages</h2>
+              <p className="mt-2 text-gray-600">
+                Communicate with students through real-time chat messages.
+              </p>
+            </div>
+            <AdminChat />
           </div>
         )}
 

@@ -74,7 +74,8 @@ export async function POST(request) {
     
     return NextResponse.json({
       message: 'Login successful',
-      student: studentData
+      student: studentData,
+      token: token  // Include token for localStorage storage
     });
     
   } catch (error) {
