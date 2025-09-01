@@ -30,7 +30,7 @@ const Unlock = () => {
           {/*  */}
           {/* Uncomment and replace with your actual image */}
           <Image
-            src="/bar-chart.png" // replace with your actual image path
+            src="/left-image.png" // replace with your actual image path
             alt="SAT Score Chart"
             fill
             className="object-cover w-1/2 h-full"

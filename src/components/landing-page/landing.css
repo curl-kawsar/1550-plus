@@ -1,5 +1,5 @@
 .hero-image {
-  background-image: url('/heroimage.png');
+  background-image: url('/header.png');
   background-size: cover; /* makes it fill */
   background-position: top right; /* keeps it centered */
   background-repeat: no-repeat; /* no tiling */
