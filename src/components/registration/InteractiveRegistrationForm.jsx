@@ -225,7 +225,7 @@ const InteractiveRegistrationForm = () => {
               <div>
                 <Label className="text-sm font-medium text-gray-700">Email *</Label>
                 <div className="mt-2">
-                  {renderInputField('email', 'collegemastermind@gmail.com', 'email')}
+                  {renderInputField('email', '1550plus@1550plus.com', 'email')}
                 </div>
               </div>
 
@@ -254,15 +254,38 @@ const InteractiveRegistrationForm = () => {
                 <Label className="text-sm font-medium text-gray-700">Phone Number *</Label>
                 <div className="relative mt-2">
                   <div className="relative">
-                    {renderInputField('phoneNumber', 'XXXXXXXXXXXX', 'tel')}
+                    <Input
+                      type="tel"
+                      placeholder="(555) 123-4567"
+                      value={formData.phoneNumber}
+                      onChange={(e) => {
+                        // Format phone number as user types
+                        let value = e.target.value.replace(/\D/g, ''); // Remove non-digits
+                        if (value.length <= 3) {
+                          value = value;
+                        } else if (value.length <= 6) {
+                          value = `(${value.slice(0, 3)}) ${value.slice(3)}`;
+                        } else {
+                          value = `(${value.slice(0, 3)}) ${value.slice(3, 6)}-${value.slice(6, 10)}`;
+                        }
+                        handleInputChange('phoneNumber', value);
+                      }}
+                      className={`border-[#457BF5] pr-10 transition-all duration-200 ${
+                        getFieldStatus('phoneNumber') === 'error' ? 'border-red-500 bg-red-50' :
+                        getFieldStatus('phoneNumber') === 'success' ? 'border-green-500 bg-green-50' : ''
+                      }`}
+                      required={true}
+                      maxLength={14}
+                    />
                     <div className="absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                      <span className="text-gray-500">🇺🇸</span>
+                      {/* <span className="text-gray-500">🇺🇸</span> */}
                     </div>
-                    <style jsx>{`
-                      input[type="tel"] {
-                        padding-left: 3rem;
-                      }
-                    `}</style>
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                      {getFieldIcon('phoneNumber')}
+                    </div>
+                    {fieldErrors['phoneNumber'] && touchedFields['phoneNumber'] && (
+                      <p className="text-xs text-red-500 mt-1">{fieldErrors['phoneNumber']}</p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -364,10 +387,38 @@ const InteractiveRegistrationForm = () => {
                 <Label className="text-sm font-medium text-gray-700">Phone Number *</Label>
                 <div className="relative mt-2">
                   <div className="relative">
-                    {renderInputField('parentPhoneNumber', 'XXXXXXXXXXXX', 'tel')}
+                    <Input
+                      type="tel"
+                      placeholder="(555) 123-4567"
+                      value={formData.parentPhoneNumber}
+                      onChange={(e) => {
+                        // Format phone number as user types
+                        let value = e.target.value.replace(/\D/g, ''); // Remove non-digits
+                        if (value.length <= 3) {
+                          value = value;
+                        } else if (value.length <= 6) {
+                          value = `(${value.slice(0, 3)}) ${value.slice(3)}`;
+                        } else {
+                          value = `(${value.slice(0, 3)}) ${value.slice(3, 6)}-${value.slice(6, 10)}`;
+                        }
+                        handleInputChange('parentPhoneNumber', value);
+                      }}
+                      className={`border-[#457BF5] pr-10 transition-all duration-200 ${
+                        getFieldStatus('parentPhoneNumber') === 'error' ? 'border-red-500 bg-red-50' :
+                        getFieldStatus('parentPhoneNumber') === 'success' ? 'border-green-500 bg-green-50' : ''
+                      }`}
+                      required={true}
+                      maxLength={14}
+                    />
                     <div className="absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
                       <span className="text-gray-500">🇺🇸</span>
                     </div>
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                      {getFieldIcon('parentPhoneNumber')}
+                    </div>
+                    {fieldErrors['parentPhoneNumber'] && touchedFields['parentPhoneNumber'] && (
+                      <p className="text-xs text-red-500 mt-1">{fieldErrors['parentPhoneNumber']}</p>
+                    )}
                   </div>
                 </div>
               </div>

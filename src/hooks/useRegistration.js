@@ -2,16 +2,21 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
 const submitRegistration = async (formData) => {
+  // Clean phone numbers for backend storage
+  const cleanFormData = {
+    ...formData,
+    phoneNumber: formData.phoneNumber?.replace(/\D/g, ''), // Remove formatting, keep only digits
+    parentPhoneNumber: formData.parentPhoneNumber?.replace(/\D/g, ''), // Remove formatting, keep only digits
+    graduationYear: new Date(formData.graduationYear),
+    currentGPA: parseFloat(formData.currentGPA)
+  }
+
   const response = await fetch('/api/students', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      ...formData,
-      graduationYear: new Date(formData.graduationYear),
-      currentGPA: parseFloat(formData.currentGPA)
-    })
+    body: JSON.stringify(cleanFormData)
   })
 
   const data = await response.json()
@@ -52,6 +57,9 @@ export const validateStep = (step, formData) => {
       if (!formData.graduationYear) errors.push("Graduation year is required")
       if (!formData.highSchoolName?.trim()) errors.push("High school name is required")
       if (!formData.phoneNumber?.trim()) errors.push("Phone number is required")
+      if (formData.phoneNumber && !/^\(\d{3}\) \d{3}-\d{4}$/.test(formData.phoneNumber)) {
+        errors.push("Phone number must be in format (555) 123-4567")
+      }
       if (!formData.currentGPA) errors.push("Current GPA is required")
       if (formData.currentGPA && (parseFloat(formData.currentGPA) < 0 || parseFloat(formData.currentGPA) > 4)) {
         errors.push("GPA must be between 0.0 and 4.0")
@@ -70,6 +78,9 @@ export const validateStep = (step, formData) => {
       if (!formData.parentEmail?.trim()) errors.push("Parent email is required")
       if (formData.parentEmail && !formData.parentEmail.includes('@')) errors.push("Valid parent email is required")
       if (!formData.parentPhoneNumber?.trim()) errors.push("Parent phone number is required")
+      if (formData.parentPhoneNumber && !/^\(\d{3}\) \d{3}-\d{4}$/.test(formData.parentPhoneNumber)) {
+        errors.push("Parent phone number must be in format (555) 123-4567")
+      }
       if (!formData.state?.trim()) errors.push("State is required")
       break
       

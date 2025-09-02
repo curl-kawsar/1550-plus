@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Eye, Search, Filter, Download, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Eye, Search, Filter, Download, ChevronLeft, ChevronRight, Edit2, Save, X } from 'lucide-react'
 import { toast } from "sonner"
 
 const StudentTable = () => {
@@ -22,6 +22,11 @@ const StudentTable = () => {
     diagnosticTest: ''
   })
   const [selectedStudent, setSelectedStudent] = useState(null)
+  const [editingStudent, setEditingStudent] = useState(null)
+  const [editForm, setEditForm] = useState({
+    classTime: '',
+    diagnosticTestDate: ''
+  })
 
   useEffect(() => {
     fetchStudents()
@@ -130,6 +135,64 @@ const StudentTable = () => {
       </Badge>
     )
   }
+
+  const handleEditStart = (student) => {
+    setEditingStudent(student._id)
+    setEditForm({
+      classTime: student.classTime || '',
+      diagnosticTestDate: student.diagnosticTestDate || ''
+    })
+  }
+
+  const handleEditCancel = () => {
+    setEditingStudent(null)
+    setEditForm({
+      classTime: '',
+      diagnosticTestDate: ''
+    })
+  }
+
+  const handleEditSave = async (studentId) => {
+    try {
+      const response = await fetch(`/api/students/${studentId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(editForm)
+      })
+
+      if (response.ok) {
+        toast.success('Student updated successfully')
+        setEditingStudent(null)
+        setEditForm({
+          classTime: '',
+          diagnosticTestDate: ''
+        })
+        // Refresh the students list
+        fetchStudents()
+      } else {
+        const data = await response.json()
+        toast.error(data.error || 'Failed to update student')
+      }
+    } catch (error) {
+      console.error('Error updating student:', error)
+      toast.error('Failed to update student')
+    }
+  }
+
+  const classTimeOptions = [
+    'Mon & Wed - 4:00 PM Pacific',
+    'Mon & Wed - 7:00 PM Pacific',
+    'Tue & Thu - 4:00 PM Pacific',
+    'Tue & Thu - 7:00 PM Pacific'
+  ]
+
+  const diagnosticTestOptions = [
+    'Saturday September 27th 8:30am - noon PST',
+    'Sunday September 28th 8:30am - noon PST',
+    'I can\'t make either of these dates (reply below with if neither option works for you)'
+  ]
 
   const StudentDetailModal = ({ student, onClose, onStatusUpdate }) => {
     if (!student) return null
@@ -401,47 +464,79 @@ const StudentTable = () => {
                       </td>
                       <td className="p-4">
                         <div>
-                          <div className="text-sm font-medium">{student.classTime || 'N/A'}</div>
+                          {editingStudent === student._id ? (
+                            <select
+                              value={editForm.classTime}
+                              onChange={(e) => setEditForm({...editForm, classTime: e.target.value})}
+                              className="text-sm border rounded px-2 py-1 w-full max-w-xs"
+                            >
+                              <option value="">Select Class Time</option>
+                              {classTimeOptions.map((option) => (
+                                <option key={option} value={option}>
+                                  {option}
+                                </option>
+                              ))}
+                            </select>
+                          ) : (
+                            <div className="text-sm font-medium">{student.classTime || 'N/A'}</div>
+                          )}
                         </div>
                       </td>
                       <td className="p-4">
                         <div>
-                          {student.diagnosticTestDate ? (
-                            student.diagnosticTestDate.includes('Saturday') ? (
-                              <div className="flex items-center space-x-2">
-                                <Badge className="bg-green-100 text-green-800 border-green-200">
-                                  Saturday
-                                </Badge>
-                                <div>
-                                  <div className="text-xs text-gray-500">Sept 27</div>
-                                  <div className="text-xs text-gray-500">8:30am</div>
-                                </div>
-                              </div>
-                            ) : student.diagnosticTestDate.includes('Sunday') ? (
-                              <div className="flex items-center space-x-2">
-                                <Badge className="bg-blue-100 text-blue-800 border-blue-200">
-                                  Sunday
-                                </Badge>
-                                <div>
-                                  <div className="text-xs text-gray-500">Sept 28</div>
-                                  <div className="text-xs text-gray-500">8:30am</div>
-                                </div>
-                              </div>
-                            ) : (
-                              <div className="flex items-center space-x-2">
-                                <Badge className="bg-orange-100 text-orange-800 border-orange-200">
-                                  Cannot Attend
-                                </Badge>
-                                <div>
-                                  <div className="text-xs text-orange-600">Follow-up</div>
-                                  <div className="text-xs text-orange-600">needed</div>
-                                </div>
-                              </div>
-                            )
+                          {editingStudent === student._id ? (
+                            <select
+                              value={editForm.diagnosticTestDate}
+                              onChange={(e) => setEditForm({...editForm, diagnosticTestDate: e.target.value})}
+                              className="text-sm border rounded px-2 py-1 w-full max-w-xs"
+                            >
+                              <option value="">Select Diagnostic Test</option>
+                              {diagnosticTestOptions.map((option) => (
+                                <option key={option} value={option}>
+                                  {option}
+                                </option>
+                              ))}
+                            </select>
                           ) : (
-                            <Badge className="bg-gray-100 text-gray-600 border-gray-200">
-                              Not Set
-                            </Badge>
+                            <>
+                              {student.diagnosticTestDate ? (
+                                student.diagnosticTestDate.includes('Saturday') ? (
+                                  <div className="flex items-center space-x-2">
+                                    <Badge className="bg-green-100 text-green-800 border-green-200">
+                                      Saturday
+                                    </Badge>
+                                    <div>
+                                      <div className="text-xs text-gray-500">Sept 27</div>
+                                      <div className="text-xs text-gray-500">8:30am</div>
+                                    </div>
+                                  </div>
+                                ) : student.diagnosticTestDate.includes('Sunday') ? (
+                                  <div className="flex items-center space-x-2">
+                                    <Badge className="bg-blue-100 text-blue-800 border-blue-200">
+                                      Sunday
+                                    </Badge>
+                                    <div>
+                                      <div className="text-xs text-gray-500">Sept 28</div>
+                                      <div className="text-xs text-gray-500">8:30am</div>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div className="flex items-center space-x-2">
+                                    <Badge className="bg-orange-100 text-orange-800 border-orange-200">
+                                      Cannot Attend
+                                    </Badge>
+                                    <div>
+                                      <div className="text-xs text-orange-600">Follow-up</div>
+                                      <div className="text-xs text-orange-600">needed</div>
+                                    </div>
+                                  </div>
+                                )
+                              ) : (
+                                <Badge className="bg-gray-100 text-gray-600 border-gray-200">
+                                  Not Set
+                                </Badge>
+                              )}
+                            </>
                           )}
                         </div>
                       </td>
@@ -454,14 +549,46 @@ const StudentTable = () => {
                         </div>
                       </td>
                       <td className="p-4">
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => setSelectedStudent(student)}
-                        >
-                          <Eye className="w-4 h-4 mr-1" />
-                          View
-                        </Button>
+                        <div className="flex space-x-2">
+                          {editingStudent === student._id ? (
+                            <>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => handleEditSave(student._id)}
+                                className="text-green-600 border-green-600 hover:bg-green-50"
+                              >
+                                <Save className="w-4 h-4" />
+                              </Button>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={handleEditCancel}
+                                className="text-red-600 border-red-600 hover:bg-red-50"
+                              >
+                                <X className="w-4 h-4" />
+                              </Button>
+                            </>
+                          ) : (
+                            <>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => handleEditStart(student)}
+                                className="text-blue-600 border-blue-600 hover:bg-blue-50"
+                              >
+                                <Edit2 className="w-4 h-4" />
+                              </Button>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => setSelectedStudent(student)}
+                              >
+                                <Eye className="w-4 h-4" />
+                              </Button>
+                            </>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}
