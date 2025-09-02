@@ -379,7 +379,7 @@ const InteractiveRegistrationForm = () => {
               <div>
                 <Label className="text-sm font-medium text-gray-700">Email *</Label>
                 <div className="mt-2">
-                  {renderInputField('parentEmail', 'collegemastermind@gmail.com', 'email')}
+                  {renderInputField('parentEmail', '1550plus@1550plus.com', 'email')}
                 </div>
               </div>
 
@@ -411,7 +411,7 @@ const InteractiveRegistrationForm = () => {
                       maxLength={14}
                     />
                     <div className="absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                      <span className="text-gray-500">🇺🇸</span>
+                      {/* <span className="text-gray-500">🇺🇸</span> */}
                     </div>
                     <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
                       {getFieldIcon('parentPhoneNumber')}
