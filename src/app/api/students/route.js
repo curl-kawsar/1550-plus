@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/mongodb';
 import Student from '@/models/Student';
+import Ambassador from '@/models/Ambassador';
 import bcrypt from 'bcryptjs';
 import { sendParentalConfirmationEmail } from '@/lib/emailService';
 
@@ -36,14 +37,31 @@ export async function POST(request) {
       );
     }
     
+    // Check if registration code belongs to an ambassador
+    let assignedAmbassador = null;
+    if (body.registrationCode) {
+      const ambassador = await Ambassador.findOne({ 
+        ambassadorCode: body.registrationCode.toUpperCase(),
+        isActive: true 
+      });
+      
+      if (ambassador) {
+        assignedAmbassador = ambassador._id;
+        console.log('Student will be assigned to ambassador:', ambassador.firstName, ambassador.lastName);
+      } else {
+        console.log('Registration code does not match any active ambassador:', body.registrationCode);
+      }
+    }
+    
     // Hash password
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(body.password, saltRounds);
     
-    // Create new student with hashed password
+    // Create new student with hashed password and ambassador assignment
     const studentData = {
       ...body,
-      password: hashedPassword
+      password: hashedPassword,
+      ambassador: assignedAmbassador
     };
     
     console.log('Creating student with data:', {
@@ -61,6 +79,20 @@ export async function POST(request) {
       hasPassword: !!student.password,
       passwordLength: student.password ? student.password.length : 0
     });
+
+    // Update ambassador student count if assigned
+    if (assignedAmbassador) {
+      try {
+        const ambassador = await Ambassador.findById(assignedAmbassador);
+        if (ambassador) {
+          await ambassador.updateStudentCount();
+          console.log('Updated ambassador student count for:', ambassador.firstName, ambassador.lastName);
+        }
+      } catch (ambassadorError) {
+        console.error('Error updating ambassador student count:', ambassadorError);
+        // Note: We don't fail the registration if this fails
+      }
+    }
 
     // Send parental confirmation email
     try {

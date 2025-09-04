@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/mongodb';
 import Student from '@/models/Student';
+import Ambassador from '@/models/Ambassador';
 
 export async function GET() {
   try {
@@ -85,6 +86,45 @@ export async function GET() {
       }
     ]);
     
+    // Get ambassador statistics
+    const totalAmbassadors = await Ambassador.countDocuments();
+    const activeAmbassadors = await Ambassador.countDocuments({ isActive: true });
+    
+    // Get students by ambassador
+    const studentsByAmbassador = await Student.aggregate([
+      {
+        $match: { ambassador: { $ne: null } }
+      },
+      {
+        $lookup: {
+          from: 'ambassadors',
+          localField: 'ambassador',
+          foreignField: '_id',
+          as: 'ambassadorInfo'
+        }
+      },
+      {
+        $unwind: '$ambassadorInfo'
+      },
+      {
+        $group: {
+          _id: '$ambassador',
+          ambassadorName: { $first: { $concat: ['$ambassadorInfo.firstName', ' ', '$ambassadorInfo.lastName'] } },
+          ambassadorCode: { $first: '$ambassadorInfo.ambassadorCode' },
+          studentCount: { $sum: 1 }
+        }
+      },
+      {
+        $sort: { studentCount: -1 }
+      },
+      {
+        $limit: 10
+      }
+    ]);
+    
+    const studentsWithAmbassadors = await Student.countDocuments({ ambassador: { $ne: null } });
+    const studentsWithoutAmbassadors = totalStudents - studentsWithAmbassadors;
+    
     // Format status counts
     const statusData = {
       pending: 0,
@@ -103,7 +143,14 @@ export async function GET() {
       registrationsByDay,
       universityPreferences,
       classRigorDistribution,
-      gpaStats: gpaStats[0] || { averageGPA: 0, minGPA: 0, maxGPA: 0 }
+      gpaStats: gpaStats[0] || { averageGPA: 0, minGPA: 0, maxGPA: 0 },
+      ambassadorStats: {
+        totalAmbassadors,
+        activeAmbassadors,
+        studentsWithAmbassadors,
+        studentsWithoutAmbassadors,
+        topAmbassadors: studentsByAmbassador
+      }
     });
     
   } catch (error) {

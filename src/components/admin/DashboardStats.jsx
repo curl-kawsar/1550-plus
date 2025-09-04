@@ -47,7 +47,7 @@ const DashboardStats = () => {
   return (
     <div className="space-y-6">
       {/* Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Students</CardTitle>
@@ -56,6 +56,19 @@ const DashboardStats = () => {
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalStudents}</div>
             <p className="text-xs text-muted-foreground">All time registrations</p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Ambassadors</CardTitle>
+            <div className="h-4 w-4 text-muted-foreground">🤝</div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.ambassadorStats?.totalAmbassadors || 0}</div>
+            <p className="text-xs text-muted-foreground">
+              {stats.ambassadorStats?.activeAmbassadors || 0} active
+            </p>
           </CardContent>
         </Card>
 
@@ -207,6 +220,51 @@ const DashboardStats = () => {
             </ResponsiveContainer>
           </CardContent>
         </Card>
+
+        {/* Ambassador Performance */}
+        {stats.ambassadorStats && stats.ambassadorStats.topAmbassadors && stats.ambassadorStats.topAmbassadors.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Top Ambassadors</CardTitle>
+              <CardDescription>Ambassadors by student count</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={stats.ambassadorStats.topAmbassadors}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis 
+                    dataKey="ambassadorCode"
+                    tick={{ fontSize: 12 }}
+                  />
+                  <YAxis />
+                  <Tooltip 
+                    labelFormatter={(label) => `Ambassador: ${label}`}
+                    formatter={(value, name, props) => [
+                      value, 
+                      'Students',
+                      props.payload?.ambassadorName ? `Name: ${props.payload.ambassadorName}` : ''
+                    ]}
+                  />
+                  <Bar dataKey="studentCount" fill="#6366F1" />
+                </BarChart>
+              </ResponsiveContainer>
+              
+              {/* Ambassador Assignment Summary */}
+              <div className="mt-4 pt-4 border-t">
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="text-gray-600">Students with Ambassadors:</span>
+                    <span className="ml-2 font-semibold">{stats.ambassadorStats.studentsWithAmbassadors}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-600">Students without Ambassadors:</span>
+                    <span className="ml-2 font-semibold">{stats.ambassadorStats.studentsWithoutAmbassadors}</span>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   )

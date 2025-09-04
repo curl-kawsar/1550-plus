@@ -126,6 +126,12 @@ const StudentSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
+  // Ambassador Assignment
+  ambassador: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Ambassador',
+    default: null
+  },
   
   // Class Schedule Information
   classTime: {

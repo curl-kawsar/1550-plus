@@ -10,6 +10,7 @@ import EnrollmentTracking from '@/components/admin/EnrollmentTracking'
 import DiagnosticTracking from '@/components/admin/DiagnosticTracking'
 import MaintenanceToggle from '@/components/admin/MaintenanceToggle'
 import AdminChat from '@/components/admin/AdminChat'
+import AmbassadorManagement from '@/components/admin/AmbassadorManagement'
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('overview')
@@ -91,6 +92,12 @@ export default function AdminDashboard() {
               </p>
             </div>
             <StudentTable />
+          </div>
+        )}
+
+        {activeTab === 'ambassadors' && (
+          <div>
+            <AmbassadorManagement />
           </div>
         )}
 
