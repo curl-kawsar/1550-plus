@@ -11,6 +11,7 @@ import { Progress } from "@/components/ui/progress"
 import { CheckCircle2, AlertCircle, Zap, Star } from "lucide-react"
 import { useSubmitRegistration, validateStep, getStepProgress } from "@/hooks/useRegistration"
 import { useEnrollmentCounts } from "@/hooks/useEnrollment"
+import { useEmailValidation } from "@/hooks/useEmailValidation"
 import { toast } from "sonner"
 
 
@@ -31,6 +32,11 @@ const InteractiveRegistrationForm = () => {
   const [currentStep, setCurrentStep] = useState(1)
   const [fieldErrors, setFieldErrors] = useState({})
   const [touchedFields, setTouchedFields] = useState({})
+  const [emailValidationState, setEmailValidationState] = useState({
+    isValidating: false,
+    exists: false,
+    message: ''
+  })
   const [formData, setFormData] = useState({
     // Student Information
     firstName: "", lastName: "", email: "", graduationYear: "",
@@ -53,10 +59,58 @@ const InteractiveRegistrationForm = () => {
   })
 
   const submitMutation = useSubmitRegistration()
+  const emailValidationMutation = useEmailValidation()
   const totalSteps = 6
 
   // Get real-time enrollment data
   const { data: enrollmentData, isLoading: isLoadingEnrollment, error: enrollmentError } = useEnrollmentCounts()
+
+  // Email validation effect with debouncing
+  useEffect(() => {
+    const validateEmailExists = async () => {
+      if (formData.email && formData.email.length > 5 && formData.email.includes('@') && touchedFields.email) {
+        setEmailValidationState(prev => ({ ...prev, isValidating: true }))
+        
+        try {
+          const result = await emailValidationMutation.mutateAsync(formData.email)
+          setEmailValidationState({
+            isValidating: false,
+            exists: result.exists,
+            message: result.message
+          })
+          
+          if (result.exists) {
+            setFieldErrors(prev => ({ ...prev, email: 'This email is already registered. Please use a different email or log in.' }))
+          } else {
+            // Remove email error if it was about duplicate email
+            setFieldErrors(prev => {
+              const newErrors = { ...prev }
+              if (newErrors.email && newErrors.email.includes('already registered')) {
+                delete newErrors.email
+              }
+              return newErrors
+            })
+          }
+        } catch (error) {
+          setEmailValidationState({
+            isValidating: false,
+            exists: false,
+            message: 'Unable to validate email'
+          })
+        }
+      } else {
+        setEmailValidationState({
+          isValidating: false,
+          exists: false,
+          message: ''
+        })
+      }
+    }
+
+    // Debounce email validation
+    const timeoutId = setTimeout(validateEmailExists, 800)
+    return () => clearTimeout(timeoutId)
+  }, [formData.email, touchedFields.email])
 
   // Real-time validation
   useEffect(() => {
@@ -84,6 +138,11 @@ const InteractiveRegistrationForm = () => {
       if (field) stepErrors[field] = error
     })
     
+    // Don't override email error if it's about duplicate email
+    if (!stepErrors.email && fieldErrors.email && fieldErrors.email.includes('already registered')) {
+      stepErrors.email = fieldErrors.email
+    }
+    
     setFieldErrors(stepErrors)
   }, [formData, currentStep])
 
@@ -96,6 +155,12 @@ const InteractiveRegistrationForm = () => {
     const errors = validateStep(currentStep, formData)
     if (errors.length > 0) {
       errors.forEach(error => toast.error(error))
+      return
+    }
+    
+    // Check for email validation in step 1
+    if (currentStep === 1 && emailValidationState.exists) {
+      toast.error('Please use a different email address. This email is already registered.')
       return
     }
     
@@ -115,6 +180,13 @@ const InteractiveRegistrationForm = () => {
     const errors = validateStep(currentStep, formData)
     if (errors.length > 0) {
       errors.forEach(error => toast.error(error))
+      return
+    }
+
+    // Final check for email validation
+    if (emailValidationState.exists) {
+      toast.error('Cannot submit registration. This email is already registered.')
+      setCurrentStep(1) // Go back to step 1 to fix email
       return
     }
 
@@ -155,6 +227,15 @@ const InteractiveRegistrationForm = () => {
   }
 
   const getFieldStatus = (field) => {
+    // Special handling for email field
+    if (field === 'email') {
+      if (emailValidationState.isValidating) return 'validating'
+      if (emailValidationState.exists) return 'error'
+      if (fieldErrors[field] && touchedFields[field]) return 'error'
+      if (formData[field] && !fieldErrors[field] && !emailValidationState.exists && touchedFields[field]) return 'success'
+      return 'default'
+    }
+    
     if (fieldErrors[field] && touchedFields[field]) return 'error'
     if (formData[field] && !fieldErrors[field]) return 'success'
     return 'default'
@@ -162,6 +243,7 @@ const InteractiveRegistrationForm = () => {
 
   const getFieldIcon = (field) => {
     const status = getFieldStatus(field)
+    if (status === 'validating') return <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
     if (status === 'success') return <CheckCircle2 className="w-4 h-4 text-green-500" />
     if (status === 'error') return <AlertCircle className="w-4 h-4 text-red-500" />
     return null
@@ -179,7 +261,8 @@ const InteractiveRegistrationForm = () => {
         onChange={(e) => handleInputChange(field, e.target.value)}
         className={`border-[#457BF5] pr-10 transition-all duration-200 ${
           getFieldStatus(field) === 'error' ? 'border-red-500 bg-red-50' :
-          getFieldStatus(field) === 'success' ? 'border-green-500 bg-green-50' : ''
+          getFieldStatus(field) === 'success' ? 'border-green-500 bg-green-50' :
+          getFieldStatus(field) === 'validating' ? 'border-blue-500 bg-blue-50' : ''
         }`}
         required={required}
       />
@@ -188,6 +271,24 @@ const InteractiveRegistrationForm = () => {
       </div>
       {fieldErrors[field] && touchedFields[field] && (
         <p className="text-xs text-red-500 mt-1">{fieldErrors[field]}</p>
+      )}
+      {field === 'email' && emailValidationState.isValidating && (
+        <p className="text-xs text-blue-500 mt-1">Checking if email is available...</p>
+      )}
+      {field === 'email' && !emailValidationState.isValidating && !emailValidationState.exists && emailValidationState.message && touchedFields[field] && (
+        <p className="text-xs text-green-500 mt-1">✓ Email is available</p>
+      )}
+      {field === 'email' && emailValidationState.exists && touchedFields[field] && (
+        <div className="text-xs text-red-500 mt-1">
+          This email is already registered. 
+          <button 
+            type="button"
+            onClick={() => router.push('/student-login')}
+            className="ml-1 text-blue-600 hover:text-blue-800 underline"
+          >
+            Log in instead
+          </button>
+        </div>
       )}
     </div>
   )
