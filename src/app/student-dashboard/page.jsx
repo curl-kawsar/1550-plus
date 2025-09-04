@@ -3,12 +3,14 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useStudentAuth, useStudentLogout } from '@/hooks/useStudentAuth'
+import { useQueryClient } from '@tanstack/react-query'
 import StudentDashboard from '@/components/student/StudentDashboard'
 
 export default function StudentDashboardPage() {
   const router = useRouter()
   const { student, isAuthenticated, isLoading } = useStudentAuth()
   const logoutMutation = useStudentLogout()
+  const queryClient = useQueryClient()
 
   useEffect(() => {
     // If not authenticated, redirect to login
@@ -23,6 +25,11 @@ export default function StudentDashboardPage() {
         router.push('/student-login')
       }
     })
+  }
+
+  const handleRefreshStudent = async () => {
+    // Invalidate and refetch the current student data
+    await queryClient.invalidateQueries({ queryKey: ['current-student'] })
   }
 
   if (isLoading) {
@@ -42,7 +49,11 @@ export default function StudentDashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <StudentDashboard student={student} onLogout={handleLogout} />
+      <StudentDashboard 
+        student={student} 
+        onLogout={handleLogout} 
+        onRefreshStudent={handleRefreshStudent}
+      />
     </div>
   )
 }

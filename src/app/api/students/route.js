@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/mongodb';
 import Student from '@/models/Student';
 import bcrypt from 'bcryptjs';
+import { sendParentalConfirmationEmail } from '@/lib/emailService';
 
 export async function POST(request) {
   try {
@@ -60,10 +61,31 @@ export async function POST(request) {
       hasPassword: !!student.password,
       passwordLength: student.password ? student.password.length : 0
     });
+
+    // Send parental confirmation email
+    try {
+      const emailResult = await sendParentalConfirmationEmail(student);
+      
+      if (emailResult.success) {
+        // Update student with approval token
+        await Student.findByIdAndUpdate(student._id, {
+          parentalApprovalToken: emailResult.approvalToken,
+          parentalApprovalEmailSent: true
+        });
+        
+        console.log('Parental confirmation email sent successfully:', emailResult.messageId);
+      } else {
+        console.error('Failed to send parental confirmation email:', emailResult.error);
+        // Note: We don't fail the registration if email fails
+      }
+    } catch (emailError) {
+      console.error('Error sending parental confirmation email:', emailError);
+      // Note: We don't fail the registration if email fails
+    }
     
     return NextResponse.json(
       { 
-        message: 'Student registration submitted successfully',
+        message: 'Student registration submitted successfully. A parental confirmation email has been sent.',
         studentId: student._id 
       },
       { status: 201 }

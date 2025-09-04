@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import StudentChatTab from '@/components/student/StudentChatTab'
+import ScheduleManager from '@/components/student/ScheduleManager'
+import ParentalApprovalModal from '@/components/student/ParentalApprovalModal'
 import { useChatMessages } from '@/hooks/useChat'
 import { 
   User, 
@@ -23,8 +25,11 @@ import {
   MessageSquare
 } from 'lucide-react'
 
-export default function StudentDashboard({ student, onLogout }) {
+export default function StudentDashboard({ student, onLogout, onRefreshStudent }) {
   const [activeTab, setActiveTab] = useState('overview')
+  
+  // Check if parental approval is required
+  const needsParentalApproval = student?.parentalApprovalStatus !== 'approved'
 
   // Chat Tab Button with notification badge
   const ChatTabButton = ({ student, isActive, onClick, icon: Icon, label }) => {
@@ -246,60 +251,69 @@ export default function StudentDashboard({ student, onLogout }) {
         )}
 
         {activeTab === 'schedule' && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Clock className="h-5 w-5" />
-                  Class Schedule
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium text-gray-700">Selected Time Slot</label>
-                  <p className="text-lg font-semibold text-[#457BF5] mt-1">
-                    {student.classTime || 'Not yet assigned'}
-                  </p>
-                </div>
-                {student.classTime && (
-                  <div className="bg-blue-50 p-4 rounded-lg">
-                    <h4 className="font-medium text-blue-900 mb-2">Class Details</h4>
-                    <ul className="text-sm text-blue-800 space-y-1">
-                      <li>• Duration: 2 hours per session</li>
-                      <li>• Format: Live interactive sessions</li>
-                      <li>• Materials: Provided digitally</li>
-                    </ul>
+          <div className="space-y-6">
+            {/* Current Schedule Overview */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Clock className="h-5 w-5" />
+                    Class Schedule
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">Selected Time Slot</label>
+                    <p className="text-lg font-semibold text-[#457BF5] mt-1">
+                      {student.classTime || 'Not yet assigned'}
+                    </p>
                   </div>
-                )}
-              </CardContent>
-            </Card>
+                  {student.classTime && (
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                      <h4 className="font-medium text-blue-900 mb-2">Class Details</h4>
+                      <ul className="text-sm text-blue-800 space-y-1">
+                        <li>• Duration: 2 hours per session</li>
+                        <li>• Format: Live interactive sessions</li>
+                        <li>• Materials: Provided digitally</li>
+                      </ul>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Target className="h-5 w-5" />
-                  Diagnostic Test
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium text-gray-700">Test Date</label>
-                  <p className="text-lg font-semibold text-green-600 mt-1">
-                    {student.diagnosticTestDate || 'Not scheduled'}
-                  </p>
-                </div>
-                {student.diagnosticTestDate && (
-                  <div className="bg-green-50 p-4 rounded-lg">
-                    <h4 className="font-medium text-green-900 mb-2">Test Information</h4>
-                    <ul className="text-sm text-green-800 space-y-1">
-                      <li>• Duration: 3.5 hours</li>
-                      <li>• Format: Full SAT practice test</li>
-                      <li>• Results: Available within 48 hours</li>
-                    </ul>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Target className="h-5 w-5" />
+                    Diagnostic Test
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">Test Date</label>
+                    <p className="text-lg font-semibold text-green-600 mt-1">
+                      {student.diagnosticTestDate || 'Not scheduled'}
+                    </p>
                   </div>
-                )}
-              </CardContent>
-            </Card>
+                  {student.diagnosticTestDate && (
+                    <div className="bg-green-50 p-4 rounded-lg">
+                      <h4 className="font-medium text-green-900 mb-2">Test Information</h4>
+                      <ul className="text-sm text-green-800 space-y-1">
+                        <li>• Duration: 3.5 hours</li>
+                        <li>• Format: Full SAT practice test</li>
+                        <li>• Results: Available within 48 hours</li>
+                      </ul>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Schedule Manager Component */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Manage Your Schedule</h3>
+              <ScheduleManager />
+            </div>
           </div>
         )}
 
@@ -438,6 +452,20 @@ export default function StudentDashboard({ student, onLogout }) {
           </div>
         )}
       </div>
+
+      {/* Parental Approval Modal - shows when approval is needed */}
+      {needsParentalApproval && (
+        <ParentalApprovalModal 
+          student={student} 
+          onRefresh={onRefreshStudent}
+        />
+      )}
+
+      {/* Access Restriction Overlay - dims content when approval is pending */}
+      {needsParentalApproval && (
+        <div className="fixed inset-0 bg-white bg-opacity-75 z-40 pointer-events-none" 
+             style={{ backdropFilter: 'blur(2px)' }} />
+      )}
     </div>
   )
 }

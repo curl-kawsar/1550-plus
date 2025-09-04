@@ -6,8 +6,8 @@ const emailConfig = {
   port: parseInt(process.env.EMAIL_PORT) || 465,
   secure: true, // true for 465, false for other ports
   auth: {
-    user: process.env.EMAIL_USER || '1550plus@1550plus.com',
-    pass: process.env.EMAIL_PASS || 'd,$$1#13Nl?D'
+    user: process.env.EMAIL_USER || 'no-reply@1550plus.com',
+    pass: process.env.EMAIL_PASS || 'b|q2@21b*321'
   },
   tls: {
     rejectUnauthorized: false
@@ -364,6 +364,268 @@ Please respond to this inquiry as soon as possible.
     
   } catch (error) {
     console.error('Error sending admin notification email:', error);
+    return {
+      success: false,
+      error: error.message
+    };
+  }
+};
+
+// Parental confirmation email template
+const createParentalConfirmationEmailTemplate = (studentFirstName, studentLastName, parentFirstName, approvalToken) => {
+  const websiteUrl = process.env.NEXT_PUBLIC_WEBSITE_URL || 'https://1550plus.com';
+  const logoUrl = `${websiteUrl}/logo.png`;
+  const approvalUrl = `${websiteUrl}/api/approval/confirm?token=${approvalToken}`;
+  const declineUrl = `${websiteUrl}/api/approval/decline?token=${approvalToken}`;
+  
+  return {
+    subject: `Parental Consent Required - ${studentFirstName} ${studentLastName}'s Registration for 1550+ SAT Prep`,
+    html: `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Parental Consent Required - 1550+</title>
+        <style>
+          body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            background-color: #f9f9f9;
+            color: #333333;
+          }
+          .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            border: 1px solid #e5e5e5;
+          }
+          .header {
+            background-color: #113076;
+            color: white;
+            padding: 30px 40px;
+            text-align: center;
+          }
+          .logo {
+            max-width: 150px;
+            height: auto;
+            margin-bottom: 20px;
+          }
+          .content {
+            padding: 40px;
+          }
+          .student-info {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #113076;
+          }
+          .approval-section {
+            background-color: #e8f4fd;
+            padding: 25px;
+            border-radius: 8px;
+            margin: 25px 0;
+            text-align: center;
+          }
+          .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            margin: 10px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 16px;
+            text-align: center;
+            cursor: pointer;
+          }
+          .btn-approve {
+            background-color: #28a745;
+            color: white;
+          }
+          .btn-decline {
+            background-color: #dc3545;
+            color: white;
+          }
+          .btn:hover {
+            opacity: 0.9;
+          }
+          .footer {
+            background-color: #f8f9fa;
+            padding: 20px 40px;
+            border-top: 1px solid #e5e5e5;
+            font-size: 14px;
+            color: #666666;
+          }
+          .important-note {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 20px 0;
+          }
+          .program-details {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+          }
+          .detail-item {
+            margin: 8px 0;
+            padding-left: 15px;
+            position: relative;
+          }
+          .detail-item:before {
+            content: "•";
+            color: #113076;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <img src="${logoUrl}" alt="1550+ Logo" class="logo">
+            <h1 style="margin: 0; font-size: 24px;">Parental Consent Required</h1>
+          </div>
+          
+          <div class="content">
+            <p>Dear ${parentFirstName},</p>
+            
+            <p>Your child, <strong>${studentFirstName} ${studentLastName}</strong>, has registered for our 1550+ SAT Preparation Program. As the parent/guardian, your approval is required to complete the registration process.</p>
+            
+            <div class="student-info">
+              <h3 style="margin-top: 0; color: #113076;">Student Information</h3>
+              <p><strong>Name:</strong> ${studentFirstName} ${studentLastName}</p>
+              <p><strong>Registration Date:</strong> ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+            </div>
+
+            <div class="program-details">
+              <h3 style="margin-top: 0; color: #113076;">Program Overview</h3>
+              <div class="detail-item">6-week intensive SAT preparation program</div>
+              <div class="detail-item">12 live interactive lessons with expert instructors</div>
+              <div class="detail-item">Comprehensive diagnostic testing</div>
+              <div class="detail-item">Personalized study plans and progress tracking</div>
+              <div class="detail-item">Target: 1550+ SAT score (99th percentile)</div>
+              <div class="detail-item">Small class sizes for personalized attention</div>
+            </div>
+
+            <div class="important-note">
+              <p style="margin: 0;"><strong>Important:</strong> Your child will not be able to access their student dashboard or course materials until you provide parental consent.</p>
+            </div>
+
+            <div class="approval-section">
+              <h3 style="color: #113076; margin-top: 0;">Please Choose One Option</h3>
+              <p>Click one of the buttons below to confirm your decision:</p>
+              
+              <a href="${approvalUrl}" class="btn btn-approve">
+                ✓ APPROVE REGISTRATION
+              </a>
+              
+              <a href="${declineUrl}" class="btn btn-decline">
+                ✗ DECLINE REGISTRATION
+              </a>
+              
+              <p style="font-size: 14px; color: #666; margin-top: 20px;">
+                <em>Note: This action will immediately update your child's registration status.</em>
+              </p>
+            </div>
+
+            <p>If you have any questions about the program or need assistance, please don't hesitate to contact us:</p>
+            <ul>
+              <li>Email: support@1550plus.com</li>
+              <li>Phone: (555) 123-4567</li>
+              <li>Website: 1550plus.com</li>
+            </ul>
+
+            <p>Thank you for considering 1550+ for your child's SAT preparation. We look forward to helping ${studentFirstName} achieve their academic goals.</p>
+
+            <p>Best regards,<br>
+            <strong>The 1550+ Team</strong></p>
+          </div>
+          
+          <div class="footer">
+            <p style="margin: 0;">
+              <strong>1550+ SAT Preparation Program</strong><br>
+              Excellence in Education | Proven Results | Personalized Approach
+            </p>
+            <p style="margin: 10px 0 0 0; font-size: 12px;">
+              This email was sent to confirm parental consent for student registration.
+              If you did not expect this email, please contact us immediately.
+            </p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `,
+    text: `
+Dear ${parentFirstName},
+
+Your child, ${studentFirstName} ${studentLastName}, has registered for our 1550+ SAT Preparation Program. Parental approval is required to complete the registration.
+
+Program Overview:
+- 6-week intensive SAT preparation program
+- 12 live interactive lessons with expert instructors
+- Comprehensive diagnostic testing
+- Personalized study plans and progress tracking
+- Target: 1550+ SAT score (99th percentile)
+
+To approve the registration, visit: ${approvalUrl}
+To decline the registration, visit: ${declineUrl}
+
+Important: Your child cannot access their dashboard until you provide consent.
+
+Contact us:
+- Email: support@1550plus.com
+- Phone: (555) 123-4567
+- Website: 1550plus.com
+
+Best regards,
+The 1550+ Team
+    `
+  };
+};
+
+// Send parental confirmation email
+export const sendParentalConfirmationEmail = async (studentData) => {
+  try {
+    const transporter = createTransporter();
+    
+    // Generate unique approval token
+    const crypto = await import('crypto');
+    const approvalToken = crypto.randomBytes(32).toString('hex');
+    
+    const emailTemplate = createParentalConfirmationEmailTemplate(
+      studentData.firstName,
+      studentData.lastName,
+      studentData.parentFirstName,
+      approvalToken
+    );
+
+    const mailOptions = {
+      from: `"1550+ SAT Prep" <${emailConfig.auth.user}>`,
+      to: studentData.parentEmail,
+      subject: emailTemplate.subject,
+      html: emailTemplate.html,
+      text: emailTemplate.text
+    };
+
+    const result = await transporter.sendMail(mailOptions);
+    
+    console.log('Parental confirmation email sent successfully:', result.messageId);
+    
+    return {
+      success: true,
+      messageId: result.messageId,
+      approvalToken: approvalToken
+    };
+    
+  } catch (error) {
+    console.error('Error sending parental confirmation email:', error);
     return {
       success: false,
       error: error.message

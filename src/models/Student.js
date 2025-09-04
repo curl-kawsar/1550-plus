@@ -149,6 +149,55 @@ const StudentSchema = new mongoose.Schema({
     ],
     trim: true
   },
+  
+  // Schedule Change Tracking
+  classTimeChangeCount: {
+    type: Number,
+    default: 0,
+    min: 0,
+    max: 2
+  },
+  diagnosticTestChangeCount: {
+    type: Number,
+    default: 0,
+    min: 0,
+    max: 2
+  },
+  classTimeChangeHistory: [{
+    from: String,
+    to: String,
+    changedAt: {
+      type: Date,
+      default: Date.now
+    }
+  }],
+  diagnosticTestChangeHistory: [{
+    from: String,
+    to: String,
+    changedAt: {
+      type: Date,
+      default: Date.now
+    }
+  }],
+
+  // Parental Approval
+  parentalApprovalStatus: {
+    type: String,
+    enum: ['pending', 'approved', 'declined'],
+    default: 'pending'
+  },
+  parentalApprovalToken: {
+    type: String,
+    unique: true,
+    sparse: true // Allow multiple null values
+  },
+  parentalApprovedAt: {
+    type: Date
+  },
+  parentalApprovalEmailSent: {
+    type: Boolean,
+    default: false
+  },
 
   // Metadata
   submittedAt: {
