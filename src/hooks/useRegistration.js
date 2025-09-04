@@ -91,6 +91,8 @@ export const validateStep = (step, formData) => {
       
     case 4: // Additional Information
       if (!formData.typeOfStudent?.trim()) errors.push("Type of student is required")
+      if (!formData.biggestStressor?.trim()) errors.push("Biggest stressor about college admissions is required")
+      if (!formData.parentWorry?.trim()) errors.push("Parent biggest worries or concerns is required")
       if (!formData.registrationCode?.trim()) errors.push("Registration code is required")
       break
       
@@ -111,7 +113,7 @@ export const getStepProgress = (step, formData) => {
     1: 10, // firstName, lastName, email, gender, phoneNumber, graduationYear, highSchoolName, currentGPA, password, confirmPassword (topCollegeChoices is optional)
     2: 5, // parentFirstName, parentLastName, state, parentEmail, parentPhoneNumber  
     3: 3, // classRigor, universitiesWant, satActScores (optional)
-    4: 2, // typeOfStudent, registrationCode (biggestStressor & parentWorry are optional)
+    4: 4, // typeOfStudent, biggestStressor, parentWorry, registrationCode (all required now)
     5: 1, // classTime
     6: 1  // diagnosticTestDate
   }
@@ -130,8 +132,8 @@ export const getStepProgress = (step, formData) => {
       formData.classRigor, formData.universitiesWant
     ].filter(Boolean).length + (formData.satActScores ? 1 : 0),
     4: [
-      formData.typeOfStudent, formData.registrationCode
-    ].filter(Boolean).length + (formData.biggestStressor ? 1 : 0) + (formData.parentWorry ? 1 : 0),
+      formData.typeOfStudent, formData.biggestStressor, formData.parentWorry, formData.registrationCode
+    ].filter(Boolean).length,
     5: [
       formData.classTime
     ].filter(Boolean).length,

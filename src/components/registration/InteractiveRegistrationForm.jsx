@@ -658,29 +658,49 @@ const InteractiveRegistrationForm = () => {
 
               <div>
                 <Label className="text-sm font-medium text-gray-700">
-                  Biggest Stressor About College Admissions (Optional)
+                  Biggest Stressor About College Admissions*
                 </Label>
-                <div className="mt-2">
+                <div className="mt-2 relative">
                   <textarea
                     placeholder="Your answer here"
                     value={formData.biggestStressor}
                     onChange={(e) => handleInputChange('biggestStressor', e.target.value)}
-                    className="w-full p-3 border border-[#457BF5] rounded-md resize-none h-20 focus:outline-none focus:ring-2 focus:ring-[#457BF5] focus:border-[#457BF5]"
+                    className={`w-full p-3 border rounded-md resize-none h-20 focus:outline-none focus:ring-2 focus:ring-[#457BF5] focus:border-[#457BF5] transition-all duration-200 ${
+                      getFieldStatus('biggestStressor') === 'error' ? 'border-red-500 bg-red-50' :
+                      getFieldStatus('biggestStressor') === 'success' ? 'border-green-500 bg-green-50' : 'border-[#457BF5]'
+                    }`}
+                    required
                   />
+                  <div className="absolute right-3 top-3">
+                    {getFieldIcon('biggestStressor')}
+                  </div>
+                  {fieldErrors['biggestStressor'] && touchedFields['biggestStressor'] && (
+                    <p className="text-xs text-red-500 mt-1">{fieldErrors['biggestStressor']}</p>
+                  )}
                 </div>
               </div>
 
               <div>
                 <Label className="text-sm font-medium text-gray-700">
-                  Parent(s) Biggest Worries Or Concerns (Optional)
+                  Parent(s) Biggest Worries Or Concerns*
                 </Label>
-                <div className="mt-2">
+                <div className="mt-2 relative">
                   <textarea
                     placeholder="Your answer here"
                     value={formData.parentWorry}
                     onChange={(e) => handleInputChange('parentWorry', e.target.value)}
-                    className="w-full p-3 border border-[#457BF5] rounded-md resize-none h-20 focus:outline-none focus:ring-2 focus:ring-[#457BF5] focus:border-[#457BF5]"
+                    className={`w-full p-3 border rounded-md resize-none h-20 focus:outline-none focus:ring-2 focus:ring-[#457BF5] focus:border-[#457BF5] transition-all duration-200 ${
+                      getFieldStatus('parentWorry') === 'error' ? 'border-red-500 bg-red-50' :
+                      getFieldStatus('parentWorry') === 'success' ? 'border-green-500 bg-green-50' : 'border-[#457BF5]'
+                    }`}
+                    required
                   />
+                  <div className="absolute right-3 top-3">
+                    {getFieldIcon('parentWorry')}
+                  </div>
+                  {fieldErrors['parentWorry'] && touchedFields['parentWorry'] && (
+                    <p className="text-xs text-red-500 mt-1">{fieldErrors['parentWorry']}</p>
+                  )}
                 </div>
               </div>
 
