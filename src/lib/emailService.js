@@ -373,7 +373,9 @@ Please respond to this inquiry as soon as possible.
 
 // Parental confirmation email template
 const createParentalConfirmationEmailTemplate = (studentFirstName, studentLastName, parentFirstName, approvalToken) => {
-  const websiteUrl = process.env.NEXT_PUBLIC_WEBSITE_URL || 'https://1550plus.com';
+  // Use localhost for development, production URL for deployed environments
+  const websiteUrl = process.env.NEXT_PUBLIC_WEBSITE_URL || 
+                    (process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://1550plus.com');
   const logoUrl = `${websiteUrl}/logo.png`;
   const approvalUrl = `${websiteUrl}/api/approval/confirm?token=${approvalToken}`;
   const declineUrl = `${websiteUrl}/api/approval/decline?token=${approvalToken}`;
