@@ -11,6 +11,7 @@ import DiagnosticTracking from '@/components/admin/DiagnosticTracking'
 import MaintenanceToggle from '@/components/admin/MaintenanceToggle'
 import AdminChat from '@/components/admin/AdminChat'
 import AmbassadorManagement from '@/components/admin/AmbassadorManagement'
+import AppointmentManagement from '@/components/admin/AppointmentManagement'
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('overview')
@@ -98,6 +99,18 @@ export default function AdminDashboard() {
         {activeTab === 'ambassadors' && (
           <div>
             <AmbassadorManagement />
+          </div>
+        )}
+
+        {activeTab === 'appointments' && (
+          <div>
+            <div className="mb-8">
+              <h2 className="text-3xl font-bold text-gray-900">Appointment Management</h2>
+              <p className="mt-2 text-gray-600">
+                View appointments for students who are registered on the 1550Plus platform.
+              </p>
+            </div>
+            <AppointmentManagement />
           </div>
         )}
 

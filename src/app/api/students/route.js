@@ -4,6 +4,7 @@ import Student from '@/models/Student';
 import Ambassador from '@/models/Ambassador';
 import bcrypt from 'bcryptjs';
 import { sendParentalConfirmationEmail } from '@/lib/emailService';
+import { createTraffTCustomer } from '@/services/trafftService';
 
 export async function POST(request) {
   try {
@@ -92,6 +93,44 @@ export async function POST(request) {
         console.error('Error updating ambassador student count:', ambassadorError);
         // Note: We don't fail the registration if this fails
       }
+    }
+
+    // Create customer in Trafft platform
+    try {
+      console.log('Creating Trafft customer for:', student.email);
+      
+      const trafftResult = await createTraffTCustomer({
+        firstName: student.firstName,
+        lastName: student.lastName,
+        email: student.email,
+        phone: student.phoneNumber
+      });
+
+      // Update student record with Trafft information
+      const trafftUpdate = {
+        trafftCustomerCreated: trafftResult.success,
+        ...(trafftResult.success && { trafftCustomerId: trafftResult.trafftCustomerId }),
+        ...(trafftResult.error && { trafftError: trafftResult.error })
+      };
+
+      await Student.findByIdAndUpdate(student._id, trafftUpdate);
+
+      if (trafftResult.success) {
+        console.log('Successfully created Trafft customer:', trafftResult.trafftCustomerId);
+      } else {
+        console.error('Failed to create Trafft customer:', trafftResult.error);
+        // Note: We don't fail the registration if Trafft fails
+      }
+    } catch (trafftError) {
+      console.error('Error in Trafft integration:', trafftError);
+      
+      // Update student with error info
+      await Student.findByIdAndUpdate(student._id, {
+        trafftCustomerCreated: false,
+        trafftError: trafftError.message
+      });
+      
+      // Note: We don't fail the registration if Trafft fails
     }
 
     // Send parental confirmation email

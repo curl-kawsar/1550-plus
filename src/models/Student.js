@@ -205,6 +205,20 @@ const StudentSchema = new mongoose.Schema({
     default: false
   },
 
+  // Trafft Integration
+  trafftCustomerId: {
+    type: String,
+    required: false
+  },
+  trafftCustomerCreated: {
+    type: Boolean,
+    default: false
+  },
+  trafftError: {
+    type: String,
+    required: false
+  },
+
   // Metadata
   submittedAt: {
     type: Date,

@@ -359,6 +359,48 @@ const StudentTable = () => {
                 ))}
               </div>
             </div>
+
+            {/* Trafft Integration Status */}
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Trafft Booking Platform</h3>
+              <div className="bg-gray-50 rounded-lg p-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Customer Created</label>
+                    <div className="flex items-center mt-1">
+                      {student.trafftCustomerCreated ? (
+                        <>
+                          <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                          <span className="text-sm text-green-700 font-medium">Yes</span>
+                        </>
+                      ) : (
+                        <>
+                          <div className="w-2 h-2 bg-red-500 rounded-full mr-2"></div>
+                          <span className="text-sm text-red-700 font-medium">No</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Customer ID</label>
+                    <p className="text-sm mt-1">{student.trafftCustomerId || 'Not available'}</p>
+                  </div>
+                </div>
+                {student.trafftError && (
+                  <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-md">
+                    <label className="text-sm font-medium text-red-800">Error</label>
+                    <p className="text-sm text-red-700 mt-1">{student.trafftError}</p>
+                  </div>
+                )}
+                {student.trafftCustomerCreated && student.trafftCustomerId && (
+                  <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                    <p className="text-sm text-blue-800">
+                      ✅ Student can book appointments through the booking system
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>

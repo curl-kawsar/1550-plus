@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import StudentChatTab from '@/components/student/StudentChatTab'
 import ScheduleManager from '@/components/student/ScheduleManager'
 import ParentalApprovalModal from '@/components/student/ParentalApprovalModal'
+import BookingWidget from '@/components/student/BookingWidget'
 import { useChatMessages } from '@/hooks/useChat'
 import { 
   User, 
@@ -22,7 +23,8 @@ import {
   Target,
   LogOut,
   Settings,
-  MessageSquare
+  MessageSquare,
+  HelpCircle
 } from 'lucide-react'
 
 export default function StudentDashboard({ student, onLogout, onRefreshStudent }) {
@@ -92,6 +94,7 @@ export default function StudentDashboard({ student, onLogout, onRefreshStudent }
     { id: 'schedule', label: 'Schedule', icon: Calendar },
     { id: 'academic', label: 'Academic Info', icon: BookOpen },
     { id: 'contact', label: 'Contact Info', icon: Mail },
+    { id: 'help', label: 'Get Personalized Help', icon: HelpCircle },
     { id: 'chat', label: 'Chat', icon: MessageSquare }
   ]
 
@@ -441,6 +444,48 @@ export default function StudentDashboard({ student, onLogout, onRefreshStudent }
                     <p className="text-lg">{student.parentPhoneNumber || 'N/A'}</p>
                   </div>
                 </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {activeTab === 'help' && (
+          <div className="max-w-6xl mx-auto">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                  <HelpCircle className="h-6 w-6 text-[#457BF5]" />
+                  Get Personalized Help
+                </CardTitle>
+                <p className="text-gray-600">
+                  Schedule a one-on-one consultation with our college admission experts
+                </p>
+              </CardHeader>
+              <CardContent>
+                <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                  <h3 className="font-semibold text-lg mb-2">What to Expect:</h3>
+                  <ul className="space-y-2 text-gray-700">
+                    <li className="flex items-start gap-2">
+                      <div className="w-2 h-2 bg-[#457BF5] rounded-full mt-2 flex-shrink-0"></div>
+                      <span>Personalized college admission strategy</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <div className="w-2 h-2 bg-[#457BF5] rounded-full mt-2 flex-shrink-0"></div>
+                      <span>Review of your application materials</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <div className="w-2 h-2 bg-[#457BF5] rounded-full mt-2 flex-shrink-0"></div>
+                      <span>SAT/ACT test preparation guidance</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <div className="w-2 h-2 bg-[#457BF5] rounded-full mt-2 flex-shrink-0"></div>
+                      <span>College selection and application timeline</span>
+                    </li>
+                  </ul>
+                </div>
+                
+                {/* Embedded Booking Widget */}
+                <BookingWidget />
               </CardContent>
             </Card>
           </div>
