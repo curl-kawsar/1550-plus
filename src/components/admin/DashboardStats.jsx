@@ -46,6 +46,23 @@ const DashboardStats = () => {
 
   return (
     <div className="space-y-6">
+      {/* Header with Refresh Button */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-bold">Dashboard Statistics</h2>
+          <p className="text-gray-600">Real-time overview of student registrations and system metrics</p>
+        </div>
+        <Button 
+          onClick={() => refetch()} 
+          variant="outline" 
+          size="sm"
+          disabled={isRefetching}
+        >
+          <RefreshCw className={`h-4 w-4 mr-2 ${isRefetching ? 'animate-spin' : ''}`} />
+          {isRefetching ? 'Refreshing...' : 'Refresh'}
+        </Button>
+      </div>
+
       {/* Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
         <Card>

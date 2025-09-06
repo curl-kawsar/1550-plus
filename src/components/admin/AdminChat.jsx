@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Send, MessageCircle, User, ArrowLeft, Clock } from 'lucide-react';
+import { Send, MessageCircle, User, ArrowLeft, Clock, RefreshCw } from 'lucide-react';
 import { useChatConversations, useChatMessages, useSendMessage, useMarkAsRead } from '@/hooks/useChat';
 
 export default function AdminChat() {
@@ -13,16 +13,21 @@ export default function AdminChat() {
   const [message, setMessage] = useState('');
   const [adminName] = useState('Admin Support'); // You can make this dynamic
   const [lastReadMessageId, setLastReadMessageId] = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
   const messagesEndRef = useRef(null);
   
   const { 
     data: conversationsData, 
-    isLoading: conversationsLoading 
+    isLoading: conversationsLoading,
+    refetch: refetchConversations,
+    isRefetching: isRefetchingConversations
   } = useChatConversations();
   
   const { 
     data: chatData, 
-    isLoading: messagesLoading 
+    isLoading: messagesLoading,
+    refetch: refetchMessages,
+    isRefetching: isRefetchingMessages
   } = useChatMessages(selectedConversation?.studentEmail, {
     enabled: !!selectedConversation?.studentEmail
   });
@@ -32,6 +37,19 @@ export default function AdminChat() {
 
   const conversations = conversationsData?.conversations || [];
   const messages = chatData?.messages || [];
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
+      if (selectedConversation) {
+        await refetchMessages();
+      } else {
+        await refetchConversations();
+      }
+    } finally {
+      setTimeout(() => setRefreshing(false), 1000);
+    }
+  };
 
   // Reset last read message ID when conversation changes
   useEffect(() => {
@@ -121,16 +139,27 @@ export default function AdminChat() {
             </p>
           </div>
         </div>
-        {selectedConversation && (
+        <div className="flex items-center space-x-2">
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setSelectedConversation(null)}
+            onClick={handleRefresh}
+            disabled={refreshing || isRefetchingConversations || isRefetchingMessages}
             className="p-2"
           >
-            <ArrowLeft className="h-4 w-4 text-gray-600" />
+            <RefreshCw className={`h-4 w-4 text-gray-600 ${(refreshing || isRefetchingConversations || isRefetchingMessages) ? 'animate-spin' : ''}`} />
           </Button>
-        )}
+          {selectedConversation && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setSelectedConversation(null)}
+              className="p-2"
+            >
+              <ArrowLeft className="h-4 w-4 text-gray-600" />
+            </Button>
+          )}
+        </div>
       </div>
       {/* Content Area */}
       <div className="flex-1 overflow-hidden">

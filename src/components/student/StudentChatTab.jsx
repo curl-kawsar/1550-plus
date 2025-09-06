@@ -11,6 +11,7 @@ import { useChatMessages, useSendMessage, useMarkAsRead } from '@/hooks/useChat'
 export default function StudentChatTab({ student }) {
   const [message, setMessage] = useState('');
   const [lastReadMessageId, setLastReadMessageId] = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
   const messagesEndRef = useRef(null);
   
   const studentEmail = student?.email;
@@ -19,7 +20,8 @@ export default function StudentChatTab({ student }) {
     data: chatData, 
     isLoading,
     error,
-    refetch
+    refetch,
+    isRefetching
   } = useChatMessages(studentEmail, {
     enabled: !!studentEmail
   });
@@ -76,8 +78,13 @@ export default function StudentChatTab({ student }) {
     }
   };
 
-  const handleRefresh = () => {
-    refetch();
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await refetch();
+    } finally {
+      setTimeout(() => setRefreshing(false), 1000);
+    }
   };
 
   if (!studentEmail) {
@@ -110,10 +117,10 @@ export default function StudentChatTab({ student }) {
           variant="ghost"
           size="sm"
           onClick={handleRefresh}
-          disabled={isLoading}
+          disabled={refreshing || isLoading || isRefetching}
           className="p-2"
         >
-          <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''} text-gray-600`} />
+          <RefreshCw className={`h-4 w-4 ${(refreshing || isLoading || isRefetching) ? 'animate-spin' : ''} text-gray-600`} />
         </Button>
       </div>
       
@@ -131,8 +138,15 @@ export default function StudentChatTab({ student }) {
               <div className="text-center text-red-500">
                 <MessageCircle className="h-12 w-12 mx-auto mb-4 text-red-300" />
                 <p>Failed to load messages</p>
-                <Button variant="outline" size="sm" onClick={handleRefresh} className="mt-2">
-                  Try Again
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleRefresh} 
+                  className="mt-2"
+                  disabled={refreshing || isRefetching}
+                >
+                  <RefreshCw className={`w-4 h-4 mr-2 ${(refreshing || isRefetching) ? 'animate-spin' : ''}`} />
+                  {(refreshing || isRefetching) ? 'Retrying...' : 'Try Again'}
                 </Button>
               </div>
             </div>

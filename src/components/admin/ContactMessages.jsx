@@ -5,17 +5,27 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Eye, Search, ChevronLeft, ChevronRight, Trash2, MailOpen, Mail } from 'lucide-react'
+import { Eye, Search, ChevronLeft, ChevronRight, Trash2, MailOpen, Mail, RefreshCw } from 'lucide-react'
 import { useContactMessages, useUpdateContactStatus, useDeleteContactMessage } from '@/hooks/useContact'
 
 const ContactMessages = () => {
   const [currentPage, setCurrentPage] = useState(1)
   const [statusFilter, setStatusFilter] = useState('')
   const [selectedMessage, setSelectedMessage] = useState(null)
+  const [refreshing, setRefreshing] = useState(false)
   
-  const { data, isLoading, error } = useContactMessages(currentPage, 10, statusFilter)
+  const { data, isLoading, error, refetch, isRefetching } = useContactMessages(currentPage, 10, statusFilter)
   const updateStatusMutation = useUpdateContactStatus()
   const deleteMessageMutation = useDeleteContactMessage()
+
+  const handleRefresh = async () => {
+    setRefreshing(true)
+    try {
+      await refetch()
+    } finally {
+      setTimeout(() => setRefreshing(false), 1000)
+    }
+  }
 
   const getStatusBadge = (status) => {
     const colors = {
@@ -122,8 +132,13 @@ const ContactMessages = () => {
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <p className="text-red-600 mb-4">Failed to load messages</p>
-          <Button onClick={() => window.location.reload()}>
-            Retry
+          <Button 
+            onClick={() => refetch()}
+            variant="outline"
+            disabled={isRefetching}
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${isRefetching ? 'animate-spin' : ''}`} />
+            {isRefetching ? 'Retrying...' : 'Retry'}
           </Button>
         </div>
       </div>
@@ -134,7 +149,18 @@ const ContactMessages = () => {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Contact Messages</CardTitle>
+          <div className="flex justify-between items-center">
+            <CardTitle>Contact Messages</CardTitle>
+            <Button 
+              onClick={handleRefresh} 
+              size="sm" 
+              variant="outline"
+              disabled={refreshing || isRefetching}
+            >
+              <RefreshCw className={`w-4 h-4 mr-2 ${(refreshing || isRefetching) ? 'animate-spin' : ''}`} />
+              {(refreshing || isRefetching) ? 'Refreshing...' : 'Refresh'}
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           {/* Filters */}

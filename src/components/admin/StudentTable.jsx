@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Eye, Search, Filter, Download, ChevronLeft, ChevronRight, Edit2, Save, X } from 'lucide-react'
+import { Eye, Search, Filter, Download, ChevronLeft, ChevronRight, Edit2, Save, X, Trash2, RefreshCw } from 'lucide-react'
 import { toast } from "sonner"
 
 const StudentTable = () => {
@@ -27,6 +27,11 @@ const StudentTable = () => {
     classTime: '',
     diagnosticTestDate: ''
   })
+  const [deleteModal, setDeleteModal] = useState({
+    isOpen: false,
+    student: null
+  })
+  const [refreshing, setRefreshing] = useState(false)
 
   useEffect(() => {
     fetchStudents()
@@ -54,6 +59,40 @@ const StudentTable = () => {
       toast.error('Error fetching students')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleRefresh = async () => {
+    setRefreshing(true)
+    try {
+      await fetchStudents()
+      toast.success('Student list refreshed')
+    } finally {
+      setTimeout(() => setRefreshing(false), 1000)
+    }
+  }
+
+  const handleDeleteStudent = async (studentId) => {
+    try {
+      const response = await fetch(`/api/students/${studentId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      })
+
+      if (response.ok) {
+        toast.success('Student deleted successfully')
+        setDeleteModal({ isOpen: false, student: null })
+        // Refresh the students list
+        fetchStudents()
+      } else {
+        const data = await response.json()
+        toast.error(data.error || 'Failed to delete student')
+      }
+    } catch (error) {
+      console.error('Error deleting student:', error)
+      toast.error('Failed to delete student')
     }
   }
 
@@ -193,6 +232,43 @@ const StudentTable = () => {
     'Sunday September 28th 8:30am - noon PST',
     'I can\'t make either of these dates (reply below with if neither option works for you)'
   ]
+
+  const DeleteConfirmationModal = ({ isOpen, student, onClose, onConfirm }) => {
+    if (!isOpen || !student) return null
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-lg max-w-md w-full p-6">
+          <div className="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 rounded-full mb-4">
+            <Trash2 className="w-6 h-6 text-red-600" />
+          </div>
+          <h3 className="text-lg font-medium text-gray-900 text-center mb-2">
+            Delete Student
+          </h3>
+          <p className="text-sm text-gray-500 text-center mb-6">
+            Are you sure you want to delete <strong>{student.firstName} {student.lastName}</strong>? 
+            This action cannot be undone and all student data will be permanently removed.
+          </p>
+          <div className="flex space-x-3">
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={onClose}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              className="flex-1"
+              onClick={() => onConfirm(student._id)}
+            >
+              Delete Student
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   const StudentDetailModal = ({ student, onClose, onStatusUpdate }) => {
     if (!student) return null
@@ -413,10 +489,21 @@ const StudentTable = () => {
         <CardHeader>
           <div className="flex justify-between items-center">
             <CardTitle>Student Registrations</CardTitle>
-            <Button onClick={exportToCSV} size="sm">
-              <Download className="w-4 h-4 mr-2" />
-              Export CSV
-            </Button>
+            <div className="flex space-x-2">
+              <Button 
+                onClick={handleRefresh} 
+                size="sm" 
+                variant="outline"
+                disabled={refreshing}
+              >
+                <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+                {refreshing ? 'Refreshing...' : 'Refresh'}
+              </Button>
+              <Button onClick={exportToCSV} size="sm">
+                <Download className="w-4 h-4 mr-2" />
+                Export CSV
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -628,6 +715,14 @@ const StudentTable = () => {
                               >
                                 <Eye className="w-4 h-4" />
                               </Button>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => setDeleteModal({ isOpen: true, student: student })}
+                                className="text-red-600 border-red-600 hover:bg-red-50"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
                             </>
                           )}
                         </div>
@@ -679,6 +774,14 @@ const StudentTable = () => {
           }}
         />
       )}
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={deleteModal.isOpen}
+        student={deleteModal.student}
+        onClose={() => setDeleteModal({ isOpen: false, student: null })}
+        onConfirm={handleDeleteStudent}
+      />
     </div>
   )
 }

@@ -5,13 +5,24 @@ import { useDiagnosticCounts } from "@/hooks/useDiagnostic"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { AlertCircle, CheckCircle2, Users, Clock, Calendar, X } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { AlertCircle, CheckCircle2, Users, Clock, Calendar, X, RefreshCw } from "lucide-react"
 import StudentListModal from "./StudentListModal"
 
 const DiagnosticTracking = () => {
-  const { data: diagnosticData, isLoading, error, refetch } = useDiagnosticCounts()
+  const { data: diagnosticData, isLoading, error, refetch, isRefetching } = useDiagnosticCounts()
   const [modalOpen, setModalOpen] = useState(false)
   const [modalData, setModalData] = useState({ title: '', filterType: '', filterValue: '' })
+  const [refreshing, setRefreshing] = useState(false)
+
+  const handleRefresh = async () => {
+    setRefreshing(true)
+    try {
+      await refetch()
+    } finally {
+      setTimeout(() => setRefreshing(false), 1000)
+    }
+  }
 
   if (isLoading) {
     return (
@@ -33,12 +44,15 @@ const DiagnosticTracking = () => {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-bold text-gray-900">Diagnostic Test Tracking</h2>
-          <button
-            onClick={() => refetch()}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          <Button
+            onClick={handleRefresh}
+            variant="outline"
+            size="sm"
+            disabled={refreshing || isRefetching}
           >
-            Retry
-          </button>
+            <RefreshCw className={`h-4 w-4 mr-2 ${(refreshing || isRefetching) ? 'animate-spin' : ''}`} />
+            {(refreshing || isRefetching) ? 'Retrying...' : 'Retry'}
+          </Button>
         </div>
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center">
           <AlertCircle className="w-5 h-5 text-red-500 mr-3" />
@@ -105,12 +119,15 @@ const DiagnosticTracking = () => {
           <div className="text-sm text-gray-600">
             Last updated: {new Date().toLocaleTimeString()}
           </div>
-          <button
-            onClick={() => refetch()}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          <Button
+            onClick={handleRefresh}
+            variant="outline"
+            size="sm"
+            disabled={refreshing || isRefetching}
           >
-            Refresh
-          </button>
+            <RefreshCw className={`h-4 w-4 mr-2 ${(refreshing || isRefetching) ? 'animate-spin' : ''}`} />
+            {(refreshing || isRefetching) ? 'Refreshing...' : 'Refresh'}
+          </Button>
         </div>
       </div>
 

@@ -5,9 +5,12 @@
  */
 
 const TRAFFT_CONFIG = {
-  baseUrl: 'https://collegemastermind.admin.trafft.com',
-  clientId: '3c8926342a9aabdbf52886294a36ddb3',
-  clientSecret: '948f647a3f846090b47d8109ed25a0150733a402d621afdea93c9690ff04c4b0'
+  // Use Process.env.TRAFFT_BASE_URL
+  baseUrl: process.env.TRAFFT_BASE_URL,
+  // Use Process.env.TRAFFT_CLIENT_ID
+  clientId: process.env.TRAFFT_CLIENT_ID,
+  // Use Process.env.TRAFFT_CLIENT_SECRET
+  clientSecret: process.env.TRAFFT_CLIENT_SECRET
 }
 
 /**

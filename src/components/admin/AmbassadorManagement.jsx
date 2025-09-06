@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Plus, Edit2, Eye, Trash2, Users, Copy, CheckCircle } from 'lucide-react'
+import { Plus, Edit2, Eye, Trash2, Users, Copy, CheckCircle, RefreshCw } from 'lucide-react'
 import { toast } from 'sonner'
 
 // Fetch all ambassadors
@@ -63,6 +63,7 @@ export default function AmbassadorManagement() {
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [editingAmbassador, setEditingAmbassador] = useState(null)
   const [viewingAmbassador, setViewingAmbassador] = useState(null)
+  const [refreshing, setRefreshing] = useState(false)
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -76,10 +77,20 @@ export default function AmbassadorManagement() {
   const queryClient = useQueryClient()
 
   // Queries
-  const { data: ambassadorsData, isLoading, error } = useQuery({
+  const { data: ambassadorsData, isLoading, error, refetch, isRefetching } = useQuery({
     queryKey: ['ambassadors'],
     queryFn: fetchAmbassadors
   })
+
+  const handleRefresh = async () => {
+    setRefreshing(true)
+    try {
+      await refetch()
+      toast.success('Ambassador data refreshed')
+    } finally {
+      setTimeout(() => setRefreshing(false), 1000)
+    }
+  }
 
   // Mutations
   const createMutation = useMutation({
@@ -203,17 +214,28 @@ export default function AmbassadorManagement() {
           <h1 className="text-2xl font-bold text-gray-900">Ambassador Management</h1>
           <p className="text-gray-600">Manage ambassador accounts and track their performance</p>
         </div>
-        <Button
-          onClick={() => {
-            setShowCreateForm(true)
-            setEditingAmbassador(null)
-            resetForm()
-          }}
-          className="bg-blue-600 hover:bg-blue-700"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Add Ambassador
-        </Button>
+        <div className="flex items-center space-x-2">
+          <Button
+            onClick={handleRefresh}
+            variant="outline"
+            size="sm"
+            disabled={refreshing || isRefetching}
+          >
+            <RefreshCw className={`w-4 h-4 mr-2 ${(refreshing || isRefetching) ? 'animate-spin' : ''}`} />
+            {(refreshing || isRefetching) ? 'Refreshing...' : 'Refresh'}
+          </Button>
+          <Button
+            onClick={() => {
+              setShowCreateForm(true)
+              setEditingAmbassador(null)
+              resetForm()
+            }}
+            className="bg-blue-600 hover:bg-blue-700"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add Ambassador
+          </Button>
+        </div>
       </div>
 
       {/* Statistics Cards */}

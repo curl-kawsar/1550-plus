@@ -24,14 +24,25 @@ import {
   LogOut,
   Settings,
   MessageSquare,
-  HelpCircle
+  HelpCircle,
+  RefreshCw
 } from 'lucide-react'
 
 export default function StudentDashboard({ student, onLogout, onRefreshStudent }) {
   const [activeTab, setActiveTab] = useState('overview')
+  const [refreshing, setRefreshing] = useState(false)
   
   // Check if parental approval is required
   const needsParentalApproval = student?.parentalApprovalStatus !== 'approved'
+
+  const handleRefresh = async () => {
+    setRefreshing(true)
+    try {
+      await onRefreshStudent()
+    } finally {
+      setTimeout(() => setRefreshing(false), 1000)
+    }
+  }
 
   // Chat Tab Button with notification badge
   const ChatTabButton = ({ student, isActive, onClick, icon: Icon, label }) => {
@@ -123,6 +134,16 @@ export default function StudentDashboard({ student, onLogout, onRefreshStudent }
               <Badge className={getStatusColor(student.status)}>
                 {student.status || 'pending'}
               </Badge>
+              <Button
+                onClick={handleRefresh}
+                variant="outline"
+                size="sm"
+                disabled={refreshing}
+                className="flex items-center gap-2"
+              >
+                <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+                {refreshing ? 'Refreshing...' : 'Refresh'}
+              </Button>
               <Button
                 onClick={onLogout}
                 variant="outline"
@@ -314,7 +335,6 @@ export default function StudentDashboard({ student, onLogout, onRefreshStudent }
 
             {/* Schedule Manager Component */}
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Manage Your Schedule</h3>
               <ScheduleManager />
             </div>
           </div>

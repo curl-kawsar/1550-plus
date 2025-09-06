@@ -4,15 +4,26 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Calendar, Clock, AlertTriangle, CheckCircle2, History } from 'lucide-react'
+import { Calendar, Clock, AlertTriangle, CheckCircle2, History, RefreshCw } from 'lucide-react'
 import { useStudentSchedule, useChangeSchedule } from '@/hooks/useStudentSchedule'
 import { toast } from 'sonner'
 
 const ScheduleManager = () => {
-  const { data: scheduleData, isLoading, error } = useStudentSchedule()
+  const { data: scheduleData, isLoading, error, refetch, isRefetching } = useStudentSchedule()
   const changeScheduleMutation = useChangeSchedule()
   const [activeChangeType, setActiveChangeType] = useState(null)
   const [selectedValue, setSelectedValue] = useState('')
+  const [refreshing, setRefreshing] = useState(false)
+
+  const handleRefresh = async () => {
+    setRefreshing(true)
+    try {
+      await refetch()
+      toast.success('Schedule data refreshed')
+    } finally {
+      setTimeout(() => setRefreshing(false), 1000)
+    }
+  }
 
   const classTimeOptions = [
     'Mon & Wed - 4:00 PM Pacific',
@@ -107,6 +118,16 @@ const ScheduleManager = () => {
           <div className="text-center text-red-600">
             <AlertTriangle className="w-8 h-8 mx-auto mb-2" />
             <p>Failed to load schedule information</p>
+            <Button 
+              onClick={handleRefresh} 
+              variant="outline" 
+              size="sm" 
+              className="mt-2"
+              disabled={refreshing || isRefetching}
+            >
+              <RefreshCw className={`w-4 h-4 mr-2 ${(refreshing || isRefetching) ? 'animate-spin' : ''}`} />
+              {(refreshing || isRefetching) ? 'Retrying...' : 'Try Again'}
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -117,6 +138,23 @@ const ScheduleManager = () => {
 
   return (
     <div className="space-y-6">
+      {/* Header with Refresh Button */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900">Schedule Management</h3>
+          <p className="text-sm text-gray-600">Manage your class time and diagnostic test schedule</p>
+        </div>
+        <Button
+          onClick={handleRefresh}
+          variant="outline"
+          size="sm"
+          disabled={refreshing || isRefetching}
+        >
+          <RefreshCw className={`w-4 h-4 mr-2 ${(refreshing || isRefetching) ? 'animate-spin' : ''}`} />
+          {(refreshing || isRefetching) ? 'Refreshing...' : 'Refresh'}
+        </Button>
+      </div>
+
       {/* Class Time Section */}
       <Card>
         <CardHeader>

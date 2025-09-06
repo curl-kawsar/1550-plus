@@ -27,6 +27,7 @@ export default function AppointmentManagement() {
   const [matchedCustomers, setMatchedCustomers] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [refreshing, setRefreshing] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
 
@@ -146,6 +147,19 @@ export default function AppointmentManagement() {
     return matchesSearch && matchesStatus
   })
 
+  // Unified refresh handler
+  const handleRefresh = async () => {
+    setRefreshing(true)
+    try {
+      await Promise.all([
+        fetchPlatformStudents(),
+        fetchTraffTData()
+      ])
+    } finally {
+      setTimeout(() => setRefreshing(false), 1000)
+    }
+  }
+
   // Load data on component mount
   useEffect(() => {
     fetchPlatformStudents()
@@ -205,9 +219,13 @@ export default function AppointmentManagement() {
             <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Error Loading Data</h3>
             <p className="text-gray-600 mb-4">{error}</p>
-            <Button onClick={fetchTraffTData} className="bg-[#457BF5] hover:bg-[#3a6ae0]">
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Try Again
+            <Button 
+              onClick={handleRefresh} 
+              disabled={refreshing || loading}
+              className="bg-[#457BF5] hover:bg-[#3a6ae0]"
+            >
+              <RefreshCw className={`w-4 h-4 mr-2 ${(refreshing || loading) ? 'animate-spin' : ''}`} />
+              {(refreshing || loading) ? 'Retrying...' : 'Try Again'}
             </Button>
           </div>
         </CardContent>
@@ -276,12 +294,13 @@ export default function AppointmentManagement() {
           <div className="flex justify-between items-center">
             <CardTitle>1550Plus Students with Appointments</CardTitle>
             <Button 
-              onClick={fetchTraffTData} 
+              onClick={handleRefresh} 
               size="sm"
+              disabled={refreshing || loading}
               className="bg-[#457BF5] hover:bg-[#3a6ae0]"
             >
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Refresh
+              <RefreshCw className={`w-4 h-4 mr-2 ${(refreshing || loading) ? 'animate-spin' : ''}`} />
+              {(refreshing || loading) ? 'Refreshing...' : 'Refresh'}
             </Button>
           </div>
         </CardHeader>
