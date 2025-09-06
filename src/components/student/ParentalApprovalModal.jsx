@@ -12,7 +12,8 @@ import {
   CheckCircle2, 
   Phone,
   ExternalLink,
-  RefreshCw
+  RefreshCw,
+  LogOut
 } from 'lucide-react'
 
 const ParentalApprovalModal = ({ student, onRefresh }) => {
@@ -25,6 +26,13 @@ const ParentalApprovalModal = ({ student, onRefresh }) => {
     } finally {
       setTimeout(() => setIsRefreshing(false), 1000) // Add slight delay for UX
     }
+  }
+
+  const handleLogout = () => {
+    // Clear student token from localStorage
+    localStorage.removeItem('studentToken')
+    // Redirect to login page
+    window.location.href = '/student-login'
   }
 
   const getStatusInfo = () => {
@@ -81,75 +89,62 @@ const ParentalApprovalModal = ({ student, onRefresh }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <Card className={`w-full max-w-2xl mx-auto ${statusInfo.borderColor} ${statusInfo.bgColor} border-2`}>
-        <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <div className={`p-4 rounded-full ${statusInfo.bgColor} border-2 ${statusInfo.borderColor}`}>
-              <StatusIcon className={`w-12 h-12 ${statusInfo.iconColor}`} />
+      <Card className={`w-full max-w-lg mx-auto ${statusInfo.borderColor} ${statusInfo.bgColor} border-2`}>
+        <CardHeader className="text-center pb-4">
+          <div className="flex justify-center mb-3">
+            <div className={`p-3 rounded-full ${statusInfo.bgColor} border-2 ${statusInfo.borderColor}`}>
+              <StatusIcon className={`w-8 h-8 ${statusInfo.iconColor}`} />
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold text-gray-900">
+          <CardTitle className="text-xl font-bold text-gray-900">
             {statusInfo.title}
           </CardTitle>
-          <p className="text-gray-600 mt-2">{statusInfo.subtitle}</p>
-          <div className="flex justify-center mt-3">
+          <p className="text-gray-600 mt-1 text-sm">{statusInfo.subtitle}</p>
+          <div className="flex justify-center mt-2">
             <Badge 
               variant={statusInfo.statusBadge.variant} 
-              className={`text-sm ${statusInfo.statusBadge.className || ''}`}
+              className={`text-xs ${statusInfo.statusBadge.className || ''}`}
             >
               {statusInfo.statusBadge.text}
             </Badge>
           </div>
         </CardHeader>
 
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-4">
           {/* Student Information */}
-          <div className="bg-white p-4 rounded-lg border">
-            <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-              <Shield className="w-4 h-4 text-blue-600" />
+          <div className="bg-white p-3 rounded-lg border">
+            <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2 text-sm">
+              <Shield className="w-3 h-3 text-blue-600" />
               Registration Details
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+            <div className="space-y-2 text-xs">
               <div>
                 <span className="text-gray-600">Student:</span>
                 <div className="font-medium">{student.firstName} {student.lastName}</div>
-              </div>
-              <div>
-                <span className="text-gray-600">Email:</span>
-                <div className="font-medium">{student.email}</div>
               </div>
               <div>
                 <span className="text-gray-600">Parent/Guardian:</span>
                 <div className="font-medium">{student.parentFirstName} {student.parentLastName}</div>
               </div>
               <div>
-                <span className="text-gray-600">Registration Date:</span>
-                <div className="font-medium">
-                  {new Date(student.submittedAt).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  })}
-                </div>
+                <span className="text-gray-600">Parent Email:</span>
+                <div className="font-medium">{student.parentEmail}</div>
               </div>
             </div>
           </div>
 
           {/* Status-specific content */}
           {student.parentalApprovalStatus === 'pending' && (
-            <div className="space-y-4">
-              <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                <h3 className="font-semibold text-blue-900 mb-3 flex items-center gap-2">
-                  <Mail className="w-4 h-4" />
+            <div className="space-y-3">
+              <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                <h3 className="font-semibold text-blue-900 mb-2 flex items-center gap-2 text-sm">
+                  <Mail className="w-3 h-3" />
                   Email Confirmation Sent
                 </h3>
-                <p className="text-blue-800 text-sm mb-3">
-                  A confirmation email has been sent to your parent/guardian at:
+                <p className="text-blue-800 text-xs mb-2">
+                  A confirmation email has been sent to your parent/guardian.
                 </p>
-                <div className="font-medium text-blue-900 bg-white p-2 rounded border">
-                  {student.parentEmail}
-                </div>
-                <div className="mt-3 text-xs text-blue-700">
+                <div className="text-xs text-blue-700">
                   {student.parentalApprovalEmailSent ? (
                     <span className="flex items-center gap-1">
                       <CheckCircle2 className="w-3 h-3" />
@@ -164,61 +159,42 @@ const ParentalApprovalModal = ({ student, onRefresh }) => {
                 </div>
               </div>
 
-              <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
-                <h3 className="font-semibold text-yellow-900 mb-2 flex items-center gap-2">
-                  <AlertTriangle className="w-4 h-4" />
+              <div className="bg-yellow-50 p-3 rounded-lg border border-yellow-200">
+                <h3 className="font-semibold text-yellow-900 mb-2 flex items-center gap-2 text-sm">
+                  <AlertTriangle className="w-3 h-3" />
                   What happens next?
                 </h3>
-                <ul className="text-yellow-800 text-sm space-y-1 list-disc list-inside">
+                <ul className="text-yellow-800 text-xs space-y-1 list-disc list-inside">
                   <li>Your parent/guardian will receive an email with approval buttons</li>
                   <li>They need to click "APPROVE" to activate your account</li>
                   <li>Once approved, you'll have full access to the dashboard</li>
-                  <li>You'll receive your class schedule and course materials</li>
                 </ul>
-              </div>
-
-              <div className="bg-gray-50 p-4 rounded-lg border">
-                <h3 className="font-semibold text-gray-900 mb-2">Email not received?</h3>
-                <p className="text-gray-700 text-sm mb-3">
-                  Ask your parent/guardian to check their spam/junk folder. The email is sent from:
-                </p>
-                <div className="font-mono text-xs bg-white p-2 rounded border">
-                  no-reply@1550plus.com
-                </div>
               </div>
             </div>
           )}
 
           {student.parentalApprovalStatus === 'declined' && (
-            <div className="space-y-4">
-              <div className="bg-red-50 p-4 rounded-lg border border-red-200">
-                <h3 className="font-semibold text-red-900 mb-3">Registration Declined</h3>
-                <p className="text-red-800 text-sm mb-3">
+            <div className="space-y-3">
+              <div className="bg-red-50 p-3 rounded-lg border border-red-200">
+                <h3 className="font-semibold text-red-900 mb-2 text-sm">Registration Declined</h3>
+                <p className="text-red-800 text-xs mb-2">
                   Your parent/guardian has declined your registration for the 1550+ SAT Prep program.
                 </p>
-                <div className="text-sm text-red-700">
-                  <p className="mb-2"><strong>What this means:</strong></p>
+                <div className="text-xs text-red-700">
                   <ul className="list-disc list-inside space-y-1">
-                    <li>You cannot access course materials or the student dashboard</li>
+                    <li>You cannot access course materials</li>
                     <li>Your registration has been cancelled</li>
                     <li>If this was a mistake, you can register again</li>
                   </ul>
                 </div>
               </div>
 
-              <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                <h3 className="font-semibold text-blue-900 mb-2">Need Help?</h3>
-                <p className="text-blue-800 text-sm mb-3">
-                  If you believe this was a mistake or want to discuss the decision, please contact us:
-                </p>
-                <div className="text-sm text-blue-700 space-y-1">
+              <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                <h3 className="font-semibold text-blue-900 mb-2 text-sm">Need Help?</h3>
+                <div className="text-xs text-blue-700 space-y-1">
                   <div className="flex items-center gap-2">
                     <Mail className="w-3 h-3" />
                     support@1550plus.com
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Phone className="w-3 h-3" />
-                    (555) 123-4567
                   </div>
                 </div>
               </div>
@@ -226,29 +202,40 @@ const ParentalApprovalModal = ({ student, onRefresh }) => {
           )}
 
           {/* Action buttons */}
-          <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t">
+          <div className="flex flex-col sm:flex-row gap-2 pt-3 border-t">
             <Button 
               onClick={handleRefresh}
               disabled={isRefreshing}
               variant="outline"
+              size="sm"
               className="flex items-center gap-2"
             >
-              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-3 h-3 ${isRefreshing ? 'animate-spin' : ''}`} />
               {isRefreshing ? 'Checking...' : 'Check Status'}
             </Button>
             
             {student.parentalApprovalStatus === 'pending' && (
-              <Button variant="outline" className="flex items-center gap-2" asChild>
+              <Button variant="outline" size="sm" className="flex items-center gap-2" asChild>
                 <a href="mailto:support@1550plus.com" target="_blank" rel="noopener noreferrer">
-                  <ExternalLink className="w-4 h-4" />
+                  <ExternalLink className="w-3 h-3" />
                   Contact Support
                 </a>
               </Button>
             )}
+
+            <Button 
+              onClick={handleLogout}
+              variant="destructive"
+              size="sm"
+              className="flex items-center gap-2"
+            >
+              <LogOut className="w-3 h-3" />
+              Logout
+            </Button>
           </div>
 
           {/* Footer note */}
-          <div className="text-xs text-gray-500 text-center pt-2 border-t">
+          <div className="text-xs text-gray-500 text-center pt-2">
             This approval process ensures proper parental consent for all program participants.
           </div>
         </CardContent>
