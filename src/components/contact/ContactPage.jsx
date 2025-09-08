@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Mail, Phone, MapPin, Send } from 'lucide-react'
+import { Mail, Phone, Send } from 'lucide-react'
 import { useSubmitContact } from '@/hooks/useContact'
 
 export default function ContactPage() {
@@ -127,15 +127,6 @@ Message: ${formData.message}`
                   </div>
                 </div>
 
-                <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-                    <MapPin className="w-6 h-6 text-purple-600" />
-                  </div>
-                  {/* <div>
-                    <p className="text-sm font-medium text-gray-500">Location</p>
-                    <p className="text-lg text-gray-900">Online & In-Person</p>
-                  </div> */}
-                </div>
               </div>
             </div>
 

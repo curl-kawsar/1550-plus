@@ -12,6 +12,8 @@ import MaintenanceToggle from '@/components/admin/MaintenanceToggle'
 import AdminChat from '@/components/admin/AdminChat'
 import AmbassadorManagement from '@/components/admin/AmbassadorManagement'
 import AppointmentManagement from '@/components/admin/AppointmentManagement'
+import AssignmentManagement from '@/components/admin/AssignmentManagement'
+import AssignmentResults from '@/components/admin/AssignmentResults'
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('overview')
@@ -85,6 +87,18 @@ export default function AdminDashboard() {
               </p>
             </div>
             <StudentTable />
+          </div>
+        )}
+
+        {activeTab === 'assignments' && (
+          <div>
+            <AssignmentManagement />
+          </div>
+        )}
+
+        {activeTab === 'assignment-results' && (
+          <div>
+            <AssignmentResults />
           </div>
         )}
 

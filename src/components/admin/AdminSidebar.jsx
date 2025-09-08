@@ -1,16 +1,29 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { BarChart3, Users, MessageCircle, Calendar, ClipboardCheck, Wrench, LogOut, Menu, X, MessageSquare, UserCheck, CalendarCheck } from "lucide-react"
+import { BarChart3, Users, MessageCircle, Calendar, ClipboardCheck, Wrench, LogOut, Menu, X, MessageSquare, UserCheck, CalendarCheck, FileText, ChevronDown, ChevronRight, Trophy } from "lucide-react"
 import { toast } from "sonner"
 import { useState } from "react"
 
 const AdminSidebar = ({ activeTab, setActiveTab, admin, onLogout }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [assignmentsDropdownOpen, setAssignmentsDropdownOpen] = useState(
+    activeTab === 'assignments' || activeTab === 'assignment-results'
+  )
 
   const navigation = [
     { id: 'overview', label: 'Overview', icon: BarChart3 },
     { id: 'students', label: 'Students', icon: Users },
+    { 
+      id: 'assignments', 
+      label: 'Assignments', 
+      icon: FileText,
+      hasDropdown: true,
+      subItems: [
+        { id: 'assignments', label: 'Assignment Management', icon: FileText },
+        { id: 'assignment-results', label: 'Results', icon: Trophy }
+      ]
+    },
     { id: 'ambassadors', label: 'Ambassadors', icon: UserCheck },
     { id: 'appointments', label: 'Appointments', icon: CalendarCheck },
     { id: 'chat', label: 'Student Messages', icon: MessageSquare },
@@ -45,6 +58,15 @@ const AdminSidebar = ({ activeTab, setActiveTab, admin, onLogout }) => {
   const handleNavClick = (tabId) => {
     setActiveTab(tabId)
     setIsMobileMenuOpen(false) // Close mobile menu when selecting an item
+    
+    // Keep assignments dropdown open if an assignment-related tab is selected
+    if (tabId === 'assignments' || tabId === 'assignment-results') {
+      setAssignmentsDropdownOpen(true)
+    }
+  }
+
+  const handleDropdownToggle = () => {
+    setAssignmentsDropdownOpen(!assignmentsDropdownOpen)
   }
 
   return (
@@ -106,7 +128,62 @@ const AdminSidebar = ({ activeTab, setActiveTab, admin, onLogout }) => {
         <nav className="flex-1 p-6 space-y-2">
           {navigation.map((item) => {
             const Icon = item.icon
-            const isActive = activeTab === item.id
+            const isActive = activeTab === item.id || (item.subItems && item.subItems.some(sub => sub.id === activeTab))
+            
+            if (item.hasDropdown) {
+              return (
+                <div key={item.id}>
+                  {/* Main dropdown button */}
+                  <button
+                    onClick={handleDropdownToggle}
+                    className={`
+                      w-full flex items-center justify-between px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200
+                      ${isActive
+                        ? 'bg-blue-50 text-blue-700'
+                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      }
+                    `}
+                  >
+                    <div className="flex items-center">
+                      <Icon className={`w-5 h-5 mr-3 ${isActive ? 'text-blue-700' : 'text-gray-400'}`} />
+                      {item.label}
+                    </div>
+                    {assignmentsDropdownOpen ? (
+                      <ChevronDown className="w-4 h-4" />
+                    ) : (
+                      <ChevronRight className="w-4 h-4" />
+                    )}
+                  </button>
+                  
+                  {/* Dropdown items */}
+                  {assignmentsDropdownOpen && (
+                    <div className="ml-8 mt-2 space-y-1">
+                      {item.subItems.map((subItem) => {
+                        const SubIcon = subItem.icon
+                        const isSubActive = activeTab === subItem.id
+                        
+                        return (
+                          <button
+                            key={subItem.id}
+                            onClick={() => handleNavClick(subItem.id)}
+                            className={`
+                              w-full flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200
+                              ${isSubActive
+                                ? 'bg-blue-100 text-blue-800 border-r-2 border-blue-700'
+                                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                              }
+                            `}
+                          >
+                            <SubIcon className={`w-4 h-4 mr-3 ${isSubActive ? 'text-blue-700' : 'text-gray-400'}`} />
+                            {subItem.label}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
+              )
+            }
             
             return (
               <button

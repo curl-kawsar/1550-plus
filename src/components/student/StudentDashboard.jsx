@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -8,6 +8,8 @@ import StudentChatTab from '@/components/student/StudentChatTab'
 import ScheduleManager from '@/components/student/ScheduleManager'
 import ParentalApprovalModal from '@/components/student/ParentalApprovalModal'
 import BookingWidget from '@/components/student/BookingWidget'
+import AssignmentTab from '@/components/student/AssignmentTab'
+import ResultsTab from '@/components/student/ResultsTab'
 import { useChatMessages } from '@/hooks/useChat'
 import { 
   User, 
@@ -25,15 +27,35 @@ import {
   Settings,
   MessageSquare,
   HelpCircle,
-  RefreshCw
+  RefreshCw,
+  FileText,
+  Trophy,
+  Menu,
+  X,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react'
 
 export default function StudentDashboard({ student, onLogout, onRefreshStudent }) {
   const [activeTab, setActiveTab] = useState('overview')
   const [refreshing, setRefreshing] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const scrollContainerRef = useRef(null)
   
   // Check if parental approval is required
   const needsParentalApproval = student?.parentalApprovalStatus !== 'approved'
+
+  // Chat data for notifications - call at top level
+  const studentEmail = student?.email;
+  const { data: chatData } = useChatMessages(studentEmail, {
+    enabled: !!studentEmail,
+    refetchInterval: 10000 // Check for new messages every 10 seconds
+  });
+
+  const messages = chatData?.messages || [];
+  const unreadAdminMessages = messages.filter(
+    msg => msg.sender === 'admin' && msg.status !== 'read'
+  ).length;
 
   const handleRefresh = async () => {
     setRefreshing(true)
@@ -44,20 +66,23 @@ export default function StudentDashboard({ student, onLogout, onRefreshStudent }
     }
   }
 
+  const scrollTabs = (direction) => {
+    if (scrollContainerRef.current) {
+      const scrollAmount = 200
+      scrollContainerRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      })
+    }
+  }
+
+  const handleTabChange = (tabId) => {
+    setActiveTab(tabId)
+    setMobileMenuOpen(false)
+  }
+
   // Chat Tab Button with notification badge
-  const ChatTabButton = ({ student, isActive, onClick, icon: Icon, label }) => {
-    const studentEmail = student?.email;
-    
-    const { data: chatData } = useChatMessages(studentEmail, {
-      enabled: !!studentEmail,
-      refetchInterval: 10000 // Check for new messages every 10 seconds
-    });
-
-    const messages = chatData?.messages || [];
-    const unreadAdminMessages = messages.filter(
-      msg => msg.sender === 'admin' && msg.status !== 'read'
-    ).length;
-
+  const ChatTabButton = ({ isActive, onClick, icon: Icon, label, unreadCount }) => {
     return (
       <button
         onClick={onClick}
@@ -69,9 +94,9 @@ export default function StudentDashboard({ student, onLogout, onRefreshStudent }
       >
         <Icon className="h-4 w-4" />
         {label}
-        {unreadAdminMessages > 0 && (
+        {unreadCount > 0 && (
           <Badge variant="destructive" className="ml-1 text-xs h-5 w-5 rounded-full p-0 flex items-center justify-center">
-            {unreadAdminMessages}
+            {unreadCount}
           </Badge>
         )}
       </button>
@@ -103,6 +128,8 @@ export default function StudentDashboard({ student, onLogout, onRefreshStudent }
   const tabs = [
     { id: 'overview', label: 'Overview', icon: User },
     { id: 'schedule', label: 'Schedule', icon: Calendar },
+    { id: 'assignments', label: 'Assignments', icon: FileText },
+    { id: 'results', label: 'Results', icon: Trophy },
     { id: 'academic', label: 'Academic Info', icon: BookOpen },
     { id: 'contact', label: 'Contact Info', icon: Mail },
     { id: 'help', label: 'Get Personalized Help', icon: HelpCircle },
@@ -114,91 +141,269 @@ export default function StudentDashboard({ student, onLogout, onRefreshStudent }
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div className="flex items-center space-x-4">
+          <div className="flex justify-between items-center py-4 sm:py-6">
+            <div className="flex items-center space-x-3 sm:space-x-4 min-w-0">
               <div className="flex-shrink-0">
-                <div className="w-12 h-12 bg-[#457BF5] rounded-full flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#457BF5] rounded-full flex items-center justify-center">
+                  <span className="text-white font-bold text-sm sm:text-lg">
                     {student.firstName?.[0]}{student.lastName?.[0]}
                   </span>
                 </div>
               </div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">
+              <div className="min-w-0">
+                <h1 className="text-lg sm:text-2xl font-bold text-gray-900 truncate">
                   Welcome, {student.firstName} {student.lastName}
                 </h1>
-                <p className="text-gray-600">Student Dashboard</p>
+                <p className="text-sm sm:text-base text-gray-600">Student Dashboard</p>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
-              <Badge className={getStatusColor(student.status)}>
+            <div className="flex items-center space-x-2 sm:space-x-4">
+              <Badge className={`${getStatusColor(student.status)} text-xs sm:text-sm`}>
                 {student.status || 'pending'}
               </Badge>
-              <Button
-                onClick={handleRefresh}
-                variant="outline"
-                size="sm"
-                disabled={refreshing}
-                className="flex items-center gap-2"
-              >
-                <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
-                {refreshing ? 'Refreshing...' : 'Refresh'}
-              </Button>
-              <Button
-                onClick={onLogout}
-                variant="outline"
-                className="flex items-center gap-2"
-              >
-                <LogOut className="h-4 w-4" />
-                Logout
-              </Button>
+              <div className="hidden sm:flex items-center space-x-2">
+                <Button
+                  onClick={handleRefresh}
+                  variant="outline"
+                  size="sm"
+                  disabled={refreshing}
+                  className="flex items-center gap-2"
+                >
+                  <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+                  {refreshing ? 'Refreshing...' : 'Refresh'}
+                </Button>
+                <Button
+                  onClick={onLogout}
+                  variant="outline"
+                  className="flex items-center gap-2"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Logout
+                </Button>
+              </div>
+              {/* Mobile menu button */}
+              <div className="sm:hidden">
+                <Button
+                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-1"
+                >
+                  {mobileMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+                </Button>
+              </div>
             </div>
           </div>
+          
+          {/* Mobile menu dropdown */}
+          {mobileMenuOpen && (
+            <div className="sm:hidden border-t bg-gray-50 py-2">
+              <div className="flex flex-col space-y-2 px-4">
+                <Button
+                  onClick={handleRefresh}
+                  variant="outline"
+                  size="sm"
+                  disabled={refreshing}
+                  className="flex items-center gap-2 justify-start"
+                >
+                  <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+                  {refreshing ? 'Refreshing...' : 'Refresh'}
+                </Button>
+                <Button
+                  onClick={onLogout}
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2 justify-start"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Logout
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Navigation Tabs */}
       <div className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="flex space-x-8">
-            {tabs.map((tab) => {
-              const Icon = tab.icon
-              
-              // Special handling for chat tab with notifications
-              if (tab.id === 'chat') {
+        <div className="max-w-7xl mx-auto">
+          {/* Desktop Navigation */}
+          <div className="hidden lg:block px-4 sm:px-6 lg:px-8">
+            <nav className="flex space-x-8">
+              {tabs.map((tab) => {
+                const Icon = tab.icon
+                
+                // Special handling for chat tab with notifications
+                if (tab.id === 'chat') {
+                  return (
+                    <ChatTabButton
+                      key={tab.id}
+                      isActive={activeTab === tab.id}
+                      onClick={() => handleTabChange(tab.id)}
+                      icon={Icon}
+                      label={tab.label}
+                      unreadCount={unreadAdminMessages}
+                    />
+                  )
+                }
+                
                 return (
-                  <ChatTabButton
+                  <button
                     key={tab.id}
-                    student={student}
-                    isActive={activeTab === tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    icon={Icon}
-                    label={tab.label}
-                  />
+                    onClick={() => handleTabChange(tab.id)}
+                    className={`py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2 whitespace-nowrap ${
+                      activeTab === tab.id
+                        ? 'border-[#457BF5] text-[#457BF5]'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`}
+                  >
+                    <Icon className="h-4 w-4" />
+                    {tab.label}
+                  </button>
                 )
-              }
+              })}
+            </nav>
+          </div>
+
+          {/* Tablet Navigation with scroll */}
+          <div className="hidden md:block lg:hidden px-4 sm:px-6">
+            <div className="relative">
+              <button
+                onClick={() => scrollTabs('left')}
+                className="absolute left-0 top-0 bottom-0 z-10 bg-gradient-to-r from-white to-transparent w-8 flex items-center justify-center hover:from-gray-50"
+              >
+                <ChevronLeft className="h-4 w-4 text-gray-400" />
+              </button>
               
-              return (
+              <div
+                ref={scrollContainerRef}
+                className="overflow-x-auto scrollbar-hide px-8"
+                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+              >
+                <nav className="flex space-x-6 min-w-max">
+                  {tabs.map((tab) => {
+                    const Icon = tab.icon
+                    
+                    if (tab.id === 'chat') {
+                      return (
+                        <ChatTabButton
+                          key={tab.id}
+                          isActive={activeTab === tab.id}
+                          onClick={() => handleTabChange(tab.id)}
+                          icon={Icon}
+                          label={tab.label}
+                          unreadCount={unreadAdminMessages}
+                        />
+                      )
+                    }
+                    
+                    return (
+                      <button
+                        key={tab.id}
+                        onClick={() => handleTabChange(tab.id)}
+                        className={`py-4 px-2 border-b-2 font-medium text-sm flex items-center gap-2 whitespace-nowrap ${
+                          activeTab === tab.id
+                            ? 'border-[#457BF5] text-[#457BF5]'
+                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                        }`}
+                      >
+                        <Icon className="h-4 w-4" />
+                        {tab.label}
+                      </button>
+                    )
+                  })}
+                </nav>
+              </div>
+              
+              <button
+                onClick={() => scrollTabs('right')}
+                className="absolute right-0 top-0 bottom-0 z-10 bg-gradient-to-l from-white to-transparent w-8 flex items-center justify-center hover:from-gray-50"
+              >
+                <ChevronRight className="h-4 w-4 text-gray-400" />
+              </button>
+            </div>
+          </div>
+
+          {/* Mobile Navigation - Dropdown */}
+          <div className="md:hidden px-4">
+            <div className="py-3">
+              <div className="relative">
                 <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2 ${
-                    activeTab === tab.id
-                      ? 'border-[#457BF5] text-[#457BF5]'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                  className={`w-full flex items-center justify-between px-4 py-3 rounded-lg border-2 transition-all ${
+                    mobileMenuOpen 
+                      ? 'border-[#457BF5] bg-blue-50' 
+                      : 'border-gray-200 bg-white hover:border-gray-300'
                   }`}
                 >
-                  <Icon className="h-4 w-4" />
-                  {tab.label}
+                  <div className="flex items-center gap-3">
+                    {(() => {
+                      const activeTabData = tabs.find(tab => tab.id === activeTab)
+                      const Icon = activeTabData?.icon || User
+                      return (
+                        <>
+                          <Icon className="h-5 w-5 text-[#457BF5]" />
+                          <span className="font-medium text-gray-900">
+                            {activeTabData?.label || 'Overview'}
+                          </span>
+                        </>
+                      )
+                    })()}
+                  </div>
+                  <ChevronRight className={`h-4 w-4 text-gray-400 transition-transform ${mobileMenuOpen ? 'rotate-90' : ''}`} />
                 </button>
-              )
-            })}
-          </nav>
+                
+                {mobileMenuOpen && (
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-80 overflow-y-auto">
+                    {tabs.map((tab) => {
+                      const Icon = tab.icon
+                      const isActive = activeTab === tab.id
+                      
+                      if (tab.id === 'chat') {
+                        return (
+                          <button
+                            key={tab.id}
+                            onClick={() => handleTabChange(tab.id)}
+                            className={`w-full flex items-center justify-between px-4 py-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-b-0 ${
+                              isActive ? 'bg-blue-50 text-[#457BF5]' : 'text-gray-700'
+                            }`}
+                          >
+                            <div className="flex items-center gap-3">
+                              <Icon className="h-5 w-5" />
+                              <span className="font-medium">{tab.label}</span>
+                            </div>
+                            {unreadAdminMessages > 0 && (
+                              <Badge variant="destructive" className="text-xs h-5 w-5 rounded-full p-0 flex items-center justify-center">
+                                {unreadAdminMessages}
+                              </Badge>
+                            )}
+                          </button>
+                        )
+                      }
+                      
+                      return (
+                        <button
+                          key={tab.id}
+                          onClick={() => handleTabChange(tab.id)}
+                          className={`w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-b-0 ${
+                            isActive ? 'bg-blue-50 text-[#457BF5]' : 'text-gray-700'
+                          }`}
+                        >
+                          <Icon className="h-5 w-5" />
+                          <span className="font-medium">{tab.label}</span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
         {activeTab === 'overview' && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Quick Stats */}
@@ -508,6 +713,18 @@ export default function StudentDashboard({ student, onLogout, onRefreshStudent }
                 <BookingWidget />
               </CardContent>
             </Card>
+          </div>
+        )}
+
+        {activeTab === 'assignments' && (
+          <div className="max-w-6xl mx-auto">
+            <AssignmentTab student={student} />
+          </div>
+        )}
+
+        {activeTab === 'results' && (
+          <div className="max-w-6xl mx-auto">
+            <ResultsTab student={student} />
           </div>
         )}
 
