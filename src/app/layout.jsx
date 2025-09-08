@@ -7,9 +7,11 @@ import LayoutContent from "@/components/LayoutContent";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "College Mastermind - Your Gateway to College Success",
+  // make a lengthy title for 1550+
+
+  title: "1550plus - SAT Prep, College Admissions, and Scholarships",
   description: "Join thousands of students on their journey to academic excellence with personalized college guidance and support.",
-};
+};  
 
 export default function RootLayout({ children }) {
   return (
