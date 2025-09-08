@@ -119,10 +119,10 @@ Message: ${formData.message}`
                   <div>
                     <p className="text-sm font-medium text-gray-500">Contact Number</p>
                     <a 
-                      href="tel:(475) 333-0443" 
+                      href="tel:(475) 333-0550" 
                       className="text-lg text-gray-900 hover:text-green-600 transition-colors"
                     >
-                      (475) 333-0443
+                      (475) 333-0550
                     </a>
                   </div>
                 </div>
@@ -131,10 +131,10 @@ Message: ${formData.message}`
                   <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
                     <MapPin className="w-6 h-6 text-purple-600" />
                   </div>
-                  <div>
+                  {/* <div>
                     <p className="text-sm font-medium text-gray-500">Location</p>
                     <p className="text-lg text-gray-900">Online & In-Person</p>
-                  </div>
+                  </div> */}
                 </div>
               </div>
             </div>

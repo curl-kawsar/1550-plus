@@ -23,11 +23,9 @@ const Spark = () => {
             1200+ scores were finishing in the top 2% of test-takers nationwide.
           </p>
           
-          <p className="text-lg">
-            By 2016, demand grew so high that schools began inviting us to deliver large seminars to parents 
-            across the Midwest on the secrets of high test scores. Soon after, we launched our after-school 
-            methods in a more affordable group format, taking 10-20 students per class.
-          </p>
+          {/* <p className="text-lg">
+            By 2021, those quiet referrals had expanded into Arizona and California, and today the majority of our most dedicated families still come from the West.
+          </p> */}
           
           <p className="text-lg">
             Private family clients were limited to only 10-12 per year, and those spots became highly coveted, 
@@ -36,9 +34,7 @@ const Spark = () => {
           
           <p className="text-lg">
             For years, families guarded our name, sharing it only with their closest friends and relatives. We never 
-            advertised because word-of-mouth alone kept our limited private spaces full each year. By 2021, 
-            those quiet referrals had expanded into Arizona and California, and today the majority of our most 
-            dedicated
+            advertised because word-of-mouth alone kept our limited private spaces full each year. By 2021, those quiet referrals had expanded into Arizona and California, and today the majority of our most dedicated families still come from the West.
           </p>
         </div>
         
