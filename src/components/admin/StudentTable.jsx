@@ -1,12 +1,13 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Eye, Search, Filter, Download, ChevronLeft, ChevronRight, Edit2, Save, X, Trash2, RefreshCw } from 'lucide-react'
 import { toast } from "sonner"
+import { useDebounce } from '@/hooks/useDebounce'
 
 const StudentTable = () => {
   const [students, setStudents] = useState([])
@@ -19,7 +20,8 @@ const StudentTable = () => {
   const [filters, setFilters] = useState({
     search: '',
     status: '',
-    diagnosticTest: ''
+    diagnosticTest: '',
+    classTime: ''
   })
   const [selectedStudent, setSelectedStudent] = useState(null)
   const [editingStudent, setEditingStudent] = useState(null)
@@ -33,9 +35,20 @@ const StudentTable = () => {
   })
   const [refreshing, setRefreshing] = useState(false)
 
+  // Debounce search input to avoid excessive API calls
+  const debouncedSearch = useDebounce(filters.search, 500)
+
+  // Create memoized filters object to prevent unnecessary re-renders
+  const memoizedFilters = useMemo(() => ({
+    search: debouncedSearch,
+    status: filters.status,
+    diagnosticTest: filters.diagnosticTest,
+    classTime: filters.classTime
+  }), [debouncedSearch, filters.status, filters.diagnosticTest, filters.classTime])
+
   useEffect(() => {
     fetchStudents()
-  }, [pagination.currentPage, filters])
+  }, [pagination.currentPage, memoizedFilters])
 
   const fetchStudents = async () => {
     setLoading(true)
@@ -45,18 +58,29 @@ const StudentTable = () => {
         limit: '10'
       })
       
-      if (filters.search) params.append('search', filters.search)
-      if (filters.status) params.append('status', filters.status)
-      if (filters.diagnosticTest) params.append('diagnosticTest', filters.diagnosticTest)
+      if (memoizedFilters.search) params.append('search', memoizedFilters.search)
+      if (memoizedFilters.status) params.append('status', memoizedFilters.status)
+      if (memoizedFilters.diagnosticTest) params.append('diagnosticTest', memoizedFilters.diagnosticTest)
+      if (memoizedFilters.classTime) params.append('classTime', memoizedFilters.classTime)
       
       const response = await fetch(`/api/students?${params}`)
       const data = await response.json()
       
-      setStudents(data.students)
-      setPagination(data.pagination)
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch students')
+      }
+      
+      setStudents(data.students || [])
+      setPagination(data.pagination || {
+        currentPage: 1,
+        totalPages: 1,
+        totalStudents: 0,
+        hasNext: false,
+        hasPrev: false
+      })
     } catch (error) {
       console.error('Error fetching students:', error)
-      toast.error('Error fetching students')
+      toast.error(error.message || 'Error fetching students')
     } finally {
       setLoading(false)
     }
@@ -508,12 +532,12 @@ const StudentTable = () => {
         </CardHeader>
         <CardContent>
           {/* Filters */}
-          <div className="flex space-x-4 mb-6">
-            <div className="flex-1">
+          <div className="flex flex-wrap gap-4 mb-6">
+            <div className="flex-1 min-w-64">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <Input
-                  placeholder="Search students..."
+                  placeholder="Search by name, email, or school..."
                   value={filters.search}
                   onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
                   className="pl-10 border-[#457BF5]"
@@ -523,7 +547,7 @@ const StudentTable = () => {
             <select
               value={filters.status}
               onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
-              className="border border-[#457BF5] rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#457BF5] focus:border-[#457BF5]"
+              className="border border-[#457BF5] rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#457BF5] focus:border-[#457BF5] min-w-32"
             >
               <option value="">All Status</option>
               <option value="pending">Pending</option>
@@ -531,15 +555,36 @@ const StudentTable = () => {
               <option value="contacted">Contacted</option>
             </select>
             <select
+              value={filters.classTime}
+              onChange={(e) => setFilters(prev => ({ ...prev, classTime: e.target.value }))}
+              className="border border-[#457BF5] rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#457BF5] focus:border-[#457BF5] min-w-48"
+            >
+              <option value="">All Class Times</option>
+              <option value="Mon & Wed - 4:00 PM Pacific">Mon & Wed - 4:00 PM</option>
+              <option value="Mon & Wed - 7:00 PM Pacific">Mon & Wed - 7:00 PM</option>
+              <option value="Tue & Thu - 4:00 PM Pacific">Tue & Thu - 4:00 PM</option>
+              <option value="Tue & Thu - 7:00 PM Pacific">Tue & Thu - 7:00 PM</option>
+            </select>
+            <select
               value={filters.diagnosticTest}
               onChange={(e) => setFilters(prev => ({ ...prev, diagnosticTest: e.target.value }))}
-              className="border border-[#457BF5] rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#457BF5] focus:border-[#457BF5]"
+              className="border border-[#457BF5] rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#457BF5] focus:border-[#457BF5] min-w-48"
             >
               <option value="">All Diagnostic Tests</option>
-              <option value="saturday">Saturday Sept 27</option>
-              <option value="sunday">Sunday Sept 28</option>
-              <option value="cannot">Cannot Attend</option>
+              <option value="saturday">Saturday, Sept 27 (8:30am)</option>
+              <option value="sunday">Sunday, Sept 28 (8:30am)</option>
+              <option value="cannot">Cannot Attend Either</option>
             </select>
+            {(filters.search || filters.status || filters.classTime || filters.diagnosticTest) && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setFilters({ search: '', status: '', classTime: '', diagnosticTest: '' })}
+                className="px-3 py-2"
+              >
+                Clear Filters
+              </Button>
+            )}
           </div>
 
           {/* Table */}

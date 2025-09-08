@@ -15,9 +15,11 @@ import {
   RefreshCw,
   LogOut
 } from 'lucide-react'
+import { useStudentLogout } from '@/hooks/useStudentAuth'
 
 const ParentalApprovalModal = ({ student, onRefresh }) => {
   const [isRefreshing, setIsRefreshing] = useState(false)
+  const logoutMutation = useStudentLogout()
 
   const handleRefresh = async () => {
     setIsRefreshing(true)
@@ -29,10 +31,7 @@ const ParentalApprovalModal = ({ student, onRefresh }) => {
   }
 
   const handleLogout = () => {
-    // Clear student token from localStorage
-    localStorage.removeItem('studentToken')
-    // Redirect to login page
-    window.location.href = '/student-login'
+    logoutMutation.mutate()
   }
 
   const getStatusInfo = () => {
@@ -227,10 +226,11 @@ const ParentalApprovalModal = ({ student, onRefresh }) => {
               onClick={handleLogout}
               variant="destructive"
               size="sm"
+              disabled={logoutMutation.isPending}
               className="flex items-center gap-2"
             >
-              <LogOut className="w-3 h-3" />
-              Logout
+              <LogOut className={`w-3 h-3 ${logoutMutation.isPending ? 'animate-spin' : ''}`} />
+              {logoutMutation.isPending ? 'Logging out...' : 'Logout'}
             </Button>
           </div>
 
