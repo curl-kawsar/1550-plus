@@ -1,5 +1,6 @@
 import connectToDatabase from '@/lib/mongodb'
 import Ambassador from '@/models/Ambassador'
+import Admin from '@/models/Admin'
 import { cookies } from 'next/headers'
 import jwt from 'jsonwebtoken'
 

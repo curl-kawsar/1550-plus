@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import connectToDatabase from '@/lib/mongodb';
 import Assignment from '@/models/Assignment';
+import Admin from '@/models/Admin';
 import jwt from 'jsonwebtoken';
 
 // Get all assignments (Admin only)

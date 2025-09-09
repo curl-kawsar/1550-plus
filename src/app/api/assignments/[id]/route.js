@@ -3,6 +3,7 @@ import { cookies } from 'next/headers';
 import connectToDatabase from '@/lib/mongodb';
 import Assignment from '@/models/Assignment';
 import AssignmentSubmission from '@/models/AssignmentSubmission';
+import Admin from '@/models/Admin';
 import jwt from 'jsonwebtoken';
 
 // Get single assignment
