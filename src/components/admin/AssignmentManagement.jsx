@@ -14,7 +14,7 @@ import {
   Edit2, 
   Trash2, 
   ToggleLeft, 
-  ToggleRight, 
+  ToggleRight,
   RefreshCw,
   Download,
   FileText,
@@ -122,7 +122,7 @@ const AssignmentManagement = () => {
         <div className="flex space-x-2">
           <Button 
             onClick={handleRefresh} 
-            size="sm" 
+            size="sm"
             variant="outline"
             disabled={refreshing || isRefetching}
           >
@@ -246,18 +246,18 @@ const AssignmentList = ({ assignments, isLoading, onToggleStatus, onDelete, onVi
       <div className="space-y-4">
         {[...Array(5)].map((_, i) => (
           <div key={i} className="animate-pulse">
-            <Card>
+        <Card>
               <CardContent className="p-6">
                 <div className="flex justify-between items-start">
                   <div className="space-y-2">
                     <div className="h-6 bg-gray-200 rounded w-48"></div>
                     <div className="h-4 bg-gray-200 rounded w-32"></div>
-                  </div>
+              </div>
                   <div className="h-6 bg-gray-200 rounded w-16"></div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
         ))}
       </div>
     )
@@ -276,18 +276,18 @@ const AssignmentList = ({ assignments, isLoading, onToggleStatus, onDelete, onVi
   }
 
   return (
-    <div className="space-y-4">
-      {assignments.map((assignment) => (
+            <div className="space-y-4">
+              {assignments.map((assignment) => (
         <Card key={assignment._id}>
           <CardContent className="p-6">
             <div className="flex justify-between items-start">
-              <div className="flex-1">
+                    <div className="flex-1">
                 <div className="flex items-center space-x-3 mb-2">
                   <h3 className="text-lg font-semibold text-gray-900">{assignment.title}</h3>
                   <Badge className={assignment.isActive ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}>
                     {assignment.isActive ? 'Active' : 'Inactive'}
-                  </Badge>
-                </div>
+                        </Badge>
+                      </div>
                 
                 <p className="text-gray-600 mb-3">{assignment.description || 'No description'}</p>
                 
@@ -298,11 +298,11 @@ const AssignmentList = ({ assignments, isLoading, onToggleStatus, onDelete, onVi
                   </div>
                   <div className="flex items-center space-x-1">
                     <Clock className="w-4 h-4" />
-                    <span>{assignment.timeLimit} minutes</span>
-                  </div>
+                        <span>{assignment.timeLimit} minutes</span>
+                      </div>
                   <div className="flex items-center space-x-1">
                     <span>Created by {assignment.createdBy?.firstName} {assignment.createdBy?.lastName}</span>
-                  </div>
+                    </div>
                   <div>
                     <span>{new Date(assignment.createdAt).toLocaleDateString()}</span>
                   </div>
@@ -310,39 +310,39 @@ const AssignmentList = ({ assignments, isLoading, onToggleStatus, onDelete, onVi
               </div>
               
               <div className="flex items-center space-x-2 ml-4">
-                <Button
+                      <Button
                   variant="outline"
-                  size="sm"
+                        size="sm"
                   onClick={() => onView(assignment)}
-                >
-                  <Eye className="w-4 h-4" />
-                </Button>
+                      >
+                        <Eye className="w-4 h-4" />
+                      </Button>
                 
-                <Button
+                      <Button
                   variant="outline"
-                  size="sm"
+                        size="sm"
                   onClick={() => onToggleStatus(assignment._id)}
                   disabled={isToggling}
                   className={assignment.isActive ? "text-orange-600 border-orange-600 hover:bg-orange-50" : "text-green-600 border-green-600 hover:bg-green-50"}
-                >
+                      >
                   {assignment.isActive ? <ToggleLeft className="w-4 h-4" /> : <ToggleRight className="w-4 h-4" />}
-                </Button>
+                      </Button>
                 
-                <Button
+                      <Button
                   variant="outline"
-                  size="sm"
+                        size="sm"
                   onClick={() => onDelete(assignment._id)}
                   disabled={isDeleting}
                   className="text-red-600 border-red-600 hover:bg-red-50"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+        </CardContent>
+      </Card>
       ))}
-    </div>
+              </div>
   )
 }
 
@@ -455,154 +455,154 @@ const CreateAssignment = ({ onSuccess }) => {
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Basic Info */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
               <Label htmlFor="title">Assignment Title *</Label>
-              <Input
-                id="title"
-                value={formData.title}
+                  <Input
+                    id="title"
+                    value={formData.title}
                 onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
                 placeholder="Enter assignment title"
-                required
-              />
-            </div>
+                    required
+                  />
+                </div>
             
-            <div className="space-y-2">
-              <Label htmlFor="timeLimit">Time Limit (minutes)</Label>
-              <Input
-                id="timeLimit"
-                type="number"
-                min="1"
-                value={formData.timeLimit}
+                <div className="space-y-2">
+                  <Label htmlFor="timeLimit">Time Limit (minutes)</Label>
+                  <Input
+                    id="timeLimit"
+                    type="number"
+                    min="1"
+                    value={formData.timeLimit}
                 onChange={(e) => setFormData(prev => ({ ...prev, timeLimit: parseInt(e.target.value) || 60 }))}
-              />
-            </div>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
-            <textarea
-              id="description"
-              value={formData.description}
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="description">Description</Label>
+                <textarea
+                  id="description"
+                  value={formData.description}
               onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
               placeholder="Enter assignment description (optional)"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none h-20"
-            />
-          </div>
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none h-20"
+                />
+              </div>
 
-          {/* Questions */}
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <Label className="text-lg font-medium">Questions</Label>
-              <Button type="button" onClick={addQuestion} size="sm">
-                <Plus className="w-4 h-4 mr-2" />
-                Add Question
-              </Button>
-            </div>
-
-            {formData.questions.map((question, index) => (
+              {/* Questions */}
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <Label className="text-lg font-medium">Questions</Label>
+                  <Button type="button" onClick={addQuestion} size="sm">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Question
+                  </Button>
+                </div>
+                
+                {formData.questions.map((question, index) => (
               <Card key={index} className="border-2 border-gray-200">
                 <CardHeader className="pb-3">
-                  <div className="flex justify-between items-center">
-                    <h4 className="font-medium">Question {index + 1}</h4>
-                    {formData.questions.length > 1 && (
-                      <Button
-                        type="button"
+                      <div className="flex justify-between items-center">
+                        <h4 className="font-medium">Question {index + 1}</h4>
+                        {formData.questions.length > 1 && (
+                          <Button
+                            type="button"
                         variant="outline"
-                        size="sm"
-                        onClick={() => removeQuestion(index)}
+                            size="sm"
+                            onClick={() => removeQuestion(index)}
                         className="text-red-600 border-red-600 hover:bg-red-50"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    )}
-                  </div>
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        )}
+                      </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label>Question *</Label>
-                    <textarea
-                      value={question.question}
+                      <div className="space-y-2">
+                        <Label>Question *</Label>
+                        <textarea
+                          value={question.question}
                       onChange={(e) => updateQuestion(index, 'question', e.target.value)}
-                      placeholder="Enter the question"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none h-20"
-                      required
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label>Instruction (optional)</Label>
-                    <Input
-                      value={question.instruction}
+                          placeholder="Enter the question"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none h-20"
+                          required
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label>Instruction (optional)</Label>
+                        <Input
+                          value={question.instruction}
                       onChange={(e) => updateQuestion(index, 'instruction', e.target.value)}
                       placeholder="Additional instructions for this question"
-                    />
-                  </div>
-                  
+                        />
+                      </div>
+                      
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Option A *</Label>
-                      <Input
-                        value={question.optionA}
+                        <div className="space-y-2">
+                          <Label>Option A *</Label>
+                          <Input
+                            value={question.optionA}
                         onChange={(e) => updateQuestion(index, 'optionA', e.target.value)}
-                        placeholder="Option A"
-                        required
-                      />
-                    </div>
+                            placeholder="Option A"
+                            required
+                          />
+                        </div>
                     
-                    <div className="space-y-2">
-                      <Label>Option B *</Label>
-                      <Input
-                        value={question.optionB}
+                        <div className="space-y-2">
+                          <Label>Option B *</Label>
+                          <Input
+                            value={question.optionB}
                         onChange={(e) => updateQuestion(index, 'optionB', e.target.value)}
-                        placeholder="Option B"
-                        required
-                      />
-                    </div>
+                            placeholder="Option B"
+                            required
+                          />
+                        </div>
                     
-                    <div className="space-y-2">
-                      <Label>Option C *</Label>
-                      <Input
-                        value={question.optionC}
+                        <div className="space-y-2">
+                          <Label>Option C *</Label>
+                          <Input
+                            value={question.optionC}
                         onChange={(e) => updateQuestion(index, 'optionC', e.target.value)}
-                        placeholder="Option C"
-                        required
-                      />
-                    </div>
+                            placeholder="Option C"
+                            required
+                          />
+                        </div>
                     
-                    <div className="space-y-2">
-                      <Label>Option D *</Label>
-                      <Input
-                        value={question.optionD}
+                        <div className="space-y-2">
+                          <Label>Option D *</Label>
+                          <Input
+                            value={question.optionD}
                         onChange={(e) => updateQuestion(index, 'optionD', e.target.value)}
-                        placeholder="Option D"
-                        required
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label>Correct Answer *</Label>
-                    <select
-                      value={question.answer}
+                            placeholder="Option D"
+                            required
+                          />
+                        </div>
+                      </div>
+                      
+                        <div className="space-y-2">
+                          <Label>Correct Answer *</Label>
+                          <select
+                            value={question.answer}
                       onChange={(e) => updateQuestion(index, 'answer', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      required
-                    >
-                      <option value="A">A</option>
-                      <option value="B">B</option>
-                      <option value="C">C</option>
-                      <option value="D">D</option>
-                    </select>
-                  </div>
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            required
+                          >
+                            <option value="A">A</option>
+                            <option value="B">B</option>
+                            <option value="C">C</option>
+                            <option value="D">D</option>
+                          </select>
+                        </div>
                 </CardContent>
-              </Card>
-            ))}
-          </div>
+                  </Card>
+                ))}
+              </div>
 
           <div className="flex justify-end space-x-2">
-            <Button
-              type="submit"
+                <Button
+                  type="submit"
               disabled={createAssignmentMutation.isPending}
               className="bg-blue-600 hover:bg-blue-700"
             >
@@ -614,9 +614,9 @@ const CreateAssignment = ({ onSuccess }) => {
               ) : (
                 'Create Assignment'
               )}
-            </Button>
-          </div>
-        </form>
+                </Button>
+              </div>
+            </form>
       </CardContent>
     </Card>
   )
@@ -722,43 +722,43 @@ const UploadCSV = ({ onSuccess }) => {
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Basic Info */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
               <Label htmlFor="title">Assignment Title *</Label>
-              <Input
+                  <Input
                 id="title"
                 value={formData.title}
                 onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
                 placeholder="Enter assignment title"
-                required
-              />
-            </div>
+                    required
+                  />
+                </div>
             
-            <div className="space-y-2">
+                <div className="space-y-2">
               <Label htmlFor="timeLimit">Time Limit (minutes)</Label>
-              <Input
+                  <Input
                 id="timeLimit"
-                type="number"
-                min="1"
+                    type="number"
+                    min="1"
                 value={formData.timeLimit}
                 onChange={(e) => setFormData(prev => ({ ...prev, timeLimit: parseInt(e.target.value) || 60 }))}
-              />
-            </div>
-          </div>
-          
-          <div className="space-y-2">
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-2">
             <Label htmlFor="description">Description</Label>
-            <textarea
+                <textarea
               id="description"
               value={formData.description}
               onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
               placeholder="Enter assignment description (optional)"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none h-20"
-            />
-          </div>
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none h-20"
+                />
+              </div>
 
-          {/* File Upload */}
-          <div className="space-y-2">
+              {/* File Upload */}
+              <div className="space-y-2">
             <Label>CSV File *</Label>
             <div
               className={`relative border-2 border-dashed rounded-lg p-6 text-center ${
@@ -771,8 +771,8 @@ const UploadCSV = ({ onSuccess }) => {
             >
               <input
                 ref={fileInputRef}
-                type="file"
-                accept=".csv"
+                  type="file"
+                  accept=".csv"
                 onChange={handleFileChange}
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
               />
@@ -790,8 +790,8 @@ const UploadCSV = ({ onSuccess }) => {
                 )}
               </p>
               <p className="text-xs text-gray-500">CSV files only</p>
-            </div>
-          </div>
+                  </div>
+                </div>
 
           {/* CSV Format Example */}
           <div className="bg-gray-50 rounded-lg p-4">
@@ -804,8 +804,8 @@ const UploadCSV = ({ onSuccess }) => {
           </div>
 
           <div className="flex justify-end space-x-2">
-            <Button
-              type="submit"
+                <Button
+                  type="submit"
               disabled={uploadCSVMutation.isPending}
               className="bg-blue-600 hover:bg-blue-700"
             >
@@ -820,9 +820,9 @@ const UploadCSV = ({ onSuccess }) => {
                   Upload & Create
                 </>
               )}
-            </Button>
-          </div>
-        </form>
+                </Button>
+              </div>
+            </form>
       </CardContent>
     </Card>
   )
@@ -831,11 +831,11 @@ const UploadCSV = ({ onSuccess }) => {
 // Assignment Detail Modal
 const AssignmentDetailModal = ({ assignment, onClose }) => {
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="p-6 border-b">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b">
           <div className="flex justify-between items-start">
-            <div>
+                <div>
               <h2 className="text-2xl font-bold">{assignment.title}</h2>
               <p className="text-gray-600 mt-1">{assignment.description || 'No description'}</p>
               <div className="flex items-center space-x-4 mt-2 text-sm text-gray-500">
@@ -843,15 +843,15 @@ const AssignmentDetailModal = ({ assignment, onClose }) => {
                 <span>{assignment.timeLimit} minutes</span>
                 <Badge className={assignment.isActive ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}>
                   {assignment.isActive ? 'Active' : 'Inactive'}
-                </Badge>
-              </div>
+                  </Badge>
+                </div>
             </div>
             <Button variant="outline" size="sm" onClick={onClose}>
               ✕
-            </Button>
-          </div>
-        </div>
-
+                </Button>
+              </div>
+            </div>
+            
         <div className="p-6">
           <h3 className="text-lg font-semibold mb-4">Questions ({assignment.questions?.length || 0})</h3>
           <div className="space-y-6">
@@ -866,11 +866,11 @@ const AssignmentDetailModal = ({ assignment, onClose }) => {
                       <Badge variant="outline" className="text-xs">
                         Answer: {question.answer}
                       </Badge>
-                    </div>
-                    
+              </div>
+
                     <p className="text-gray-800">{question.question}</p>
                     
-                    {question.instruction && (
+                        {question.instruction && (
                       <p className="text-sm text-gray-600 italic">
                         Instructions: {question.instruction}
                       </p>
@@ -879,24 +879,24 @@ const AssignmentDetailModal = ({ assignment, onClose }) => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
                       <div className={`p-2 rounded ${question.answer === 'A' ? 'bg-green-100 text-green-800' : 'bg-gray-100'}`}>
                         <strong>A:</strong> {question.optionA}
-                      </div>
+                          </div>
                       <div className={`p-2 rounded ${question.answer === 'B' ? 'bg-green-100 text-green-800' : 'bg-gray-100'}`}>
                         <strong>B:</strong> {question.optionB}
-                      </div>
+                          </div>
                       <div className={`p-2 rounded ${question.answer === 'C' ? 'bg-green-100 text-green-800' : 'bg-gray-100'}`}>
                         <strong>C:</strong> {question.optionC}
-                      </div>
+                          </div>
                       <div className={`p-2 rounded ${question.answer === 'D' ? 'bg-green-100 text-green-800' : 'bg-gray-100'}`}>
                         <strong>D:</strong> {question.optionD}
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
                 </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </div>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            </div>
     </div>
   )
 }
