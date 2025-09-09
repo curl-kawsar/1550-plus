@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 import connectToDatabase from '@/lib/mongodb';
 import Admin from '@/models/Admin';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production';
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
 export async function GET() {
   try {

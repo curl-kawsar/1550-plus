@@ -3,7 +3,7 @@ import connectToDatabase from '@/lib/mongodb';
 import Admin from '@/models/Admin';
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production';
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
 export async function POST(request) {
   try {
@@ -67,8 +67,9 @@ export async function POST(request) {
     response.cookies.set('admin-token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+      sameSite: 'lax',
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      path: '/'
     });
     
     return response;

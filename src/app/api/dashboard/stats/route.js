@@ -1,10 +1,43 @@
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
+import jwt from 'jsonwebtoken';
 import connectToDatabase from '@/lib/mongodb';
 import Student from '@/models/Student';
 import Ambassador from '@/models/Ambassador';
+import Admin from '@/models/Admin';
+
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
 export async function GET() {
   try {
+    // Check authentication
+    const cookieStore = await cookies();
+    const token = cookieStore.get('admin-token')?.value;
+    
+    if (!token) {
+      return NextResponse.json(
+        { error: 'Invalid or expired token' },
+        { status: 401 }
+      );
+    }
+
+    let decoded;
+    try {
+      decoded = jwt.verify(token, JWT_SECRET);
+    } catch (error) {
+      return NextResponse.json(
+        { error: 'Invalid admin token' },
+        { status: 401 }
+      );
+    }
+
+    if (!decoded.role || (decoded.role !== 'admin' && decoded.role !== 'super-admin')) {
+      return NextResponse.json(
+        { error: 'Admin access required' },
+        { status: 403 }
+      );
+    }
+
     await connectToDatabase();
     
     // Get total students count
