@@ -14,7 +14,7 @@ export async function GET(request) {
     }
 
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production')
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key')
       if (!decoded.role || (decoded.role !== 'admin' && decoded.role !== 'super-admin')) {
         return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
       }

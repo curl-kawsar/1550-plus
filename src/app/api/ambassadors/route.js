@@ -17,7 +17,7 @@ export async function GET() {
     }
     
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production')
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key')
       if (!decoded.role || (decoded.role !== 'admin' && decoded.role !== 'super-admin')) {
         console.error('Invalid role:', decoded.role)
         return Response.json({ error: 'Admin access required' }, { status: 403 })
@@ -53,7 +53,7 @@ export async function POST(request) {
     
     let adminId
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production')
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key')
       if (!decoded.role || (decoded.role !== 'admin' && decoded.role !== 'super-admin')) {
         console.error('Invalid role:', decoded.role)
         return Response.json({ error: 'Admin access required' }, { status: 403 })

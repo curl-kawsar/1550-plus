@@ -21,8 +21,9 @@ export async function GET(request) {
     
     let decoded;
     try {
-      decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production');
+      decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
     } catch (jwtError) {
+      console.error('JWT verification error in assignments/student:', jwtError);
       return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 });
     }
     

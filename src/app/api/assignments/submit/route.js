@@ -21,7 +21,7 @@ export async function POST(request) {
     
     let decoded;
     try {
-      decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production');
+      decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
     } catch (jwtError) {
       return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 });
     }

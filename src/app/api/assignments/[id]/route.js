@@ -21,7 +21,7 @@ export async function GET(request, { params }) {
     
     if (adminToken) {
       try {
-        const decoded = jwt.verify(adminToken, process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production');
+        const decoded = jwt.verify(adminToken, process.env.JWT_SECRET || 'your-secret-key');
         if (['admin', 'super-admin'].includes(decoded.role)) {
           isAdmin = true;
         }
@@ -32,7 +32,7 @@ export async function GET(request, { params }) {
     
     if (!isAdmin && studentToken) {
       try {
-        const decoded = jwt.verify(studentToken, process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production');
+        const decoded = jwt.verify(studentToken, process.env.JWT_SECRET || 'your-secret-key');
         studentId = decoded.studentId;
       } catch (error) {
         return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 });
@@ -119,7 +119,7 @@ export async function PUT(request, { params }) {
     
     let decoded;
     try {
-      decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production');
+      decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
     } catch (jwtError) {
       return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 });
     }
@@ -170,7 +170,7 @@ export async function DELETE(request, { params }) {
     
     let decoded;
     try {
-      decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production');
+      decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
     } catch (jwtError) {
       return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 });
     }
