@@ -3,7 +3,8 @@ import "./globals.css";
 import { Toaster } from "sonner";
 import QueryProvider from "@/providers/QueryProvider";
 import LayoutContent from "@/components/LayoutContent";
-
+import { SpeedInsights } from "@vercel/speed-insights/next"
+import { Analytics } from "@vercel/analytics/next"
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
@@ -21,6 +22,8 @@ export default function RootLayout({ children }) {
           <LayoutContent>{children}</LayoutContent>
           <Toaster position="top-center" />
         </QueryProvider>
+        <SpeedInsights />
+        <Analytics />
       </body>
     </html>
   );
