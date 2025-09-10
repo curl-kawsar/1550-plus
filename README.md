@@ -8,7 +8,7 @@ A full-stack Next.js application for student registration and admin management, 
 - Multi-step registration form (4 steps)
 - Student information collection
 - Parent/guardian information
-- Academic profile and preferences
+- Academic profile and preferences 
 - Form validation and error handling
 
 ### Admin Dashboard
@@ -160,5 +160,6 @@ MONGODB_URI=your_mongodb_connection_string
 5. Open a Pull Request
 
 ## License
+
 
 This project is licensed under the MIT License.
