@@ -195,7 +195,8 @@ const StudentSchema = new mongoose.Schema({
   parentalApprovalToken: {
     type: String,
     unique: true,
-    sparse: true // Allow multiple null values
+    sparse: true, // Allow multiple null values
+    default: undefined // Use undefined instead of null for sparse index
   },
   parentalApprovedAt: {
     type: Date
