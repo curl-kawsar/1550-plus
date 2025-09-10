@@ -77,16 +77,26 @@ Message: ${formData.message}`
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h1 className="text-4xl font-bold text-gray-900 sm:text-5xl">
-              Get In Touch With Us
-            </h1>
-            <p className="mt-4 text-xl text-gray-600">
-              We are looking forward to speaking with you soon
-            </p>
-          </div>
+      <div className="min-h-[300px] bg-black flex items-center justify-center px-4 relative overflow-hidden">
+        {/* Background Pattern */}
+        <div
+          className="absolute inset-0 opacity-10"
+          style={{
+            backgroundImage:
+              'radial-gradient(circle at 1px 1px, white 2px, transparent 0)',
+            backgroundSize: '20px 20px',
+          }}
+        />
+        
+        <div className="text-center relative z-10">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-blue-500 leading-tight tracking-wider mb-4">
+            GET IN TOUCH
+            <br />
+            WITH US
+          </h1>
+          <p className="text-xl sm:text-2xl text-white font-medium">
+            We are looking forward to speaking with you soon
+          </p>
         </div>
       </div>
 

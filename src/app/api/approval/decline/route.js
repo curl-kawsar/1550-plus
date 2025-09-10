@@ -118,9 +118,13 @@ export async function GET(request) {
 
     // Update student's approval status to declined
     await Student.findByIdAndUpdate(student._id, {
-      parentalApprovalStatus: 'declined',
-      parentalApprovedAt: new Date(),
-      parentalApprovalToken: null // Clear the token after use
+      $set: {
+        parentalApprovalStatus: 'declined',
+        parentalApprovedAt: new Date()
+      },
+      $unset: {
+        parentalApprovalToken: 1 // Remove the token field after use
+      }
     });
 
     return new Response(`
