@@ -856,7 +856,7 @@ const InteractiveRegistrationForm = () => {
   return (
     <div className="h-screen bg-gray-50 flex">
       {/* Left Side - Form */}
-      <div className="w-1/2 p-8 overflow-y-auto">
+      <div className="w-full lg:w-1/2 p-4 sm:p-8 overflow-y-auto">
         <div className="max-w-md mx-auto">
           {/* Header */}
           <div className="flex items-center mb-8">
@@ -919,7 +919,7 @@ const InteractiveRegistrationForm = () => {
 
              {/* Right Side - Custom Design */}
        <div 
-         className="w-1/2 h-screen flex items-center justify-center relative overflow-hidden"
+         className="hidden lg:flex w-1/2 h-screen items-center justify-center relative overflow-hidden"
          style={{
            background: 'linear-gradient(to bottom right, #113076 0%, #020610 100%)'
          }}
