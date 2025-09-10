@@ -473,7 +473,7 @@ const InteractiveRegistrationForm = () => {
               <div>
                 <Label className="text-sm font-medium text-gray-700">State *</Label>
                 <div className="mt-2">
-                  {renderInputField('state', 'Newyork')}
+                  {renderInputField('state', 'New York')}
                 </div>
               </div>
 
