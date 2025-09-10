@@ -498,13 +498,49 @@ export default function StudentDashboard({ student, onLogout, onRefreshStudent }
                     </p>
                   </div>
                   {student.classTime && (
-                    <div className="bg-blue-50 p-4 rounded-lg">
-                      <h4 className="font-medium text-blue-900 mb-2">Class Details</h4>
-                      <ul className="text-sm text-blue-800 space-y-1">
-                        <li>• Duration: 2 hours per session</li>
-                        <li>• Format: Live interactive sessions</li>
-                        <li>• Materials: Provided digitally</li>
-                      </ul>
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <h4 className="text-sm font-medium text-gray-800 mb-3">Class Details</h4>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex items-center">
+                          <span className="w-2 h-2 bg-blue-600 rounded-full mr-3"></span>
+                          <span className="font-medium text-blue-600 uppercase tracking-wide">Duration: 1 Hour per Session</span>
+                        </div>
+                        <div className="flex items-center">
+                          <span className="w-2 h-2 bg-blue-600 rounded-full mr-3"></span>
+                          <span className="font-medium text-blue-600 uppercase tracking-wide">Format: Live Interactive Sessions</span>
+                        </div>
+                        <div className="flex items-center">
+                          <span className="w-2 h-2 bg-blue-600 rounded-full mr-3"></span>
+                          <span className="font-medium text-blue-600 uppercase tracking-wide">Materials: Provided Digitally</span>
+                        </div>
+                      </div>
+                      
+                      <div className="mt-4 pt-4 border-t border-gray-300">
+                        <div className="space-y-3 text-sm">
+                          <div>
+                            <div className="font-medium text-gray-700 mb-1">Meeting Link:</div>
+                            <a 
+                              href="https://us02web.zoom.us/j/8980721475" 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:text-blue-800 underline break-all"
+                            >
+                              https://us02web.zoom.us/j/8980721475
+                            </a>
+                          </div>
+                          
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                              <div className="font-medium text-gray-700 mb-1">Online Session:</div>
+                              <div className="text-blue-600 font-medium">Room 17</div>
+                            </div>
+                            <div>
+                              <div className="font-medium text-gray-700 mb-1">Office Hours:</div>
+                              <div className="text-blue-600 font-medium">Room 18</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </CardContent>
