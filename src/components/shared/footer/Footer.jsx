@@ -63,11 +63,7 @@ const Footer = () => {
         {/* Logo Section */}
         <div className="flex justify-left mb-16">
           <Link href="/" className="flex items-center">
-            <img
-              src="/logo.png"
-              alt="1550+ Logo"
-              className="h-12 w-auto"
-            />
+            <img src="/logo.png" alt="1550+ Logo" className="h-12 w-auto" />
           </Link>
         </div>
 
@@ -166,7 +162,7 @@ const Footer = () => {
             <h3 className="text-lg font-semibold mb-6 text-white">Socials</h3>
             <div className="space-y-4">
               <a
-                href="https://facebook.com"
+                href="https://www.facebook.com/collegemastermindUSA"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors"
@@ -175,7 +171,7 @@ const Footer = () => {
                 <span>Facebook</span>
               </a>
               <a
-                href="https://instagram.com"
+                href="https://www.instagram.com/collegemastermind"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors"
@@ -183,7 +179,7 @@ const Footer = () => {
                 <Instagram className="h-5 w-5" />
                 <span>Instagram</span>
               </a>
-              <a
+              {/* <a
                 href="https://youtube.com"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -191,7 +187,7 @@ const Footer = () => {
               >
                 <Youtube className="h-5 w-5" />
                 <span>Youtube</span>
-              </a>
+              </a> */}
               {/* <a
                 href="https://tiktok.com"
                 target="_blank"
