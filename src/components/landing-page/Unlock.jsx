@@ -10,7 +10,8 @@ const Unlock = () => {
   useEffect(() => {
     // Load Norwester font dynamically
     const link = document.createElement('link');
-    link.href = 'https://fonts.googleapis.com/css2?family=Norwester&display=swap';
+    link.href =
+      'https://fonts.googleapis.com/css2?family=Norwester&display=swap';
     link.rel = 'stylesheet';
     document.head.appendChild(link);
 
@@ -20,33 +21,32 @@ const Unlock = () => {
   }, []);
 
   return (
-    <section className="min-h-screen flex flex-col lg:flex-row">
+    <section className="max-h-[800px] flex flex-col justify-between relative items-center overflow-hidden lg:flex-row">
       {/* Right Side - Full Height Image (Top on mobile, Right on desktop) */}
-      <div className="w-full lg:w-1/2 h-60 xs:h-72 sm:h-80 md:h-96 lg:h-screen relative overflow-hidden lg:order-2">
+      <div className="w-full h-96 lg:h-screen lg:w-1/2 relative overflow-hidden lg:order-2">
         {/* Responsive Image */}
-        <div className="relative h-full w-full">
-          <Image
-            src="/left-image.png"
-            alt="SAT Score Chart"
-            fill
-            className="object-cover object-center"
-            priority
-            sizes="(max-width: 1024px) 100vw, 50vw"
-          />
-        </div>
+
+        <Image
+          src="/unlock-bar.png"
+          alt="SAT Score Chart"
+          fill
+          className="object-cover object-top h-full w-full"
+          priority
+          // sizes="(max-width: 1024px) 100vw, 50vw"
+        />
       </div>
 
       {/* Left Side - White Background with Text & Checklist (Bottom on mobile, Left on desktop) */}
-      <div className="w-full lg:w-1/2 bg-white flex items-center px-6 sm:px-8 md:px-12 py-12 sm:py-16 lg:px-8 xl:px-12 2xl:px-16 lg:order-1 min-h-[50vh] lg:min-h-screen">
+      <div className="w-full h-fit px-4 sm:h-fit lg:w-1/2 bg-white flex items-center sm:px-8 py-12 sm:py-16 lg:pl-32 lg:order-1 min-h-[50vh] lg:min-h-fit">
         <div className="max-w-md sm:max-w-lg lg:max-w-lg xl:max-w-xl 2xl:max-w-2xl mx-auto lg:mx-0 space-y-8 sm:space-y-10 lg:space-y-12 w-full">
           {/* Main Heading - Responsive Typography */}
-          <h2 
+          <h2
             className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-4xl xl:text-5xl 2xl:text-6xl font-bold text-blue-500 tracking-wider text-center lg:text-left leading-tight"
             style={{fontFamily: 'Norwester'}}
           >
             NEVER SETTLE
           </h2>
-          
+
           {/* Description - Responsive Typography */}
           <p className="text-gray-600 text-base xs:text-lg sm:text-xl md:text-xl lg:text-lg xl:text-xl 2xl:text-2xl leading-relaxed text-center lg:text-left max-w-prose mx-auto lg:mx-0">
             1550+ isn't just a score. It's proof you refuse to settle for less
@@ -81,7 +81,10 @@ const Unlock = () => {
                     />
                   </svg>
                 </div>
-                <span className="tracking-wide leading-tight" style={{fontFamily: 'Norwester'}}>
+                <span
+                  className="tracking-wide leading-tight"
+                  style={{fontFamily: 'Norwester'}}
+                >
                   {item}
                 </span>
               </li>
