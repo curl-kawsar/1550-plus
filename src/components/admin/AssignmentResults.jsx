@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -18,13 +18,18 @@ import {
   Calendar,
   Award,
   BarChart3,
-  Eye
+  Eye,
+  CheckCircle,
+  XCircle,
+  HelpCircle,
+  
 } from 'lucide-react'
 import { toast } from "sonner"
 
 const AssignmentResults = () => {
   const [refreshing, setRefreshing] = useState(false)
   const [selectedAssignment, setSelectedAssignment] = useState(null)
+  const [selectedSubmission, setSelectedSubmission] = useState(null)
 
   // Fetch all assignments for admin
   const { data: assignmentsData, isLoading, refetch, isRefetching, error } = useQuery({
@@ -159,6 +164,15 @@ const AssignmentResults = () => {
         <AssignmentDetailsModal
           assignment={selectedAssignment}
           onClose={() => setSelectedAssignment(null)}
+          onViewSubmission={setSelectedSubmission}
+        />
+      )}
+
+      {/* Student Answers Modal */}
+      {selectedSubmission && (
+        <StudentAnswersModal
+          submission={selectedSubmission}
+          onClose={() => setSelectedSubmission(null)}
         />
       )}
     </div>
@@ -316,7 +330,7 @@ const AssignmentResultCard = ({ assignment, onViewDetails }) => {
 }
 
 // Assignment Details Modal Component
-const AssignmentDetailsModal = ({ assignment, onClose }) => {
+const AssignmentDetailsModal = ({ assignment, onClose, onViewSubmission }) => {
   const { data: results, isLoading } = useQuery({
     queryKey: ['assignment-details', assignment._id],
     queryFn: async () => {
@@ -493,6 +507,18 @@ const AssignmentDetailsModal = ({ assignment, onClose }) => {
                                 </div>
                               </div>
                             </div>
+                            
+                            <div className="mt-3 pt-3 border-t border-gray-200">
+                              <Button 
+                                onClick={() => onViewSubmission(submission)}
+                                variant="outline" 
+                                size="sm"
+                                className="w-full"
+                              >
+                                <Eye className="w-4 h-4 mr-2" />
+                                View Answers
+                              </Button>
+                            </div>
                           </div>
                         </CardContent>
                       </Card>
@@ -501,6 +527,261 @@ const AssignmentDetailsModal = ({ assignment, onClose }) => {
                 )}
               </div>
             </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Student Answers Modal Component
+const StudentAnswersModal = ({ submission, onClose }) => {
+  const [detailedSubmission, setDetailedSubmission] = useState(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  // Fetch detailed submission data with questions and answers
+  useEffect(() => {
+    const fetchSubmissionDetails = async () => {
+      try {
+        setIsLoading(true)
+        const response = await fetch(`/api/assignments/admin-review/${submission._id}`)
+        if (!response.ok) {
+          const errorData = await response.json()
+          throw new Error(errorData.error || 'Failed to fetch submission details')
+        }
+        const data = await response.json()
+        setDetailedSubmission(data.submission)
+      } catch (error) {
+        console.error('Error fetching submission details:', error)
+        toast.error(`Failed to load submission details: ${error.message}`)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    if (submission._id) {
+      fetchSubmissionDetails()
+    }
+  }, [submission._id])
+
+  const getAnswerIcon = (isCorrect) => {
+    return isCorrect ? (
+      <CheckCircle className="w-5 h-5 text-green-500" />
+    ) : (
+      <XCircle className="w-5 h-5 text-red-500" />
+    )
+  }
+
+  const getAnswerBadge = (isCorrect) => {
+    return isCorrect ? (
+      <Badge className="bg-green-100 text-green-800">Correct</Badge>
+    ) : (
+      <Badge className="bg-red-100 text-red-800">Incorrect</Badge>
+    )
+  }
+
+  const getGradeBadgeColor = (percentage) => {
+    if (percentage >= 90) return 'bg-green-100 text-green-800 border-green-200'
+    if (percentage >= 80) return 'bg-blue-100 text-blue-800 border-blue-200'
+    if (percentage >= 70) return 'bg-yellow-100 text-yellow-800 border-yellow-200'
+    if (percentage >= 60) return 'bg-orange-100 text-orange-800 border-orange-200'
+    return 'bg-red-100 text-red-800 border-red-200'
+  }
+
+  const getGradeLetter = (percentage) => {
+    if (percentage >= 90) return 'A'
+    if (percentage >= 80) return 'B'
+    if (percentage >= 70) return 'C'
+    if (percentage >= 60) return 'D'
+    return 'F'
+  }
+
+  const formatTime = (seconds) => {
+    const minutes = Math.floor(seconds / 60)
+    const remainingSeconds = seconds % 60
+    return `${minutes}m ${remainingSeconds}s`
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="p-6 border-b sticky top-0 bg-white">
+          <div className="flex justify-between items-start">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">
+                Student Answers: {submission.studentId?.firstName} {submission.studentId?.lastName}
+              </h2>
+              <div className="flex items-center space-x-4 mt-2">
+                <Badge className={getGradeBadgeColor(submission.percentage)}>
+                  Grade {getGradeLetter(submission.percentage)}
+                </Badge>
+                <Badge variant="outline">
+                  {submission.correctAnswers}/{submission.totalQuestions} Correct
+                </Badge>
+                <Badge variant="outline">
+                  {submission.percentage}% Score
+                </Badge>
+              </div>
+            </div>
+            <Button variant="outline" size="sm" onClick={onClose}>
+              ✕
+            </Button>
+          </div>
+        </div>
+
+        <div className="p-6">
+          {isLoading ? (
+            <div className="space-y-4">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="animate-pulse">
+                  <div className="h-6 bg-gray-200 rounded w-3/4 mb-2"></div>
+                  <div className="h-20 bg-gray-200 rounded w-full"></div>
+                </div>
+              ))}
+            </div>
+          ) : detailedSubmission ? (
+            <div className="space-y-6">
+              {detailedSubmission.assignmentId?.questions?.map((question, index) => {
+                const studentAnswerObj = detailedSubmission.answers[index]
+                const studentAnswer = studentAnswerObj?.selectedAnswer || null
+                const isCorrect = studentAnswer === question.answer
+
+                return (
+                  <Card key={index} className={`border-l-4 ${isCorrect ? 'border-l-green-500' : 'border-l-red-500'}`}>
+                    <CardContent className="p-6">
+                      <div className="space-y-4">
+                        {/* Question Header */}
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center space-x-3">
+                            <div className="bg-blue-100 text-blue-800 rounded-full w-8 h-8 flex items-center justify-center text-sm font-medium">
+                              {index + 1}
+                            </div>
+                            <h3 className="text-lg font-semibold text-gray-900">
+                              Question {index + 1}
+                            </h3>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            {getAnswerIcon(isCorrect)}
+                            {getAnswerBadge(isCorrect)}
+                          </div>
+                        </div>
+
+                        {/* Question Text */}
+                        <div className="bg-gray-50 rounded-lg p-4">
+                          <p className="text-gray-800 font-medium">{question.question}</p>
+                        </div>
+
+                        {/* Answer Options */}
+                        <div className="space-y-3">
+                          <h4 className="text-sm font-medium text-gray-700">Answer Options:</h4>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            {question.options.map((option, optionIndex) => {
+                              const optionLetter = String.fromCharCode(65 + optionIndex) // A, B, C, D
+                              const isStudentAnswer = studentAnswer === optionLetter
+                              const isCorrectAnswer = question.answer === optionLetter
+
+                              return (
+                                <div
+                                  key={optionIndex}
+                                  className={`p-3 rounded-lg border-2 ${
+                                    isCorrectAnswer 
+                                      ? 'border-green-500 bg-green-50' 
+                                      : isStudentAnswer 
+                                        ? 'border-red-500 bg-red-50' 
+                                        : 'border-gray-200 bg-white'
+                                  }`}
+                                >
+                                  <div className="flex items-center space-x-3">
+                                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-medium ${
+                                      isCorrectAnswer
+                                        ? 'bg-green-500 text-white'
+                                        : isStudentAnswer
+                                          ? 'bg-red-500 text-white'
+                                          : 'bg-gray-200 text-gray-600'
+                                    }`}>
+                                      {optionLetter}
+                                    </div>
+                                    <span className={`flex-1 ${
+                                      isCorrectAnswer ? 'text-green-800 font-medium' : 
+                                      isStudentAnswer ? 'text-red-800' : 'text-gray-700'
+                                    }`}>
+                                      {option}
+                                    </span>
+                                    {isCorrectAnswer && (
+                                      <CheckCircle className="w-5 h-5 text-green-500" />
+                                    )}
+                                    {isStudentAnswer && !isCorrectAnswer && (
+                                      <XCircle className="w-5 h-5 text-red-500" />
+                                    )}
+                                  </div>
+                                </div>
+                              )
+                            })}
+                          </div>
+                        </div>
+
+                        {/* Answer Summary */}
+                        <div className="bg-gray-50 rounded-lg p-4">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                            <div>
+                              <span className="text-gray-600">Student Answer: </span>
+                              <span className={`font-medium ${isCorrect ? 'text-green-800' : 'text-red-800'}`}>
+                                {studentAnswer || 'No Answer'}
+                              </span>
+                            </div>
+                            <div>
+                              <span className="text-gray-600">Correct Answer: </span>
+                              <span className="font-medium text-green-800">{question.answer}</span>
+                            </div>
+                            <div>
+                              <span className="text-gray-600">Points: </span>
+                              <span className="font-medium text-gray-900">
+                                {isCorrect ? question.points : 0}/{question.points}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )
+              })}
+
+              {/* Summary Footer */}
+              <Card className="bg-blue-50 border-blue-200">
+                <CardContent className="p-6">
+                  <div className="text-center">
+                    <h3 className="text-lg font-semibold text-blue-900 mb-4">Assignment Summary</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                      <div>
+                        <p className="text-2xl font-bold text-blue-900">{submission.correctAnswers}</p>
+                        <p className="text-sm text-blue-700">Correct Answers</p>
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold text-blue-900">{submission.totalQuestions - submission.correctAnswers}</p>
+                        <p className="text-sm text-blue-700">Incorrect Answers</p>
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold text-blue-900">{submission.percentage}%</p>
+                        <p className="text-sm text-blue-700">Final Score</p>
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold text-blue-900">{formatTime(submission.timeSpent)}</p>
+                        <p className="text-sm text-blue-700">Time Spent</p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          ) : (
+            <Card>
+              <CardContent className="p-8 text-center">
+                <HelpCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Unable to load answers</h3>
+                <p className="text-gray-500">The detailed answers for this submission could not be loaded.</p>
+              </CardContent>
+            </Card>
           )}
         </div>
       </div>

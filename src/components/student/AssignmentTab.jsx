@@ -52,7 +52,11 @@ const AssignmentTab = ({ student }) => {
   }
 
   const handleReviewAssignment = (assignment) => {
-    setReviewingAssignment(assignment._id)
+    if (assignment.submissionId) {
+      setReviewingAssignment(assignment.submissionId)
+    } else {
+      toast.error('No submission found for this assignment')
+    }
   }
 
   const assignments = assignmentsData?.assignments || []

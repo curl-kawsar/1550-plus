@@ -34,15 +34,20 @@ export async function GET(request) {
     
     // Get student's submissions to check which assignments are completed
     const submissions = await AssignmentSubmission.find({ studentId })
-      .select('assignmentId')
+      .select('assignmentId _id')
       .lean();
     
     const completedAssignmentIds = submissions.map(sub => sub.assignmentId.toString());
+    const submissionMap = {};
+    submissions.forEach(sub => {
+      submissionMap[sub.assignmentId.toString()] = sub._id.toString();
+    });
     
-    // Add completion status to assignments
+    // Add completion status and submission ID to assignments
     const assignmentsWithStatus = assignments.map(assignment => ({
       ...assignment.toObject(),
       isCompleted: completedAssignmentIds.includes(assignment._id.toString()),
+      submissionId: submissionMap[assignment._id.toString()] || null,
       // Remove questions from list view for performance
       questions: undefined
     }));

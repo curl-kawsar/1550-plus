@@ -23,11 +23,11 @@ import { toast } from "sonner"
 const AssignmentReview = ({ assignmentId, onBack }) => {
   const [currentQuestion, setCurrentQuestion] = useState(0)
 
-  // Fetch assignment review data
+  // Fetch assignment review data (assignmentId is actually submissionId now)
   const { data: reviewData, isLoading, error, refetch } = useQuery({
     queryKey: ['assignment-review', assignmentId],
     queryFn: async () => {
-      const response = await fetch(`/api/assignments/review/${assignmentId}`)
+      const response = await fetch(`/api/assignments/student-review/${assignmentId}`)
       if (!response.ok) {
         const error = await response.json()
         throw new Error(error.error || 'Failed to fetch assignment review')

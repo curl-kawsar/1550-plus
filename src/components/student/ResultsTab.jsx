@@ -14,12 +14,15 @@ import {
   TrendingUp,
   Target,
   Calendar,
-  Award
+  Award,
+  Eye
 } from 'lucide-react'
 import { toast } from "sonner"
+import AssignmentReview from './AssignmentReview'
 
 const ResultsTab = ({ student }) => {
   const [refreshing, setRefreshing] = useState(false)
+  const [reviewingSubmission, setReviewingSubmission] = useState(null)
 
   // Fetch student results
   const { data: resultsData, isLoading, refetch, isRefetching, error } = useQuery({
@@ -319,12 +322,36 @@ const ResultsTab = ({ student }) => {
                         </span>
                       </div>
                     </div>
+                    
+                    <div className="mt-3 pt-3 border-t border-gray-200">
+                      <Button 
+                        onClick={() => setReviewingSubmission(result._id)}
+                        variant="outline" 
+                        size="sm"
+                        className="w-full text-blue-600 border-blue-600 hover:bg-blue-50"
+                      >
+                        <Eye className="w-4 h-4 mr-2" />
+                        Review Answers
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>
             </CardContent>
           </Card>
         </>
+      )}
+
+      {/* Assignment Review Modal */}
+      {reviewingSubmission && (
+        <div className="fixed inset-0 bg-white z-50 overflow-y-auto">
+          <div className="min-h-screen py-8 px-4">
+            <AssignmentReview
+              assignmentId={reviewingSubmission}
+              onBack={() => setReviewingSubmission(null)}
+            />
+          </div>
+        </div>
       )}
     </div>
   )
