@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/mongodb';
 import Student from '@/models/Student';
+import ClassTime from '@/models/ClassTime';
+import DiagnosticTest from '@/models/DiagnosticTest';
 import jwt from 'jsonwebtoken';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
@@ -126,20 +128,6 @@ export async function PUT(request) {
     }
 
     // Validate the new value based on the change type
-    const validOptions = {
-      classTime: [
-        'Mon & Wed - 4:00 PM Pacific',
-        'Mon & Wed - 7:00 PM Pacific',
-        'Tue & Thu - 4:00 PM Pacific',
-        'Tue & Thu - 7:00 PM Pacific'
-      ],
-      diagnosticTest: [
-        'Saturday September 27th 8:30am - noon PST',
-        'Sunday September 28th 8:30am - noon PST',
-        'I can\'t make either of these dates (reply below with if neither option works for you)'
-      ]
-    };
-
     const fieldMapping = {
       classTime: 'classTime',
       diagnosticTest: 'diagnosticTestDate'
@@ -147,9 +135,57 @@ export async function PUT(request) {
 
     const actualField = fieldMapping[changeType];
     
-    if (!validOptions[changeType].includes(newValue)) {
+    // Dynamic validation against actual models
+    let isValidOption = false;
+    
+    try {
+      if (changeType === 'classTime') {
+        // Check if the class time exists and is active
+        const classTime = await ClassTime.findOne({ 
+          name: newValue, 
+          isActive: true 
+        });
+        isValidOption = !!classTime;
+        
+        // If not found in dynamic data, check legacy values as fallback
+        if (!isValidOption) {
+          const legacyClassTimes = [
+            'Mon & Wed - 4:00 PM Pacific',
+            'Mon & Wed - 7:00 PM Pacific',
+            'Tue & Thu - 4:00 PM Pacific',
+            'Tue & Thu - 7:00 PM Pacific'
+          ];
+          isValidOption = legacyClassTimes.includes(newValue);
+        }
+      } else if (changeType === 'diagnosticTest') {
+        // Check if the diagnostic test exists and is active
+        const diagnosticTest = await DiagnosticTest.findOne({ 
+          name: newValue, 
+          isActive: true 
+        });
+        isValidOption = !!diagnosticTest;
+        
+        // If not found in dynamic data, check legacy values as fallback
+        if (!isValidOption) {
+          const legacyDiagnosticTests = [
+            'Saturday September 27th 8:30am - noon PST',
+            'Sunday September 28th 8:30am - noon PST',
+            'I can\'t make either of these dates (reply below with if neither option works for you)',
+            'I can\'t make any of these dates'
+          ];
+          isValidOption = legacyDiagnosticTests.includes(newValue);
+        }
+      }
+    } catch (validationError) {
+      console.error('Error during schedule validation:', validationError);
+      // If validation fails due to database issues, allow the change
+      // This prevents blocking students during system issues
+      isValidOption = true;
+    }
+    
+    if (!isValidOption) {
       return NextResponse.json(
-        { error: `Invalid ${changeType} option` },
+        { error: `Invalid ${changeType} option. Please select from the available options.` },
         { status: 400 }
       );
     }

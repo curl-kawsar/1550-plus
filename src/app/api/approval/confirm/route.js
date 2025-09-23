@@ -183,6 +183,38 @@ export async function GET(request) {
             border-radius: 8px;
             margin: 20px 0;
           }
+          .special-offer-btn {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin: 20px 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(238, 90, 36, 0.3);
+          }
+          .special-offer-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(238, 90, 36, 0.4);
+          }
+          .redirect-notice {
+            background-color: #e8f5e8;
+            border: 2px solid #4caf50;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+          }
+          .countdown {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4caf50;
+          }
         </style>
       </head>
       <body>
@@ -213,8 +245,38 @@ export async function GET(request) {
             </p>
           </div>
 
+          <div class="redirect-notice">
+            <h3 style="color: #4caf50; margin: 0 0 10px 0;">🎉 Special Offer Available!</h3>
+            <p style="margin: 10px 0;">You'll be automatically redirected to our exclusive offers in <span class="countdown" id="countdown">3</span> seconds...</p>
+            <p style="margin: 0; font-size: 14px; color: #666;">Or click the button below to view offers now!</p>
+          </div>
+
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="/special-offer" class="special-offer-btn">
+              🎁 See Special Offers
+            </a>
+          </div>
+
           <p><strong>Thank you for choosing 1550+ for ${student.firstName}'s SAT preparation!</strong></p>
         </div>
+
+        <script>
+          let countdown = 3;
+          const countdownElement = document.getElementById('countdown');
+          
+          function updateCountdown() {
+            countdownElement.textContent = countdown;
+            if (countdown <= 0) {
+              window.location.href = '/special-offer';
+            } else {
+              countdown--;
+              setTimeout(updateCountdown, 1000);
+            }
+          }
+          
+          // Start countdown
+          setTimeout(updateCountdown, 1000);
+        </script>
       </body>
       </html>
     `, {

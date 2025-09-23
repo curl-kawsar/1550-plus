@@ -183,6 +183,33 @@ export async function GET(request) {
             border-radius: 8px;
             margin: 20px 0;
           }
+          .special-offer-btn {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin: 20px 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(238, 90, 36, 0.3);
+          }
+          .special-offer-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(238, 90, 36, 0.4);
+          }
+          .offer-notice {
+            background-color: #fff3cd;
+            border: 2px solid #ffc107;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+          }
         </style>
       </head>
       <body>
@@ -212,6 +239,17 @@ export async function GET(request) {
               Phone: (555) 123-4567<br>
               Website: 1550plus.com
             </p>
+          </div>
+
+          <div class="offer-notice">
+            <h3 style="color: #856404; margin: 0 0 10px 0;">💡 Still Interested in SAT Success?</h3>
+            <p style="margin: 10px 0; color: #856404;">Even though you've declined the registration, we have some amazing special offers that might interest you for future consideration!</p>
+          </div>
+
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="/special-offer" class="special-offer-btn">
+              🎁 View Special Offers
+            </a>
           </div>
 
           <p>Thank you for considering 1550+ for ${student.firstName}'s education.</p>
