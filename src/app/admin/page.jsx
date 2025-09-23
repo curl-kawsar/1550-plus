@@ -8,6 +8,7 @@ import StudentTable from '@/components/admin/StudentTable'
 import ContactMessages from '@/components/admin/ContactMessages'
 import EnrollmentTracking from '@/components/admin/EnrollmentTracking'
 import DiagnosticTracking from '@/components/admin/DiagnosticTracking'
+import DiagnosticTestManagement from '@/components/admin/DiagnosticTestManagement'
 import MaintenanceToggle from '@/components/admin/MaintenanceToggle'
 import AdminChat from '@/components/admin/AdminChat'
 import AmbassadorManagement from '@/components/admin/AmbassadorManagement'
@@ -106,6 +107,12 @@ export default function AdminDashboard() {
         {activeTab === 'class-times' && (
           <div>
             <ClassTimeManagement />
+          </div>
+        )}
+
+        {activeTab === 'diagnostic-tests' && (
+          <div>
+            <DiagnosticTestManagement />
           </div>
         )}
 

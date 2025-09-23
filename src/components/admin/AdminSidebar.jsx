@@ -25,12 +25,12 @@ const AdminSidebar = ({ activeTab, setActiveTab, admin, onLogout }) => {
       ]
     },
     { id: 'class-times', label: 'Class Times', icon: Calendar },
+    { id: 'diagnostic-tests', label: 'Diagnostic Tests', icon: ClipboardCheck },
     { id: 'ambassadors', label: 'Ambassadors', icon: UserCheck },
     { id: 'appointments', label: 'Appointments', icon: CalendarCheck },
     { id: 'chat', label: 'Student Messages', icon: MessageSquare },
     { id: 'contacts', label: 'Contact Messages', icon: MessageCircle },
     { id: 'enrollment', label: 'Class Enrollment', icon: Calendar },
-    { id: 'diagnostic', label: 'Diagnostic Tests', icon: ClipboardCheck },
     { id: 'maintenance', label: 'Maintenance', icon: Wrench },
   ]
 

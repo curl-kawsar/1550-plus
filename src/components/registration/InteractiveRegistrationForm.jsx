@@ -80,6 +80,29 @@ const InteractiveRegistrationForm = () => {
   // Get real-time enrollment data
   const { data: enrollmentData, isLoading: isLoadingEnrollment, error: enrollmentError } = useEnrollmentCounts()
 
+  // Get diagnostic tests data
+  const [diagnosticTests, setDiagnosticTests] = useState([])
+  const [loadingDiagnosticTests, setLoadingDiagnosticTests] = useState(true)
+
+  // Fetch diagnostic tests
+  useEffect(() => {
+    const fetchDiagnosticTests = async () => {
+      try {
+        const response = await fetch('/api/diagnostic-tests/active?includeEnrollment=true')
+        if (response.ok) {
+          const data = await response.json()
+          setDiagnosticTests(data.diagnosticTests || [])
+        }
+      } catch (error) {
+        console.error('Error fetching diagnostic tests:', error)
+      } finally {
+        setLoadingDiagnosticTests(false)
+      }
+    }
+
+    fetchDiagnosticTests()
+  }, [])
+
   // Email validation effect with debouncing
   useEffect(() => {
     const validateEmailExists = async () => {
@@ -840,27 +863,96 @@ const InteractiveRegistrationForm = () => {
               <div>
                 <Label className="text-sm font-medium text-gray-700">Diagnostic Test Date *</Label>
                 <p className="text-sm text-gray-500 mb-3">Please Choose One</p>
-                <div className="space-y-3">
-                  {[
-                    "Saturday September 27th 8:30am - noon PST",
-                    "Sunday September 28th 8:30am - noon PST",
-                    "I can't make either of these dates (reply below with if neither option works for you)"
-                  ].map((option) => (
-                    <label key={option} className="flex items-start p-4 border border-[#457BF5] rounded-lg cursor-pointer hover:bg-blue-50 transition-colors">
+                
+                {loadingDiagnosticTests ? (
+                  <div className="flex items-center justify-center p-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                    <span className="ml-2 text-gray-600">Loading test dates...</span>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {diagnosticTests.length > 0 ? (
+                      diagnosticTests.map((test) => (
+                        <label key={test.name} className="flex items-start p-4 border border-[#457BF5] rounded-lg cursor-pointer hover:bg-blue-50 transition-colors">
+                          <input
+                            type="radio"
+                            name="diagnosticTestDate"
+                            value={test.name}
+                            checked={formData.diagnosticTestDate === test.name}
+                            onChange={(e) => handleInputChange('diagnosticTestDate', e.target.value)}
+                            className="mr-3 mt-1 text-blue-600"
+                            disabled={!test.canRegister}
+                          />
+                          <div className={`flex-1 ${formData.diagnosticTestDate === test.name ? 'text-blue-600 font-medium' : ''}`}>
+                            <div className="font-semibold">
+                              {test.formattedDate || new Date(test.date).toLocaleDateString('en-US', {
+                                weekday: 'long',
+                                month: 'long',
+                                day: 'numeric'
+                              })}
+                            </div>
+                            <div className={`text-sm mt-1 ${formData.diagnosticTestDate === test.name ? 'text-blue-500' : 'text-gray-600'}`}>
+                              Test time: {formatTime(test.startTime)} - {formatTime(test.endTime)} {test.timezone}
+                            </div>
+                            {test.location && test.location !== 'Online' && (
+                              <div className={`text-sm mt-1 ${formData.diagnosticTestDate === test.name ? 'text-blue-500' : 'text-gray-600'}`}>
+                                Location: {test.location}
+                              </div>
+                            )}
+                            {test.currentEnrollment !== undefined && (
+                              <div className="text-xs text-gray-500 mt-1">
+                                {test.currentEnrollment}/{test.capacity} students registered
+                              </div>
+                            )}
+                            {test.isFull && (
+                              <div className="text-xs text-red-600 mt-1 font-medium">
+                                ⚠️ This test is full
+                              </div>
+                            )}
+                          </div>
+                        </label>
+                      ))
+                    ) : (
+                      <>
+                        {/* Fallback to legacy options if no dynamic tests available */}
+                        {[
+                          "Saturday September 27th 8:30am - noon PST",
+                          "Sunday September 28th 8:30am - noon PST",
+                          "I can't make either of these dates (reply below with if neither option works for you)"
+                        ].map((option) => (
+                          <label key={option} className="flex items-start p-4 border border-[#457BF5] rounded-lg cursor-pointer hover:bg-blue-50 transition-colors">
+                            <input
+                              type="radio"
+                              name="diagnosticTestDate"
+                              value={option}
+                              checked={formData.diagnosticTestDate === option}
+                              onChange={(e) => handleInputChange('diagnosticTestDate', e.target.value)}
+                              className="mr-3 mt-1 text-blue-600"
+                            />
+                            <span className={formData.diagnosticTestDate === option ? 'text-blue-600 font-medium' : ''}>
+                              {option}
+                            </span>
+                          </label>
+                        ))}
+                      </>
+                    )}
+                    
+                    {/* Always show "can't make it" option */}
+                    <label className="flex items-start p-4 border border-[#457BF5] rounded-lg cursor-pointer hover:bg-blue-50 transition-colors">
                       <input
                         type="radio"
                         name="diagnosticTestDate"
-                        value={option}
-                        checked={formData.diagnosticTestDate === option}
+                        value="I can't make any of these dates"
+                        checked={formData.diagnosticTestDate === "I can't make any of these dates"}
                         onChange={(e) => handleInputChange('diagnosticTestDate', e.target.value)}
                         className="mr-3 mt-1 text-blue-600"
                       />
-                      <span className={formData.diagnosticTestDate === option ? 'text-blue-600 font-medium' : ''}>
-                        {option}
+                      <span className={formData.diagnosticTestDate === "I can't make any of these dates" ? 'text-blue-600 font-medium' : ''}>
+                        I can't make any of these dates (we'll contact you to arrange an alternative)
                       </span>
                     </label>
-                  ))}
-                </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>

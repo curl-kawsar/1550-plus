@@ -3,6 +3,7 @@ import { cookies } from 'next/headers';
 import connectToDatabase from '@/lib/mongodb';
 import Admin from '@/models/Admin';
 import ClassTime from '@/models/ClassTime';
+import DiagnosticTest from '@/models/DiagnosticTest';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
@@ -32,6 +33,7 @@ export async function POST(request) {
     const results = {
       adminCreated: false,
       classTimesCreated: 0,
+      diagnosticTestsCreated: 0,
       errors: []
     };
 
@@ -123,6 +125,64 @@ export async function POST(request) {
       }
     } catch (error) {
       results.errors.push(`Failed to create class times: ${error.message}`);
+    }
+
+    // Create default diagnostic tests if none exist
+    try {
+      const diagnosticTestCount = await DiagnosticTest.countDocuments();
+      if (diagnosticTestCount === 0) {
+        const today = new Date();
+        const nextSaturday = new Date(today);
+        nextSaturday.setDate(today.getDate() + (6 - today.getDay())); // Next Saturday
+        
+        const nextSunday = new Date(nextSaturday);
+        nextSunday.setDate(nextSaturday.getDate() + 1); // Next Sunday
+
+        const defaultDiagnosticTests = [
+          {
+            name: 'Saturday September 27th 8:30am - noon PST',
+            date: nextSaturday,
+            startTime: '08:30',
+            endTime: '12:00',
+            timezone: 'PST',
+            capacity: 100,
+            location: 'Online',
+            description: 'Full SAT diagnostic test - Saturday session',
+            instructions: 'Please join the test 15 minutes early. Have a calculator, pencils, and scratch paper ready.',
+            sortOrder: 1,
+            duration: 210,
+            isActive: true,
+            createdBy: decoded.adminId
+          },
+          {
+            name: 'Sunday September 28th 8:30am - noon PST',
+            date: nextSunday,
+            startTime: '08:30',
+            endTime: '12:00',
+            timezone: 'PST',
+            capacity: 100,
+            location: 'Online',
+            description: 'Full SAT diagnostic test - Sunday session',
+            instructions: 'Please join the test 15 minutes early. Have a calculator, pencils, and scratch paper ready.',
+            sortOrder: 2,
+            duration: 210,
+            isActive: true,
+            createdBy: decoded.adminId
+          }
+        ];
+
+        for (const testData of defaultDiagnosticTests) {
+          try {
+            const diagnosticTest = new DiagnosticTest(testData);
+            await diagnosticTest.save();
+            results.diagnosticTestsCreated++;
+          } catch (error) {
+            results.errors.push(`Failed to create diagnostic test "${testData.name}": ${error.message}`);
+          }
+        }
+      }
+    } catch (error) {
+      results.errors.push(`Failed to create diagnostic tests: ${error.message}`);
     }
 
     return NextResponse.json({
