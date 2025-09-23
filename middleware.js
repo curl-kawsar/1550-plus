@@ -7,7 +7,7 @@ export async function middleware(request) {
 
   // Skip maintenance check for admin routes, API routes, and static files
   if (
-    pathname.startsWith('/admin') ||
+    pathname.startsWith('/admin') || 
     pathname.startsWith('/api') ||
     pathname.startsWith('/_next') ||
     pathname.includes('/favicon') ||
