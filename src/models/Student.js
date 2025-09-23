@@ -137,13 +137,32 @@ const StudentSchema = new mongoose.Schema({
   classTime: {
     type: String,
     required: true,
-    enum: [
-      'Mon & Wed - 4:00 PM Pacific',
-      'Mon & Wed - 7:00 PM Pacific',
-      'Tue & Thu - 4:00 PM Pacific',
-      'Tue & Thu - 7:00 PM Pacific'
-    ],
-    trim: true
+    trim: true,
+    validate: {
+      validator: async function(value) {
+        // Allow any string during initial migration
+        if (!value) return false;
+        
+        try {
+          const ClassTime = mongoose.model('ClassTime');
+          const classTime = await ClassTime.findOne({ 
+            name: value, 
+            isActive: true 
+          });
+          return !!classTime;
+        } catch (error) {
+          // During initial setup, allow the hardcoded values
+          const legacyValues = [
+            'Mon & Wed - 4:00 PM Pacific',
+            'Mon & Wed - 7:00 PM Pacific',
+            'Tue & Thu - 4:00 PM Pacific',
+            'Tue & Thu - 7:00 PM Pacific'
+          ];
+          return legacyValues.includes(value);
+        }
+      },
+      message: 'Invalid class time selection'
+    }
   },
   diagnosticTestDate: {
     type: String,

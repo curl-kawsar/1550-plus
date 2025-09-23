@@ -29,6 +29,21 @@ const InteractiveRegistrationForm = () => {
       document.head.removeChild(link);
     };
   }, []);
+
+  // Helper function to format time from 24-hour to 12-hour format
+  const formatTime = (timeString) => {
+    if (!timeString) return '';
+    
+    try {
+      const [hours, minutes] = timeString.split(':');
+      const hour24 = parseInt(hours);
+      const hour12 = hour24 === 0 ? 12 : hour24 > 12 ? hour24 - 12 : hour24;
+      const ampm = hour24 >= 12 ? 'PM' : 'AM';
+      return `${hour12}:${minutes} ${ampm}`;
+    } catch (error) {
+      return timeString; // Return original if parsing fails
+    }
+  };
   const [currentStep, setCurrentStep] = useState(1)
   const [fieldErrors, setFieldErrors] = useState({})
   const [touchedFields, setTouchedFields] = useState({})
@@ -738,31 +753,34 @@ const InteractiveRegistrationForm = () => {
                 <Label className="text-sm font-medium text-gray-700">Class Timings *</Label>
                 <p className="text-sm text-gray-500 mb-3">Select Your Preferred Time Slot.</p>
                 <div className="space-y-3">
-                  {[
-                    "Mon & Wed - 4:00 PM Pacific",
-                    "Mon & Wed - 7:00 PM Pacific", 
-                    "Tue & Thu - 4:00 PM Pacific",
-                    "Tue & Thu - 7:00 PM Pacific"
-                  ].map((option) => {
-                    const enrollmentCount = enrollmentData?.enrollments?.[option] || 0;
-                    const hasMinimumEnrollment = enrollmentCount >= (enrollmentData?.minimumRequired || 40);
+                  {(enrollmentData?.classTimes || []).map((classTime) => {
+                    const enrollmentCount = enrollmentData?.enrollments?.[classTime.name] || 0;
+                    const hasMinimumEnrollment = enrollmentCount >= (classTime.minimumRequired || 40);
                     const isLoading = isLoadingEnrollment;
                     
                     return (
-                      <div key={option} className="relative">
+                      <div key={classTime.name} className="relative">
                         <label className="flex items-center justify-between p-4 border border-[#457BF5] rounded-lg cursor-pointer hover:bg-blue-50 transition-colors">
                           <div className="flex items-center">
                             <input
                               type="radio"
                               name="classTime"
-                              value={option}
-                              checked={formData.classTime === option}
+                              value={classTime.name}
+                              checked={formData.classTime === classTime.name}
                               onChange={(e) => handleInputChange('classTime', e.target.value)}
                               className="mr-3 text-blue-600"
                             />
-                            <span className={formData.classTime === option ? 'text-blue-600 font-medium' : ''}>
-                              {option}
-                            </span>
+                            <div className={formData.classTime === classTime.name ? 'text-blue-600 font-medium' : ''}>
+                              <div className="font-semibold">
+                                {classTime.dayOfWeek ? classTime.dayOfWeek.join(' & ') : classTime.name}
+                              </div>
+                              <div className={`text-sm mt-1 ${formData.classTime === classTime.name ? 'text-blue-500' : 'text-gray-600'}`}>
+                                Class time: {classTime.startTime && classTime.endTime 
+                                  ? `${formatTime(classTime.startTime)} - ${formatTime(classTime.endTime)} ${classTime.timezone || 'Pacific'}`
+                                  : classTime.name
+                                }
+                              </div>
+                            </div>
                           </div>
                           <div className="text-sm text-gray-500">
                             {isLoading ? (

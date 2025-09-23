@@ -14,6 +14,7 @@ import AmbassadorManagement from '@/components/admin/AmbassadorManagement'
 import AppointmentManagement from '@/components/admin/AppointmentManagement'
 import AssignmentManagement from '@/components/admin/AssignmentManagement'
 import AssignmentResults from '@/components/admin/AssignmentResults'
+import ClassTimeManagement from '@/components/admin/ClassTimeManagement'
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('overview')
@@ -99,6 +100,12 @@ export default function AdminDashboard() {
         {activeTab === 'assignment-results' && (
           <div>
             <AssignmentResults />
+          </div>
+        )}
+
+        {activeTab === 'class-times' && (
+          <div>
+            <ClassTimeManagement />
           </div>
         )}
 

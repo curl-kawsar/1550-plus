@@ -34,7 +34,7 @@ const Navbar = () => {
 
   return (
     <nav
-      className="sticky top-0 z-50 w-full border-b border-gray-700/20"
+      className="top-0 z-50 w-full border-b border-gray-700/20"
       style={{backgroundColor: '#141C42'}}
     >
       <div className="max-w-7xl mx-auto flex h-16 items-center px-4 lg:px-6">

@@ -39,6 +39,7 @@ import {
 export default function StudentDashboard({ student, onLogout, onRefreshStudent }) {
   const [activeTab, setActiveTab] = useState('overview')
   const [refreshing, setRefreshing] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const scrollContainerRef = useRef(null)
   
@@ -79,6 +80,7 @@ export default function StudentDashboard({ student, onLogout, onRefreshStudent }
   const handleTabChange = (tabId) => {
     setActiveTab(tabId)
     setMobileMenuOpen(false)
+    setSidebarOpen(false) // Close sidebar on mobile after selection
   }
 
   // Chat Tab Button with notification badge
@@ -137,37 +139,171 @@ export default function StudentDashboard({ student, onLogout, onRefreshStudent }
   ]
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4 sm:py-6">
-            <div className="flex items-center space-x-3 sm:space-x-4 min-w-0">
-              <div className="flex-shrink-0">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#457BF5] rounded-full flex items-center justify-center">
-                  <span className="text-white font-bold text-sm sm:text-lg">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 flex">
+      {/* Sidebar */}
+      <div className={`fixed inset-y-0 left-0 z-50 w-72 bg-white/95 backdrop-blur-xl shadow-2xl border-r border-gray-200/50 transform transition-all duration-300 ease-out lg:translate-x-0 lg:static lg:inset-0 ${
+        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+      }`}>
+        <div className="flex flex-col h-full">
+          {/* Sidebar Header */}
+          <div className="flex items-center justify-between p-6 border-b border-gray-200/60 bg-gradient-to-r from-[#457BF5]/5 to-blue-50/50">
+            <div className="flex items-center space-x-4">
+              <div className="relative">
+                <div className="w-12 h-12 bg-gradient-to-r from-[#457BF5] to-blue-600 rounded-2xl flex items-center justify-center shadow-lg ring-2 ring-blue-100">
+                  <span className="text-white font-bold text-lg">
                     {student.firstName?.[0]}{student.lastName?.[0]}
                   </span>
                 </div>
+                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white shadow-sm"></div>
               </div>
               <div className="min-w-0">
-                <h1 className="text-lg sm:text-2xl font-bold text-gray-900 truncate">
-                  Welcome, {student.firstName} {student.lastName}
-                </h1>
-                <p className="text-sm sm:text-base text-gray-600">Student Dashboard</p>
+                <h2 className="text-base font-bold text-gray-900 truncate font-norwester">
+                  {student.firstName} {student.lastName}
+                </h2>
+                <p className="text-sm text-gray-600 font-medium">Student Portal</p>
               </div>
             </div>
-            <div className="flex items-center space-x-2 sm:space-x-4">
-              <Badge className={`${getStatusColor(student.status)} text-xs sm:text-sm`}>
+            <Button
+              onClick={() => setSidebarOpen(false)}
+              variant="ghost"
+              size="sm"
+              className="lg:hidden hover:bg-gray-100 rounded-xl p-2 transition-colors"
+            >
+              <X className="h-5 w-5 text-gray-500" />
+            </Button>
+          </div>
+
+          {/* Navigation Items */}
+          <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+            {tabs.map((tab) => {
+              const Icon = tab.icon
+              const isActive = activeTab === tab.id
+              
+              if (tab.id === 'chat') {
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => handleTabChange(tab.id)}
+                    className={`group w-full flex items-center justify-between px-4 py-3.5 text-sm font-semibold rounded-2xl transition-all duration-200 ease-out hover:scale-[1.02] ${
+                      isActive
+                        ? 'bg-gradient-to-r from-[#457BF5] to-blue-600 text-white shadow-lg shadow-blue-500/25'
+                        : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Icon className={`h-5 w-5 transition-transform group-hover:scale-110 ${
+                        isActive ? 'text-white' : 'text-gray-500'
+                      }`} />
+                      <span className="font-medium">{tab.label}</span>
+                    </div>
+                    {unreadAdminMessages > 0 && (
+                      <div className="relative">
+                        <Badge variant="destructive" className="text-xs h-5 w-5 rounded-full p-0 flex items-center justify-center animate-pulse shadow-sm">
+                          {unreadAdminMessages}
+                        </Badge>
+                        <div className="absolute inset-0 rounded-full bg-red-400 animate-ping opacity-20"></div>
+                      </div>
+                    )}
+                  </button>
+                )
+              }
+              
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => handleTabChange(tab.id)}
+                  className={`group w-full flex items-center gap-3 px-4 py-3.5 text-sm font-semibold rounded-2xl transition-all duration-200 ease-out hover:scale-[1.02] ${
+                    isActive
+                      ? 'bg-gradient-to-r from-[#457BF5] to-blue-600 text-white shadow-lg shadow-blue-500/25'
+                      : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                  }`}
+                >
+                  <Icon className={`h-5 w-5 transition-transform group-hover:scale-110 ${
+                    isActive ? 'text-white' : 'text-gray-500'
+                  }`} />
+                  <span className="font-medium">{tab.label}</span>
+                </button>
+              )
+            })}
+          </nav>
+
+          {/* Sidebar Footer - Status and Actions */}
+          <div className="p-4 border-t border-gray-200/60 bg-gradient-to-r from-gray-50/50 to-white space-y-4">
+            <div className="flex items-center justify-between p-3 bg-white rounded-xl border border-gray-200/50 shadow-sm">
+              <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">Status</span>
+              <Badge className={`${getStatusColor(student.status)} text-xs px-2 py-1 rounded-lg font-medium shadow-sm`}>
                 {student.status || 'pending'}
               </Badge>
-              <div className="hidden sm:flex items-center space-x-2">
+            </div>
+            <div className="space-y-2">
+              <Button
+                onClick={handleRefresh}
+                variant="outline"
+                size="sm"
+                disabled={refreshing}
+                className="w-full flex items-center gap-2 text-xs font-medium rounded-xl border-gray-200/50 hover:bg-gray-50 hover:border-gray-300 transition-all duration-200"
+              >
+                <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+                {refreshing ? 'Refreshing...' : 'Refresh'}
+              </Button>
+              <Button
+                onClick={onLogout}
+                variant="outline"
+                size="sm"
+                className="w-full flex items-center gap-2 text-xs font-medium rounded-xl border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 transition-all duration-200"
+              >
+                <LogOut className="h-4 w-4" />
+                Logout
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Sidebar Overlay for Mobile */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col lg:ml-0">
+        {/* Top Header */}
+        <div className="bg-white/80 backdrop-blur-xl shadow-sm border-b border-gray-200/50 top-0 z-30">
+          <div className="px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center py-4 sm:py-6">
+              <div className="flex items-center space-x-3 sm:space-x-4">
+                {/* Mobile menu button */}
+                <Button
+                  onClick={() => setSidebarOpen(true)}
+                  variant="outline"
+                  size="sm"
+                  className="lg:hidden flex items-center gap-1 rounded-xl border-gray-200/50 hover:bg-gray-50 transition-all duration-200"
+                >
+                  <Menu className="h-4 w-4" />
+                </Button>
+                <div>
+                  <h1 className="text-lg sm:text-2xl font-bold text-gray-900 font-norwester">
+                    {(() => {
+                      const activeTabData = tabs.find(tab => tab.id === activeTab)
+                      return activeTabData?.label || 'Overview'
+                    })()}
+                  </h1>
+                  <p className="text-sm sm:text-base text-gray-600 font-medium">Student Dashboard</p>
+                </div>
+              </div>
+              <div className="hidden sm:flex items-center space-x-3">
+                <Badge className={`${getStatusColor(student.status)} text-xs sm:text-sm px-3 py-1.5 rounded-xl font-medium shadow-sm`}>
+                  {student.status || 'pending'}
+                </Badge>
                 <Button
                   onClick={handleRefresh}
                   variant="outline"
                   size="sm"
                   disabled={refreshing}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 rounded-xl border-gray-200/50 hover:bg-gray-50 transition-all duration-200"
                 >
                   <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
                   {refreshing ? 'Refreshing...' : 'Refresh'}
@@ -175,257 +311,90 @@ export default function StudentDashboard({ student, onLogout, onRefreshStudent }
                 <Button
                   onClick={onLogout}
                   variant="outline"
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 rounded-xl border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 transition-all duration-200"
                 >
                   <LogOut className="h-4 w-4" />
                   Logout
                 </Button>
               </div>
-              {/* Mobile menu button */}
+              {/* Mobile actions dropdown */}
               <div className="sm:hidden">
                 <Button
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                   variant="outline"
                   size="sm"
-                  className="flex items-center gap-1"
+                  className="flex items-center gap-1 rounded-xl border-gray-200/50 hover:bg-gray-50 transition-all duration-200"
                 >
-                  {mobileMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+                  {mobileMenuOpen ? <X className="h-4 w-4" /> : <Settings className="h-4 w-4" />}
                 </Button>
               </div>
             </div>
-          </div>
-          
-          {/* Mobile menu dropdown */}
-          {mobileMenuOpen && (
-            <div className="sm:hidden border-t bg-gray-50 py-2">
-              <div className="flex flex-col space-y-2 px-4">
-                <Button
-                  onClick={handleRefresh}
-                  variant="outline"
-                  size="sm"
-                  disabled={refreshing}
-                  className="flex items-center gap-2 justify-start"
-                >
-                  <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
-                  {refreshing ? 'Refreshing...' : 'Refresh'}
-                </Button>
-                <Button
-                  onClick={onLogout}
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center gap-2 justify-start"
-                >
-                  <LogOut className="h-4 w-4" />
-                  Logout
-                </Button>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Navigation Tabs */}
-      <div className="bg-white border-b">
-        <div className="max-w-7xl mx-auto">
-          {/* Desktop Navigation */}
-          <div className="hidden lg:block px-4 sm:px-6 lg:px-8">
-            <nav className="flex space-x-8">
-              {tabs.map((tab) => {
-                const Icon = tab.icon
-                
-                // Special handling for chat tab with notifications
-                if (tab.id === 'chat') {
-                  return (
-                    <ChatTabButton
-                      key={tab.id}
-                      isActive={activeTab === tab.id}
-                      onClick={() => handleTabChange(tab.id)}
-                      icon={Icon}
-                      label={tab.label}
-                      unreadCount={unreadAdminMessages}
-                    />
-                  )
-                }
-                
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => handleTabChange(tab.id)}
-                    className={`py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2 whitespace-nowrap ${
-                      activeTab === tab.id
-                        ? 'border-[#457BF5] text-[#457BF5]'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                    }`}
+            
+            {/* Mobile actions dropdown */}
+            {mobileMenuOpen && (
+              <div className="sm:hidden border-t border-gray-200/60 bg-gradient-to-r from-gray-50/50 to-white py-3">
+                <div className="flex flex-col space-y-3 px-4">
+                  <div className="flex items-center justify-between py-2 px-3 bg-white rounded-xl border border-gray-200/50 shadow-sm">
+                    <span className="text-sm text-gray-600 font-medium">Status:</span>
+                    <Badge className={`${getStatusColor(student.status)} text-xs px-2 py-1 rounded-lg font-medium`}>
+                      {student.status || 'pending'}
+                    </Badge>
+                  </div>
+                  <Button
+                    onClick={handleRefresh}
+                    variant="outline"
+                    size="sm"
+                    disabled={refreshing}
+                    className="flex items-center gap-2 justify-start rounded-xl border-gray-200/50 hover:bg-gray-50 transition-all duration-200"
                   >
-                    <Icon className="h-4 w-4" />
-                    {tab.label}
-                  </button>
-                )
-              })}
-            </nav>
-          </div>
-
-          {/* Tablet Navigation with scroll */}
-          <div className="hidden md:block lg:hidden px-4 sm:px-6">
-            <div className="relative">
-              <button
-                onClick={() => scrollTabs('left')}
-                className="absolute left-0 top-0 bottom-0 z-10 bg-gradient-to-r from-white to-transparent w-8 flex items-center justify-center hover:from-gray-50"
-              >
-                <ChevronLeft className="h-4 w-4 text-gray-400" />
-              </button>
-              
-              <div
-                ref={scrollContainerRef}
-                className="overflow-x-auto scrollbar-hide px-8"
-                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-              >
-                <nav className="flex space-x-6 min-w-max">
-                  {tabs.map((tab) => {
-                    const Icon = tab.icon
-                    
-                    if (tab.id === 'chat') {
-                      return (
-                        <ChatTabButton
-                          key={tab.id}
-                          isActive={activeTab === tab.id}
-                          onClick={() => handleTabChange(tab.id)}
-                          icon={Icon}
-                          label={tab.label}
-                          unreadCount={unreadAdminMessages}
-                        />
-                      )
-                    }
-                    
-                    return (
-                      <button
-                        key={tab.id}
-                        onClick={() => handleTabChange(tab.id)}
-                        className={`py-4 px-2 border-b-2 font-medium text-sm flex items-center gap-2 whitespace-nowrap ${
-                          activeTab === tab.id
-                            ? 'border-[#457BF5] text-[#457BF5]'
-                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                        }`}
-                      >
-                        <Icon className="h-4 w-4" />
-                        {tab.label}
-                      </button>
-                    )
-                  })}
-                </nav>
+                    <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+                    {refreshing ? 'Refreshing...' : 'Refresh'}
+                  </Button>
+                  <Button
+                    onClick={onLogout}
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center gap-2 justify-start rounded-xl border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 transition-all duration-200"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Logout
+                  </Button>
+                </div>
               </div>
-              
-              <button
-                onClick={() => scrollTabs('right')}
-                className="absolute right-0 top-0 bottom-0 z-10 bg-gradient-to-l from-white to-transparent w-8 flex items-center justify-center hover:from-gray-50"
-              >
-                <ChevronRight className="h-4 w-4 text-gray-400" />
-              </button>
-            </div>
-          </div>
-
-          {/* Mobile Navigation - Dropdown */}
-          <div className="md:hidden px-4">
-            <div className="py-3">
-              <div className="relative">
-                <button
-                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                  className={`w-full flex items-center justify-between px-4 py-3 rounded-lg border-2 transition-all ${
-                    mobileMenuOpen 
-                      ? 'border-[#457BF5] bg-blue-50' 
-                      : 'border-gray-200 bg-white hover:border-gray-300'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    {(() => {
-                      const activeTabData = tabs.find(tab => tab.id === activeTab)
-                      const Icon = activeTabData?.icon || User
-                      return (
-                        <>
-                          <Icon className="h-5 w-5 text-[#457BF5]" />
-                          <span className="font-medium text-gray-900">
-                            {activeTabData?.label || 'Overview'}
-                          </span>
-                        </>
-                      )
-                    })()}
-                  </div>
-                  <ChevronRight className={`h-4 w-4 text-gray-400 transition-transform ${mobileMenuOpen ? 'rotate-90' : ''}`} />
-                </button>
-                
-                {mobileMenuOpen && (
-                  <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-80 overflow-y-auto">
-                    {tabs.map((tab) => {
-                      const Icon = tab.icon
-                      const isActive = activeTab === tab.id
-                      
-                      if (tab.id === 'chat') {
-                        return (
-                          <button
-                            key={tab.id}
-                            onClick={() => handleTabChange(tab.id)}
-                            className={`w-full flex items-center justify-between px-4 py-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-b-0 ${
-                              isActive ? 'bg-blue-50 text-[#457BF5]' : 'text-gray-700'
-                            }`}
-                          >
-                            <div className="flex items-center gap-3">
-                              <Icon className="h-5 w-5" />
-                              <span className="font-medium">{tab.label}</span>
-                            </div>
-                            {unreadAdminMessages > 0 && (
-                              <Badge variant="destructive" className="text-xs h-5 w-5 rounded-full p-0 flex items-center justify-center">
-                                {unreadAdminMessages}
-                              </Badge>
-                            )}
-                          </button>
-                        )
-                      }
-                      
-                      return (
-                        <button
-                          key={tab.id}
-                          onClick={() => handleTabChange(tab.id)}
-                          className={`w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-b-0 ${
-                            isActive ? 'bg-blue-50 text-[#457BF5]' : 'text-gray-700'
-                          }`}
-                        >
-                          <Icon className="h-5 w-5" />
-                          <span className="font-medium">{tab.label}</span>
-                        </button>
-                      )
-                    })}
-                  </div>
-                )}
-              </div>
-            </div>
+            )}
           </div>
         </div>
-      </div>
 
-      {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+
+
+        {/* Content */}
+        <div className="flex-1 px-4 sm:px-6 lg:px-8 py-6 sm:py-8 overflow-y-auto bg-gradient-to-br from-gray-50/30 via-white to-blue-50/20">
         {activeTab === 'overview' && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Quick Stats */}
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Class Time</CardTitle>
-                <Clock className="h-4 w-4 text-muted-foreground" />
+            <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-xl hover:shadow-xl transition-all duration-300 hover:scale-[1.02] group">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+                <CardTitle className="text-sm font-semibold text-gray-700 font-norwester uppercase tracking-wide">Class Time</CardTitle>
+                <div className="p-2 rounded-xl bg-blue-50 group-hover:bg-blue-100 transition-colors">
+                  <Clock className="h-5 w-5 text-[#457BF5]" />
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-[#457BF5]">
+                <div className="text-2xl font-bold text-[#457BF5] font-norwester">
                   {student.classTime || 'Not scheduled'}
                 </div>
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Diagnostic Test</CardTitle>
-                <Target className="h-4 w-4 text-muted-foreground" />
+            <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-xl hover:shadow-xl transition-all duration-300 hover:scale-[1.02] group">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+                <CardTitle className="text-sm font-semibold text-gray-700 font-norwester uppercase tracking-wide">Diagnostic Test</CardTitle>
+                <div className="p-2 rounded-xl bg-green-50 group-hover:bg-green-100 transition-colors">
+                  <Target className="h-5 w-5 text-green-600" />
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-green-600">
+                <div className="text-2xl font-bold text-green-600 font-norwester">
                   {student.diagnosticTestDate ? 
                     (student.diagnosticTestDate.includes('Saturday') ? 'Saturday' : 
                      student.diagnosticTestDate.includes('Sunday') ? 'Sunday' : 'Custom')
@@ -435,43 +404,47 @@ export default function StudentDashboard({ student, onLogout, onRefreshStudent }
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Current GPA</CardTitle>
-                <Star className="h-4 w-4 text-muted-foreground" />
+            <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-xl hover:shadow-xl transition-all duration-300 hover:scale-[1.02] group">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+                <CardTitle className="text-sm font-semibold text-gray-700 font-norwester uppercase tracking-wide">Current GPA</CardTitle>
+                <div className="p-2 rounded-xl bg-yellow-50 group-hover:bg-yellow-100 transition-colors">
+                  <Star className="h-5 w-5 text-yellow-600" />
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-yellow-600">
+                <div className="text-2xl font-bold text-yellow-600 font-norwester">
                   {student.currentGPA || 'N/A'}
                 </div>
               </CardContent>
             </Card>
 
             {/* Registration Status */}
-            <Card className="md:col-span-2 lg:col-span-3">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Settings className="h-5 w-5" />
+            <Card className="md:col-span-2 lg:col-span-3 border-0 shadow-lg bg-white/80 backdrop-blur-xl hover:shadow-xl transition-all duration-300">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-3 text-lg font-bold text-gray-900 font-norwester">
+                  <div className="p-2 rounded-xl bg-purple-50">
+                    <Settings className="h-6 w-6 text-purple-600" />
+                  </div>
                   Registration Status
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Registration Submitted</span>
-                    <Badge variant="outline" className="bg-green-50 text-green-700">
+                  <div className="flex items-center justify-between p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-200/50">
+                    <span className="text-sm font-semibold text-green-800">Registration Submitted</span>
+                    <Badge variant="outline" className="bg-green-100 text-green-700 border-green-300 px-3 py-1 rounded-lg font-medium">
                       ✓ Complete
                     </Badge>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Class Assignment</span>
-                    <Badge className={getStatusColor(student.status)}>
+                  <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200/50">
+                    <span className="text-sm font-semibold text-blue-800">Class Assignment</span>
+                    <Badge className={`${getStatusColor(student.status)} px-3 py-1 rounded-lg font-medium shadow-sm`}>
                       {student.status === 'pending' ? 'In Progress' : 
                        student.status === 'reviewed' ? 'Under Review' : 'Confirmed'}
                     </Badge>
                   </div>
-                  <div className="text-sm text-gray-600">
-                    Submitted on: {formatDate(student.submittedAt)}
+                  <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded-xl border border-gray-200/50">
+                    <span className="font-medium">Submitted on:</span> {formatDate(student.submittedAt)}
                   </div>
                 </div>
               </CardContent>
@@ -480,63 +453,65 @@ export default function StudentDashboard({ student, onLogout, onRefreshStudent }
         )}
 
         {activeTab === 'schedule' && (
-          <div className="space-y-6">
+          <div className="space-y-8">
             {/* Current Schedule Overview */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Clock className="h-5 w-5" />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-xl hover:shadow-xl transition-all duration-300">
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center gap-3 text-lg font-bold text-gray-900 font-norwester">
+                    <div className="p-2 rounded-xl bg-blue-50">
+                      <Clock className="h-6 w-6 text-[#457BF5]" />
+                    </div>
                     Class Schedule
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-6">
                   <div>
-                    <label className="text-sm font-medium text-gray-700">Selected Time Slot</label>
-                    <p className="text-lg font-semibold text-[#457BF5] mt-1">
+                    <label className="text-sm font-semibold text-gray-700 uppercase tracking-wide">Selected Time Slot</label>
+                    <p className="text-xl font-bold text-[#457BF5] mt-2 font-norwester">
                       {student.classTime || 'Not yet assigned'}
                     </p>
                   </div>
                   {student.classTime && (
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <h4 className="text-sm font-medium text-gray-800 mb-3">Class Details</h4>
-                      <div className="space-y-2 text-sm">
+                    <div className="bg-gradient-to-br from-gray-50 to-blue-50/30 rounded-2xl p-6 border border-gray-200/50">
+                      <h4 className="text-sm font-bold text-gray-800 mb-4 font-norwester uppercase tracking-wide">Class Details</h4>
+                      <div className="space-y-3 text-sm">
                         <div className="flex items-center">
-                          <span className="w-2 h-2 bg-blue-600 rounded-full mr-3"></span>
-                          <span className="font-medium text-blue-600 uppercase tracking-wide">Duration: 1 Hour per Session</span>
+                          <span className="w-2 h-2 bg-blue-600 rounded-full mr-4"></span>
+                          <span className="font-semibold text-blue-600 uppercase tracking-wide">Duration: 1 Hour per Session</span>
                         </div>
                         <div className="flex items-center">
-                          <span className="w-2 h-2 bg-blue-600 rounded-full mr-3"></span>
-                          <span className="font-medium text-blue-600 uppercase tracking-wide">Format: Live Interactive Sessions</span>
+                          <span className="w-2 h-2 bg-blue-600 rounded-full mr-4"></span>
+                          <span className="font-semibold text-blue-600 uppercase tracking-wide">Format: Live Interactive Sessions</span>
                         </div>
                         <div className="flex items-center">
-                          <span className="w-2 h-2 bg-blue-600 rounded-full mr-3"></span>
-                          <span className="font-medium text-blue-600 uppercase tracking-wide">Materials: Provided Digitally</span>
+                          <span className="w-2 h-2 bg-blue-600 rounded-full mr-4"></span>
+                          <span className="font-semibold text-blue-600 uppercase tracking-wide">Materials: Provided Digitally</span>
                         </div>
                       </div>
                       
-                      <div className="mt-4 pt-4 border-t border-gray-300">
-                        <div className="space-y-3 text-sm">
+                      <div className="mt-6 pt-6 border-t border-gray-300">
+                        <div className="space-y-4 text-sm">
                           <div>
-                            <div className="font-medium text-gray-700 mb-1">Meeting Link:</div>
+                            <div className="font-bold text-gray-700 mb-2">Meeting Link:</div>
                             <a 
                               href="https://us02web.zoom.us/j/8980721475" 
                               target="_blank" 
                               rel="noopener noreferrer"
-                              className="text-blue-600 hover:text-blue-800 underline break-all"
+                              className="text-blue-600 hover:text-blue-800 underline break-all font-medium"
                             >
                               https://us02web.zoom.us/j/8980721475
                             </a>
                           </div>
                           
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            <div>
-                              <div className="font-medium text-gray-700 mb-1">Online Session:</div>
-                              <div className="text-blue-600 font-medium">Room 17</div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="p-3 bg-white rounded-xl border border-blue-200/50">
+                              <div className="font-bold text-gray-700 mb-1">Online Session:</div>
+                              <div className="text-blue-600 font-bold">Room 17</div>
                             </div>
-                            <div>
-                              <div className="font-medium text-gray-700 mb-1">Office Hours:</div>
-                              <div className="text-blue-600 font-medium">Room 18</div>
+                            <div className="p-3 bg-white rounded-xl border border-blue-200/50">
+                              <div className="font-bold text-gray-700 mb-1">Office Hours:</div>
+                              <div className="text-blue-600 font-bold">Room 18</div>
                             </div>
                           </div>
                         </div>
@@ -546,27 +521,38 @@ export default function StudentDashboard({ student, onLogout, onRefreshStudent }
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Target className="h-5 w-5" />
+              <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-xl hover:shadow-xl transition-all duration-300">
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center gap-3 text-lg font-bold text-gray-900 font-norwester">
+                    <div className="p-2 rounded-xl bg-green-50">
+                      <Target className="h-6 w-6 text-green-600" />
+                    </div>
                     Diagnostic Test
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-6">
                   <div>
-                    <label className="text-sm font-medium text-gray-700">Test Date</label>
-                    <p className="text-lg font-semibold text-green-600 mt-1">
+                    <label className="text-sm font-semibold text-gray-700 uppercase tracking-wide">Test Date</label>
+                    <p className="text-xl font-bold text-green-600 mt-2 font-norwester">
                       {student.diagnosticTestDate || 'Not scheduled'}
                     </p>
                   </div>
                   {student.diagnosticTestDate && (
-                    <div className="bg-green-50 p-4 rounded-lg">
-                      <h4 className="font-medium text-green-900 mb-2">Test Information</h4>
-                      <ul className="text-sm text-green-800 space-y-1">
-                        <li>• Duration: 3.5 hours</li>
-                        <li>• Format: Full SAT practice test</li>
-                        <li>• Results: Available within 48 hours</li>
+                    <div className="bg-gradient-to-br from-green-50 to-emerald-50/50 p-6 rounded-2xl border border-green-200/50">
+                      <h4 className="font-bold text-green-900 mb-3 font-norwester">Test Information</h4>
+                      <ul className="text-sm text-green-800 space-y-2">
+                        <li className="flex items-center">
+                          <span className="w-2 h-2 bg-green-600 rounded-full mr-3"></span>
+                          <span className="font-medium">Duration: 3.5 hours</span>
+                        </li>
+                        <li className="flex items-center">
+                          <span className="w-2 h-2 bg-green-600 rounded-full mr-3"></span>
+                          <span className="font-medium">Format: Full SAT practice test</span>
+                        </li>
+                        <li className="flex items-center">
+                          <span className="w-2 h-2 bg-green-600 rounded-full mr-3"></span>
+                          <span className="font-medium">Results: Available within 48 hours</span>
+                        </li>
                       </ul>
                     </div>
                   )}
@@ -575,7 +561,7 @@ export default function StudentDashboard({ student, onLogout, onRefreshStudent }
             </div>
 
             {/* Schedule Manager Component */}
-            <div>
+            <div className="bg-white/60 backdrop-blur-xl rounded-2xl p-6 border border-gray-200/50 shadow-lg">
               <ScheduleManager />
             </div>
           </div>
@@ -769,6 +755,7 @@ export default function StudentDashboard({ student, onLogout, onRefreshStudent }
             <StudentChatTab student={student} />
           </div>
         )}
+        </div>
       </div>
 
       {/* Parental Approval Modal - shows when approval is needed */}

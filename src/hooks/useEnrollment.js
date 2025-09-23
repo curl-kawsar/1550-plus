@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 
 const fetchEnrollmentCounts = async () => {
-  const response = await fetch('/api/enrollment')
+  const response = await fetch('/api/class-times/active?includeEnrollment=true')
   
   if (!response.ok) {
     throw new Error('Failed to fetch enrollment counts')

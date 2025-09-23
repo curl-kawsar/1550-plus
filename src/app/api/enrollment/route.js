@@ -1,11 +1,15 @@
 import { NextResponse } from 'next/server'
 import connectDB from '@/lib/mongodb'
 import Student from '@/models/Student'
+import ClassTime from '@/models/ClassTime'
 
 export async function GET() {
   try {
     await connectDB()
 
+    // Get all active class times
+    const activeClassTimes = await ClassTime.find({ isActive: true }).lean()
+    
     // Get enrollment counts for each class time
     const enrollmentCounts = await Student.aggregate([
       {
@@ -16,13 +20,11 @@ export async function GET() {
       }
     ])
 
-    // Create a map with all possible class times initialized to 0
-    const classTimeCounts = {
-      'Mon & Wed - 4:00 PM Pacific': 0,
-      'Mon & Wed - 7:00 PM Pacific': 0,
-      'Tue & Thu - 4:00 PM Pacific': 0,
-      'Tue & Thu - 7:00 PM Pacific': 0
-    }
+    // Create a map with all active class times initialized to 0
+    const classTimeCounts = {}
+    activeClassTimes.forEach(classTime => {
+      classTimeCounts[classTime.name] = 0
+    })
 
     // Update with actual counts
     enrollmentCounts.forEach(item => {
@@ -31,10 +33,14 @@ export async function GET() {
       }
     })
 
+    // Get the default minimum required (use first class time's minimum or fallback to 40)
+    const minimumRequired = activeClassTimes[0]?.minimumRequired || 40
+
     return NextResponse.json({
       success: true,
       enrollments: classTimeCounts,
-      minimumRequired: 40
+      minimumRequired,
+      classTimes: activeClassTimes
     })
 
   } catch (error) {

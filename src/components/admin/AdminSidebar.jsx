@@ -24,6 +24,7 @@ const AdminSidebar = ({ activeTab, setActiveTab, admin, onLogout }) => {
         { id: 'assignment-results', label: 'Results', icon: Trophy }
       ]
     },
+    { id: 'class-times', label: 'Class Times', icon: Calendar },
     { id: 'ambassadors', label: 'Ambassadors', icon: UserCheck },
     { id: 'appointments', label: 'Appointments', icon: CalendarCheck },
     { id: 'chat', label: 'Student Messages', icon: MessageSquare },
