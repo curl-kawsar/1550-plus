@@ -664,7 +664,11 @@ export default function StudentDashboard({ student, onLogout, onRefreshStudent }
                   <div>
                     <label className="text-sm font-semibold text-gray-700 uppercase tracking-wide">Selected Time Slot</label>
                     <p className="text-xl font-bold text-[#457BF5] mt-2 font-norwester">
-                      {student.classTime || 'Not yet assigned'}
+                      {classTimeDetails ? (
+                        `${classTimeDetails.dayOfWeek?.join(' & ') || 'Custom'} - ${formatTime(classTimeDetails.startTime)} to ${formatTime(classTimeDetails.endTime)} ${classTimeDetails.timezone}`
+                      ) : (
+                        student.classTime || 'Not yet assigned'
+                      )}
                     </p>
                   </div>
                   {loadingClassDetails ? (
@@ -765,7 +769,11 @@ export default function StudentDashboard({ student, onLogout, onRefreshStudent }
                   <div>
                     <label className="text-sm font-semibold text-gray-700 uppercase tracking-wide">Test Date</label>
                     <p className="text-xl font-bold text-green-600 mt-2 font-norwester">
-                      {student.diagnosticTestDate || 'Not scheduled'}
+                      {diagnosticTestDetails ? (
+                        `${formatDiagnosticDate(diagnosticTestDetails.date)} - ${formatTime(diagnosticTestDetails.startTime)} to ${formatTime(diagnosticTestDetails.endTime)} ${diagnosticTestDetails.timezone}`
+                      ) : (
+                        student.diagnosticTestDate || 'Not scheduled'
+                      )}
                     </p>
                   </div>
                   {loadingDiagnosticDetails ? (

@@ -198,9 +198,12 @@ const ScheduleManager = () => {
       newValue: selectedValue
     }, {
       onSuccess: () => {
+        const formattedValue = formatScheduleOption(selectedValue, activeChangeType);
+        const scheduleType = activeChangeType === 'classTime' ? 'class time' : 'diagnostic test';
+        
         setActiveChangeType(null)
         setSelectedValue('')
-        toast.success(`${activeChangeType === 'classTime' ? 'Class time' : 'Diagnostic test'} updated successfully`)
+        toast.success(`${scheduleType.charAt(0).toUpperCase() + scheduleType.slice(1)} updated to: ${formattedValue}`)
       }
     })
   }
@@ -210,15 +213,41 @@ const ScheduleManager = () => {
     setSelectedValue('')
   }
 
-  const formatChangeHistory = (history) => {
+  const formatScheduleOption = (optionName, changeType) => {
+    if (!optionName) return 'Not set';
+    
+    // Find the option details from our loaded options
+    const options = changeType === 'classTime' ? classTimeOptions : diagnosticTestOptions;
+    const option = options.find(opt => (opt.name || opt) === optionName);
+    
+    if (option && option.name) {
+      // This is a dynamic option with details
+      if (changeType === 'classTime') {
+        if (option.dayOfWeek && option.startTime && option.endTime) {
+          return `${option.dayOfWeek.join(' & ')} - ${formatTime(option.startTime)} to ${formatTime(option.endTime)} ${option.timezone}`;
+        }
+      } else if (changeType === 'diagnosticTest') {
+        if (option.date && option.startTime && option.endTime) {
+          return `${formatDiagnosticDate(option.date)} - ${formatTime(option.startTime)} to ${formatTime(option.endTime)} ${option.timezone}`;
+        }
+      }
+    }
+    
+    // Fallback to original name if we can't find details or format
+    return optionName;
+  };
+
+  const formatChangeHistory = (history, changeType) => {
     if (!history || history.length === 0) return 'No changes made'
     
     return history.map((change, index) => (
       <div key={index} className="text-sm text-gray-600 bg-gray-50 p-2 rounded mb-1">
         <div className="font-medium">Change #{index + 1}</div>
-        <div>From: {change.from}</div>
-        <div>To: {change.to}</div>
-        <div>Date: {new Date(change.changedAt).toLocaleDateString()}</div>
+        <div className="space-y-1">
+          <div><span className="font-medium">From:</span> {formatScheduleOption(change.from, changeType)}</div>
+          <div><span className="font-medium">To:</span> {formatScheduleOption(change.to, changeType)}</div>
+          <div><span className="font-medium">Date:</span> {new Date(change.changedAt).toLocaleDateString()}</div>
+        </div>
       </div>
     )).slice(-2) // Show only last 2 changes
   }
@@ -299,7 +328,9 @@ const ScheduleManager = () => {
         <CardContent className="space-y-4">
           <div className="p-4 bg-blue-50 rounded-lg">
             <div className="text-sm text-gray-600 mb-1">Current Schedule:</div>
-            <div className="font-medium text-blue-900">{currentSchedule.classTime}</div>
+            <div className="font-medium text-blue-900">
+              {formatScheduleOption(currentSchedule.classTime, 'classTime')}
+            </div>
           </div>
 
           {activeChangeType === 'classTime' ? (
@@ -399,7 +430,7 @@ const ScheduleManager = () => {
                 View Change History
               </summary>
               <div className="mt-2 space-y-1">
-                {formatChangeHistory(changeHistory.classTime)}
+                {formatChangeHistory(changeHistory.classTime, 'classTime')}
               </div>
             </details>
           )}
@@ -420,7 +451,9 @@ const ScheduleManager = () => {
         <CardContent className="space-y-4">
           <div className="p-4 bg-green-50 rounded-lg">
             <div className="text-sm text-gray-600 mb-1">Current Schedule:</div>
-            <div className="font-medium text-green-900">{currentSchedule.diagnosticTestDate}</div>
+            <div className="font-medium text-green-900">
+              {formatScheduleOption(currentSchedule.diagnosticTestDate, 'diagnosticTest')}
+            </div>
           </div>
 
           {activeChangeType === 'diagnosticTest' ? (
@@ -525,7 +558,7 @@ const ScheduleManager = () => {
                 View Change History
               </summary>
               <div className="mt-2 space-y-1">
-                {formatChangeHistory(changeHistory.diagnosticTest)}
+                {formatChangeHistory(changeHistory.diagnosticTest, 'diagnosticTest')}
               </div>
             </details>
           )}
