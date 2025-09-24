@@ -1,11 +1,11 @@
 'use client'
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { Loader2, Shield, Star, Clock } from 'lucide-react';
 
-const SpecialOffer = () => {
+const SpecialOfferContent = () => {
     const [loading, setLoading] = useState(false);
     const [timeLeft, setTimeLeft] = useState({
         days: 15,
@@ -271,6 +271,21 @@ const SpecialOffer = () => {
                 </div>
             </div>
         </div>
+    );
+};
+
+const SpecialOffer = () => {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-pink-900 flex items-center justify-center">
+                <div className="text-center">
+                    <Loader2 className="w-12 h-12 text-white animate-spin mx-auto mb-4" />
+                    <p className="text-white text-lg">Loading special offer...</p>
+                </div>
+            </div>
+        }>
+            <SpecialOfferContent />
+        </Suspense>
     );
 };
 

@@ -75,7 +75,7 @@ const ClassTimeSchema = new mongoose.Schema({
 
 // Create indexes for better query performance
 ClassTimeSchema.index({ isActive: 1, sortOrder: 1 });
-ClassTimeSchema.index({ name: 1 });
+// Note: name field already has unique index from unique: true
 
 // Virtual for display name (formatted for UI)
 ClassTimeSchema.virtual('displayName').get(function() {

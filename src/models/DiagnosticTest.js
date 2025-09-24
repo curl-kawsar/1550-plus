@@ -79,8 +79,8 @@ const DiagnosticTestSchema = new mongoose.Schema({
 
 // Create indexes for better query performance
 DiagnosticTestSchema.index({ isActive: 1, date: 1, sortOrder: 1 });
-DiagnosticTestSchema.index({ name: 1 });
 DiagnosticTestSchema.index({ date: 1 });
+// Note: name field already has unique index from unique: true
 
 // Virtual for display name (formatted for UI)
 DiagnosticTestSchema.virtual('displayName').get(function() {
