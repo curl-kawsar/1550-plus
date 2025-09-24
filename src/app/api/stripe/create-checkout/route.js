@@ -101,8 +101,8 @@ export async function POST(request) {
         },
       ],
       mode: 'payment',
-      success_url: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/student-dashboard?payment=success&tab=classroom`,
-      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/special-offer?payment=cancelled`,
+      success_url: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://1550plus.com'}/student-dashboard?payment=success&tab=classroom`,
+      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://1550plus.com'}/special-offer?payment=cancelled`,
       metadata: {
         studentId: student._id.toString(),
         type: 'special_offer'
