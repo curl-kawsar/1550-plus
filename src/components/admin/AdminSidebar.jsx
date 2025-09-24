@@ -43,6 +43,8 @@ const AdminSidebar = ({ activeTab, setActiveTab, admin, onLogout }) => {
       })
 
       if (response.ok) {
+        // Clear localStorage token
+        localStorage.removeItem('adminToken')
         toast.success("Logged out successfully")
         onLogout()
       } else {

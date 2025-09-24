@@ -32,6 +32,10 @@ const AdminLogin = ({ onLoginSuccess }) => {
       const data = await response.json()
 
       if (response.ok) {
+        // Store token in localStorage for API calls
+        if (data.token) {
+          localStorage.setItem('adminToken', data.token)
+        }
         toast.success("Login successful!")
         onLoginSuccess(data.admin)
       } else {
