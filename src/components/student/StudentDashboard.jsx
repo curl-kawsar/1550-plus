@@ -1,6 +1,8 @@
 "use client"
 
 import { useState, useRef, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -10,6 +12,7 @@ import ParentalApprovalModal from '@/components/student/ParentalApprovalModal'
 import BookingWidget from '@/components/student/BookingWidget'
 import AssignmentTab from '@/components/student/AssignmentTab'
 import ResultsTab from '@/components/student/ResultsTab'
+import ClassroomContent from '@/components/student/ClassroomContent'
 import { useChatMessages } from '@/hooks/useChat'
 import { 
   User, 
@@ -34,7 +37,8 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
-  CheckCircle2
+  CheckCircle2,
+  Play
 } from 'lucide-react'
 
 export default function StudentDashboard({ student, onLogout, onRefreshStudent }) {
@@ -43,6 +47,8 @@ export default function StudentDashboard({ student, onLogout, onRefreshStudent }
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const scrollContainerRef = useRef(null)
+  const classroomContentRef = useRef(null)
+  const searchParams = useSearchParams()
   
   // State for dynamic class time and diagnostic test details
   const [classTimeDetails, setClassTimeDetails] = useState(null)
@@ -138,6 +144,33 @@ export default function StudentDashboard({ student, onLogout, onRefreshStudent }
     }
   }, [student]);
 
+  // Handle URL parameters (e.g., from payment redirect)
+  useEffect(() => {
+    const payment = searchParams.get('payment');
+    const tab = searchParams.get('tab');
+    
+    if (payment === 'success') {
+      toast.success('🎉 Payment successful! Welcome to the classroom!', {
+        duration: 5000,
+        description: 'You now have access to all premium content.'
+      });
+      // Refresh student data to update payment status
+      onRefreshStudent();
+      
+      // Refresh classroom content to unlock premium features
+      // Add a small delay to ensure webhook has processed the payment
+      setTimeout(() => {
+        if (classroomContentRef.current) {
+          classroomContentRef.current.refreshClassroomData();
+        }
+      }, 2000); // 2 second delay
+    }
+    
+    if (tab && tabs.some(t => t.id === tab)) {
+      setActiveTab(tab);
+    }
+  }, [searchParams, onRefreshStudent]);
+
   const handleRefresh = async () => {
     setRefreshing(true)
     try {
@@ -159,6 +192,13 @@ export default function StudentDashboard({ student, onLogout, onRefreshStudent }
 
   const handleTabChange = (tabId) => {
     setActiveTab(tabId)
+    
+    // Refresh classroom content when switching to classroom tab for paid students
+    if (tabId === 'classroom' && student?.hasPaidSpecialOffer && classroomContentRef.current) {
+      setTimeout(() => {
+        classroomContentRef.current.refreshClassroomData();
+      }, 500); // Small delay to ensure tab rendering
+    }
     setMobileMenuOpen(false)
     setSidebarOpen(false) // Close sidebar on mobile after selection
   }
@@ -282,6 +322,7 @@ export default function StudentDashboard({ student, onLogout, onRefreshStudent }
 
   const tabs = [
     { id: 'overview', label: 'Overview', icon: User },
+    { id: 'classroom', label: 'Classroom', icon: Play },
     { id: 'schedule', label: 'Schedule', icon: Calendar },
     { id: 'assignments', label: 'Assignments', icon: FileText },
     { id: 'results', label: 'Results', icon: Trophy },
@@ -644,6 +685,12 @@ export default function StudentDashboard({ student, onLogout, onRefreshStudent }
                 </div>
               </CardContent>
             </Card>
+          </div>
+        )}
+
+        {activeTab === 'classroom' && (
+          <div className="max-w-7xl mx-auto">
+            <ClassroomContent ref={classroomContentRef} />
           </div>
         )}
 

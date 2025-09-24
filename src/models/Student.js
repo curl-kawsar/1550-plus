@@ -268,6 +268,34 @@ const StudentSchema = new mongoose.Schema({
     type: String,
     enum: ['pending', 'reviewed', 'contacted'],
     default: 'pending'
+  },
+
+  // Payment and access control
+  hasPaidSpecialOffer: {
+    type: Boolean,
+    default: false
+  },
+  stripeCustomerId: {
+    type: String,
+    trim: true,
+    default: ''
+  },
+  stripePaymentIntentId: {
+    type: String,
+    trim: true,
+    default: ''
+  },
+  paymentDate: {
+    type: Date
+  },
+  paymentAmount: {
+    type: Number,
+    default: 0
+  },
+  paymentStatus: {
+    type: String,
+    enum: ['pending', 'processing', 'succeeded', 'failed', 'canceled'],
+    default: 'pending'
   }
 }, {
   timestamps: true
@@ -278,5 +306,7 @@ const StudentSchema = new mongoose.Schema({
 StudentSchema.index({ submittedAt: -1 });
 StudentSchema.index({ status: 1 });
 StudentSchema.index({ classTime: 1 }); // For enrollment counting
+StudentSchema.index({ hasPaidSpecialOffer: 1 }); // For access control
+StudentSchema.index({ stripeCustomerId: 1 }); // For payment processing
 
 export default mongoose.models.Student || mongoose.model('Student', StudentSchema);

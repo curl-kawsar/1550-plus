@@ -86,10 +86,6 @@ const StudentTable = () => {
     // Find the option details from our loaded options
     const options = changeType === 'classTime' ? classTimeOptions : diagnosticTestOptions;
     
-    // Debug: Log what we're working with
-    if (changeType === 'classTime') {
-      console.log('Class time formatting:', { optionName, optionsLength: options.length, firstOption: options[0] });
-    }
     
     const option = options.find(opt => {
       // Handle both dynamic objects and legacy strings

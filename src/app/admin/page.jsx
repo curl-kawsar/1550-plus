@@ -16,6 +16,8 @@ import AppointmentManagement from '@/components/admin/AppointmentManagement'
 import AssignmentManagement from '@/components/admin/AssignmentManagement'
 import AssignmentResults from '@/components/admin/AssignmentResults'
 import ClassTimeManagement from '@/components/admin/ClassTimeManagement'
+import ClassroomManagement from '@/components/admin/ClassroomManagement'
+import SalesReport from '@/components/admin/SalesReport'
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('overview')
@@ -92,6 +94,12 @@ export default function AdminDashboard() {
           </div>
         )}
 
+        {activeTab === 'sales' && (
+          <div>
+            <SalesReport />
+          </div>
+        )}
+
         {activeTab === 'assignments' && (
           <div>
             <AssignmentManagement />
@@ -107,6 +115,18 @@ export default function AdminDashboard() {
         {activeTab === 'class-times' && (
           <div>
             <ClassTimeManagement />
+          </div>
+        )}
+
+        {activeTab === 'classroom' && (
+          <div>
+            <div className="mb-8">
+              <h2 className="text-3xl font-bold text-gray-900">Classroom Content Management</h2>
+              <p className="mt-2 text-gray-600">
+                Manage class structures, modules, and videos for the student classroom.
+              </p>
+            </div>
+            <ClassroomManagement />
           </div>
         )}
 

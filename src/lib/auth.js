@@ -50,7 +50,7 @@ export async function verifyStudentToken(request) {
     
     return {
       email: decoded.email,
-      id: decoded.id
+      studentId: decoded.id || decoded.studentId
     };
     
   } catch (error) {

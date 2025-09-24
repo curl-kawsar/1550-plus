@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { BarChart3, Users, MessageCircle, Calendar, ClipboardCheck, Wrench, LogOut, Menu, X, MessageSquare, UserCheck, CalendarCheck, FileText, ChevronDown, ChevronRight, Trophy } from "lucide-react"
+import { BarChart3, Users, MessageCircle, Calendar, ClipboardCheck, Wrench, LogOut, Menu, X, MessageSquare, UserCheck, CalendarCheck, FileText, ChevronDown, ChevronRight, Trophy, Play, DollarSign } from "lucide-react"
 import { toast } from "sonner"
 import { useState } from "react"
 
@@ -14,6 +14,7 @@ const AdminSidebar = ({ activeTab, setActiveTab, admin, onLogout }) => {
   const navigation = [
     { id: 'overview', label: 'Overview', icon: BarChart3 },
     { id: 'students', label: 'Students', icon: Users },
+    { id: 'sales', label: 'Sales Report', icon: DollarSign },
     { 
       id: 'assignments', 
       label: 'Assignments', 
@@ -25,6 +26,7 @@ const AdminSidebar = ({ activeTab, setActiveTab, admin, onLogout }) => {
       ]
     },
     { id: 'class-times', label: 'Class Times', icon: Calendar },
+    { id: 'classroom', label: 'Classroom Content', icon: Play },
     { id: 'diagnostic-tests', label: 'Diagnostic Tests', icon: ClipboardCheck },
     { id: 'ambassadors', label: 'Ambassadors', icon: UserCheck },
     { id: 'appointments', label: 'Appointments', icon: CalendarCheck },
