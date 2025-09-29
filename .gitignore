@@ -27,7 +27,6 @@ yarn-error.log*
 
 # Local env files
 .env*.local
-.env
 .env.development.local
 .env.test.local
 .env.production.local
@@ -166,3 +165,4 @@ Thumbs.db
 # package-lock.json
 # yarn.lock
 # pnpm-lock.yaml
+config.bat
