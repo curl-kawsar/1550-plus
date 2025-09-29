@@ -59,7 +59,7 @@ export async function POST(request) {
     }
 
     // Define pricing and descriptions based on plan type
-    let productData, unitAmount;
+    let productData, baseAmount;
     
     switch (planType) {
       case 'recordings_only':
@@ -67,14 +67,14 @@ export async function POST(request) {
           name: 'SAT 1550+ Recordings Only',
           description: 'Access to all recorded SAT preparation sessions with expert strategies and content',
         };
-        unitAmount = 9900; // $99.00 in cents
+        baseAmount = 9900; // $99.00 in cents
         break;
       case 'office_hours_only':
         productData = {
           name: 'SAT 1550+ Office Hours Only',
           description: 'Weekly office hours access - Mon, Tues, Wed, Thurs 5:30-6:30pm PST',
         };
-        unitAmount = 9900; // $99.00 in cents
+        baseAmount = 9900; // $99.00 in cents
         break;
       case 'complete':
       default:
@@ -82,9 +82,13 @@ export async function POST(request) {
           name: 'SAT 1550+ Complete Package',
           description: 'Full access to recordings and office hours - everything included',
         };
-        unitAmount = 9900; // $99.00 in cents
+        baseAmount = 9900; // $99.00 in cents
         break;
     }
+
+    // Calculate 2.9% processing fee
+    const processingFee = Math.round(baseAmount * 0.029); // 2.9% fee in cents
+    const totalAmount = baseAmount + processingFee;
 
     // Create Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({
@@ -95,14 +99,25 @@ export async function POST(request) {
           price_data: {
             currency: 'usd',
             product_data: productData,
-            unit_amount: unitAmount,
+            unit_amount: baseAmount,
+          },
+          quantity: 1,
+        },
+        {
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: 'Processing Fee',
+              description: '2.9% payment processing fee',
+            },
+            unit_amount: processingFee,
           },
           quantity: 1,
         },
       ],
       mode: 'payment',
-      success_url: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://1550plus.com'}/student-dashboard?payment=success&tab=classroom`,
-      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://1550plus.com'}/special-offer?payment=cancelled`,
+      success_url: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/student-dashboard?payment=success&tab=classroom`,
+      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/special-offer?payment=cancelled`,
       metadata: {
         studentId: student._id.toString(),
         type: 'special_offer'

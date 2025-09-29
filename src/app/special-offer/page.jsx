@@ -175,6 +175,7 @@ const SpecialOfferContent = () => {
                             <div className="text-4xl font-bold text-blue-500 mb-4">
                                 $99 <span className="text-gray-400 text-2xl line-through ml-2">$297</span>
                             </div>
+                            <div className="text-sm text-gray-500 mb-2">(processing fee will apply)</div>
                             <h3 className="text-xl font-bold text-black mb-6">
                                 RECORDINGS ONLY
                             </h3>
@@ -190,7 +191,7 @@ const SpecialOfferContent = () => {
                                         Processing...
                                     </>
                                 ) : (
-                                    'Purchase - $99'
+                                    'Purchase'
                                 )}
                             </button>
                         </div>
@@ -203,6 +204,7 @@ const SpecialOfferContent = () => {
                             <div className="text-4xl font-bold text-blue-500 mb-4">
                                 $99 <span className="text-gray-400 text-2xl line-through ml-2">$297</span>
                             </div>
+                            <div className="text-sm text-gray-500 mb-2">(processing fee will apply)</div>
                             <h3 className="text-xl font-bold text-black mb-2">
                                 OFFICE HOURS ONLY
                             </h3>
@@ -222,7 +224,7 @@ const SpecialOfferContent = () => {
                                         Processing...
                                     </>
                                 ) : (
-                                    'Purchase - $99'
+                                    'Purchase'
                                 )}
                             </button>
                         </div>
@@ -237,6 +239,7 @@ const SpecialOfferContent = () => {
                             <div className="text-4xl font-bold text-blue-500 mb-4">
                                 $99 <span className="text-gray-400 text-2xl line-through ml-2">$297</span>
                             </div>
+                            <div className="text-sm text-gray-500 mb-2">(processing fee will apply)</div>
                             <h3 className="text-xl font-bold text-black mb-2">
                                 RECORDINGS AND<br />OFFICE HOURS
                             </h3>
@@ -256,7 +259,7 @@ const SpecialOfferContent = () => {
                                         Processing...
                                     </>
                                 ) : (
-                                    'Purchase - $99'
+                                    'Purchase'
                                 )}
                             </button>
                         </div>

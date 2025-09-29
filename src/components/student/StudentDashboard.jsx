@@ -150,7 +150,7 @@ export default function StudentDashboard({ student, onLogout, onRefreshStudent }
     const tab = searchParams.get('tab');
     
     if (payment === 'success') {
-      toast.success('🎉 Payment successful! Welcome to the classroom!', {
+      toast.success('Payment successful! Welcome to the classroom!', {
         duration: 5000,
         description: 'You now have access to all premium content.'
       });
@@ -739,10 +739,10 @@ export default function StudentDashboard({ student, onLogout, onRefreshStudent }
                           </span>
                         </div>
                         <div className="flex items-center">
-                          <span className="w-2 h-2 bg-blue-600 rounded-full mr-4"></span>
+                          {/* <span className="w-2 h-2 bg-blue-600 rounded-full mr-4"></span>
                           <span className="font-semibold text-blue-600 uppercase tracking-wide">
                             Capacity: {classTimeDetails.currentEnrollment || 0}/{classTimeDetails.capacity || 50} Students
-                          </span>
+                          </span> */}
                         </div>
                         {classTimeDetails.description && (
                           <div className="flex items-start">
@@ -855,12 +855,12 @@ export default function StudentDashboard({ student, onLogout, onRefreshStudent }
                             <span className="font-medium">Location: {diagnosticTestDetails.location}</span>
                           </li>
                         )}
-                        <li className="flex items-center">
+                        {/* <li className="flex items-center">
                           <span className="w-2 h-2 bg-green-600 rounded-full mr-3"></span>
                           <span className="font-medium">
                             Capacity: {diagnosticTestDetails.currentEnrollment || 0}/{diagnosticTestDetails.capacity || 50} Students
                           </span>
-                        </li>
+                        </li> */}
                         {diagnosticTestDetails.description && (
                           <li className="flex items-start">
                             <span className="w-2 h-2 bg-green-600 rounded-full mr-3 mt-2"></span>
